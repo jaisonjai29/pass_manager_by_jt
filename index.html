@@ -605,20 +605,22 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
           APIs &amp; Services → Library → search <strong style="color:var(--accent)">Google Drive API</strong> → Enable
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 3 — Configure OAuth Consent Screen</div>
-          APIs &amp; Services → OAuth consent screen → External → fill App name → Save. Add your Google email as a <strong style="color:var(--accent)">Test user</strong>.
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 3 — OAuth Consent Screen</div>
+          APIs &amp; Services → OAuth consent screen → <strong style="color:var(--accent)">External</strong> → fill App name → Save &amp; Continue.<br>
+          On <strong style="color:var(--accent)">Test users</strong> step, click Add users → add <strong style="color:var(--accent)">your own Gmail address</strong> → Save.
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 4 — Create OAuth 2.0 Client ID</div>
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 4 — Create OAuth Client ID</div>
           Credentials → Create Credentials → OAuth Client ID → <strong style="color:var(--accent)">Web application</strong><br>
-          <div style="margin-top:6px">Add to <strong style="color:var(--accent)">Authorized JavaScript origins</strong>:<br>
-          <span id="setupOriginHint" style="font-family:var(--font-mono);color:var(--accent3);font-size:11px"></span></div>
-          <div style="margin-top:6px">Add to <strong style="color:var(--accent)">Authorized redirect URIs</strong>:<br>
-          <span id="setupRedirectHint" style="font-family:var(--font-mono);color:var(--accent3);font-size:11px"></span></div>
+          <div style="margin-top:8px;padding:8px 10px;background:var(--surface3);border-radius:6px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px">Add to Authorized JavaScript origins ONLY:</div>
+            <div id="setupOriginHint" style="font-family:var(--font-mono);color:var(--accent3);font-size:12px;cursor:pointer;word-break:break-all" title="Tap to copy"></div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:4px">⚠️ Do NOT add a redirect URI — leave it empty</div>
+          </div>
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
           <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 5 — Paste your Client ID below</div>
-          Copy the Client ID (looks like: <span style="color:var(--accent);font-family:var(--font-mono)">123456.apps.googleusercontent.com</span>)
+          Copy the Client ID (looks like: <span style="color:var(--accent);font-family:var(--font-mono)">123456789-xxxx.apps.googleusercontent.com</span>)
         </div>
       </div>
       <div class="form-group">
@@ -1225,68 +1227,80 @@ function updateProfileUI(){
   updateGdriveOverlay();
 }
 
-// ====== GOOGLE OAUTH ======
-const GSCOPE='https://www.googleapis.com/auth/drive.appdata profile email';
+// ====== GOOGLE SIGN-IN via Google Identity Services (GIS) ======
+// Uses popup flow — no redirect URI config needed in Google Cloud Console
+const GSCOPE='https://www.googleapis.com/auth/drive.appdata';
 const GCLIENT_KEY='pm_gclient';
 function getClientId(){return localStorage.getItem(GCLIENT_KEY)||'';}
 function setClientId(id){localStorage.setItem(GCLIENT_KEY,id.trim());}
+function getRedirectUri(){return location.origin+location.pathname;}
 
-function getRedirectUri(){
-  // Must exactly match what's in Google Cloud Console
-  return location.origin+location.pathname;
-}
+let _tokenClient=null;
 
-function signInGoogle(){
-  const cid=getClientId();
-  if(!cid){
-    updateGdriveOverlay();openOv('gdriveOverlay');
-    return;
-  }
-  if(location.protocol==='file:'){
-    toast('⚠️ Cannot use Google OAuth from a local file. Host on HTTPS first.');
-    updateGdriveOverlay();openOv('gdriveOverlay');
-    return;
-  }
-  const p=new URLSearchParams({
-    client_id:cid,
-    redirect_uri:getRedirectUri(),
-    response_type:'token',
-    scope:GSCOPE,
-    prompt:'select_account'
+function loadGIS(){
+  return new Promise((resolve)=>{
+    if(window.google&&window.google.accounts){resolve();return;}
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';
+    s.async=true;s.defer=true;
+    s.onload=()=>resolve();
+    s.onerror=()=>resolve();
+    document.head.appendChild(s);
   });
-  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+p;
 }
 
-function handleOAuthReturn(){
-  // Check for OAuth error first
-  const params=new URLSearchParams(location.hash.slice(1));
-  const searchParams=new URLSearchParams(location.search);
-  const error=params.get('error')||searchParams.get('error');
-  if(error){
-    history.replaceState(null,'',location.pathname);
-    let msg='Google sign-in failed.';
-    if(error==='access_denied')msg='Access denied — did you add your email as a Test User in the OAuth consent screen?';
-    else if(error==='redirect_uri_mismatch')msg='Redirect URI mismatch — the URL in Google Console must exactly match: '+getRedirectUri();
-    else if(error==='invalid_client')msg='Invalid Client ID — check the Client ID you entered.';
-    else msg='OAuth error: '+error+'. Check your Google Cloud Console settings.';
-    setTimeout(()=>{
-      updateGdriveOverlay();openOv('gdriveOverlay');
-      toast('⚠️ '+msg, 5000);
-    },300);
-    return;
+async function signInGoogle(){
+  const cid=getClientId();
+  if(!cid){updateGdriveOverlay();openOv('gdriveOverlay');return;}
+  if(location.protocol==='file:'){
+    toast('\u26a0\ufe0f Host on HTTPS to use Google Sign-In');
+    updateGdriveOverlay();openOv('gdriveOverlay');return;
   }
-  const tok=params.get('access_token');
-  if(!tok)return;
-  history.replaceState(null,'',location.pathname);
-  gToken=tok;
-  fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}})
-    .then(r=>r.json()).then(u=>{
-      gUser={name:u.name,email:u.email,pic:u.picture};
-      saveGA();updateProfileUI();
-      toast('Signed in as '+u.name+' ✓');
-    }).catch(()=>toast('Sign in failed — check your connection'));
+  await loadGIS();
+  if(!window.google||!window.google.accounts){
+    toast('\u26a0\ufe0f Could not load Google Sign-In library. Check your connection.');return;
+  }
+  _tokenClient=window.google.accounts.oauth2.initTokenClient({
+    client_id:cid,
+    scope:GSCOPE+' https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    callback:(resp)=>{
+      if(resp.error){
+        let msg='Sign-in failed: '+resp.error;
+        if(resp.error==='idpiframe_initialization_failed')
+          msg='Client ID not found — check it in Google Cloud Console. Also add your origin: '+location.origin+' to Authorized JavaScript origins.';
+        if(resp.error==='access_denied')
+          msg='Access denied — add your Google email as a Test User in the OAuth consent screen.';
+        if(resp.error==='invalid_client')
+          msg='Invalid Client ID — ensure Authorized JavaScript origins includes: '+location.origin;
+        toast('\u26a0\ufe0f '+msg,6000);
+        return;
+      }
+      gToken=resp.access_token;
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}})
+        .then(r=>r.json()).then(u=>{
+          gUser={name:u.name,email:u.email,pic:u.picture};
+          saveGA();updateProfileUI();
+          closeOv('profileOverlay');closeOv('gdriveOverlay');
+          toast('\u2713 Signed in as '+u.name);
+        }).catch(()=>toast('Sign-in succeeded but profile load failed'));
+    },
+    error_callback:(err)=>{
+      if(err&&err.type==='popup_closed')return;
+      toast('\u26a0\ufe0f Sign-in error: '+(err&&err.type||'unknown'),4000);
+    }
+  });
+  _tokenClient.requestAccessToken({prompt:'select_account'});
 }
-function signOut(){if(!confirm('Sign out?'))return;gUser=null;gToken=null;lastBackup=null;localStorage.removeItem(GA);updateProfileUI();toast('Signed out');}
+
+function handleOAuthReturn(){/* no-op with GIS popup flow */}
+
+function signOut(){
+  if(!confirm('Sign out of Google?'))return;
+  if(window.google&&window.google.accounts&&gToken)
+    window.google.accounts.oauth2.revoke(gToken,()=>{});
+  gUser=null;gToken=null;lastBackup=null;
+  localStorage.removeItem(GA);updateProfileUI();toast('Signed out');
+}
 
 // ====== GOOGLE DRIVE ======
 const DRV_FILE='pm_backup.enc';
@@ -1361,17 +1375,18 @@ function updateGdriveOverlay(){
     $('driveExtraActions').innerHTML='';
     // Show live URLs
     const origin=location.origin;
-    const redirect=location.origin+location.pathname;
     const isFile=origin.startsWith('file');
     if($('appOriginDisplay')){
-      $('appOriginDisplay').textContent=redirect;
+      $('appOriginDisplay').textContent=isFile?origin+' ⚠️ file:// — host on HTTPS!':origin;
       $('appOriginDisplay').style.borderColor=isFile?'var(--danger)':'var(--border)';
     }
-    if($('setupOriginHint'))$('setupOriginHint').textContent=isFile?'⚠️ file:// not supported — host on HTTPS':origin;
-    if($('setupRedirectHint'))$('setupRedirectHint').textContent=isFile?'⚠️ file:// not supported — host on HTTPS':redirect;
-    // Tap to copy
+    if($('setupOriginHint')){
+      $('setupOriginHint').textContent=isFile?'⚠️ file:// not supported — host on HTTPS':origin;
+      if(!isFile)$('setupOriginHint').onclick=()=>{copyTxt(origin);toast('Origin copied ✓');};
+    }
+    // Tap to copy the whole URL
     const disp=$('appOriginDisplay');
-    if(disp)disp.onclick=()=>{copyTxt(redirect);toast('URL copied ✓');};
+    if(disp&&!isFile)disp.onclick=()=>{copyTxt(origin);toast('Origin copied ✓');};
     // Pre-fill
     const inp=$('gClientIdInput');
     if(inp)inp.value=getClientId();

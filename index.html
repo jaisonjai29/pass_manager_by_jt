@@ -1147,18 +1147,10 @@ function updateProfileUI(){
   $('statEntries').textContent=entries.length;
   $('statBackup').textContent=lastBackup?fmtDate(lastBackup):'—';
   // Render Google sign-in button in profile overlay
-  const pWrap=$('profileSignInBtnWrap');
+  var pWrap=$('profileSignInBtnWrap');
   if(pWrap&&!gUser){
-    const cid=getClientId();
-    pWrap.innerHTML='';
-    delete pWrap.dataset.rendered;
-    if(cid&&_gisLoaded&&window.google&&window.google.accounts){
-      _renderGoogleButtons();
-    } else if(cid){
-      pWrap.innerHTML=`<button onclick="signInGoogle()" style="padding:12px 22px;border-radius:10px;background:#fff;border:1px solid #dadce0;color:#3c4043;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15)"><svg width=18 height=18 viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Sign in with Google</button>`;
-    } else {
-      pWrap.innerHTML=`<button onclick="showClientIdSetup()" style="padding:12px 22px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>`;
-    }
+    var cid2=getClientId();
+    pWrap.innerHTML=cid2?GOOGLE_BTN_HTML:'<button onclick="showClientIdSetup()" style="padding:12px 22px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>';
   }
   $('sGdriveSub').textContent=gUser
     ?gUser.email||'Connected'
@@ -1196,138 +1188,130 @@ function updateProfileUI(){
   updateGdriveOverlay();
 }
 
-// ====== GOOGLE SIGN-IN — GIS (same as finance tracker) ======
+// ====== GOOGLE SIGN-IN — exact same as finance tracker ======
 // Only needs: Authorized JavaScript origins in Google Cloud Console
 // NO redirect URI needed
 
 const GCLIENT_KEY='pm_gclient';
-const GSCOPE='https://www.googleapis.com/auth/drive.appdata';
-function getClientId(){return localStorage.getItem(GCLIENT_KEY)||'';}
-function setClientId(id){localStorage.setItem(GCLIENT_KEY,id.trim());}
+const GSCOPE='https://www.googleapis.com/auth/drive.appdata email profile';
+var GIS_LOADED=false;
+var GAPI_LOADED=false;
+
+function getClientId(){
+  return localStorage.getItem(GCLIENT_KEY)||'';
+}
+function setClientId(id){
+  localStorage.setItem(GCLIENT_KEY,id.trim());
+}
 function getRedirectUri(){return location.origin+location.pathname;}
 
-let _tokenClient=null;
-let _gisLoaded=false;
-
-// Load GIS script eagerly (call on DOMContentLoaded)
-function loadGIS(){
-  if(_gisLoaded||document.querySelector('script[src*="gsi/client"]'))return;
-  const s=document.createElement('script');
-  s.src='https://accounts.google.com/gsi/client';
-  s.async=true;
-  s.defer=true;
-  s.onload=()=>{
-    _gisLoaded=true;
-    _initTokenClient();
-    _renderGoogleButtons();
-  };
-  document.head.appendChild(s);
+// Load both GIS + GAPI SDKs (same as finance tracker)
+function loadGoogleSDKs(){
+  if(GIS_LOADED&&GAPI_LOADED)return;
+  if(!GIS_LOADED){
+    var s1=document.createElement('script');
+    s1.src='https://accounts.google.com/gsi/client';
+    s1.onload=function(){GIS_LOADED=true;tryBootGoogle();};
+    s1.onerror=function(){toast('Failed to load Google SDK');};
+    document.head.appendChild(s1);
+  }
+  if(!GAPI_LOADED){
+    var s2=document.createElement('script');
+    s2.src='https://apis.google.com/js/api.js';
+    s2.onload=function(){
+      gapi.load('client',function(){
+        gapi.client.init({}).then(function(){
+          GAPI_LOADED=true;tryBootGoogle();
+        });
+      });
+    };
+    s2.onerror=function(){toast('Failed to load GAPI');};
+    document.head.appendChild(s2);
+  }
 }
 
-function _initTokenClient(){
-  const cid=getClientId();
-  if(!cid||!window.google||!window.google.accounts)return;
-  _tokenClient=window.google.accounts.oauth2.initTokenClient({
-    client_id:cid,
-    scope:GSCOPE+' https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-    callback:(resp)=>{
-      if(resp.error){
-        toast('Sign-in failed: '+resp.error,5000);return;
+function tryBootGoogle(){
+  if(!GIS_LOADED||!GAPI_LOADED)return;
+  // Restore saved session
+  var saved=localStorage.getItem('pm_gsession');
+  if(saved){
+    try{
+      var sess=JSON.parse(saved);
+      if(sess&&sess.access_token&&sess.expiry>Date.now()){
+        gToken=sess.access_token;
+        gUser={name:sess.name,email:sess.email,pic:sess.photo};
+        saveGA();updateProfileUI();
+        return;
       }
-      gToken=resp.access_token;
-      fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}})
-        .then(r=>r.json())
-        .then(u=>{
-          gUser={name:u.name,email:u.email,pic:u.picture};
-          saveGA();updateProfileUI();
-          closeOv('profileOverlay');closeOv('gdriveOverlay');
-          toast('\u2713 Signed in as '+u.name);
-        }).catch(()=>toast('Signed in but profile load failed'));
-    }
-  });
-}
-
-// Render official Google Sign-In button into a container div
-function _renderGoogleButtons(){
-  const cid=getClientId();
-  if(!cid||!window.google||!window.google.accounts)return;
-  ['gSignInBtnWrap','profileSignInBtnWrap'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el||el.dataset.rendered)return;
-    el.innerHTML='';
-    window.google.accounts.id.initialize({
-      client_id:cid,
-      callback:_onOneTapCredential,
-      auto_select:false,
-      cancel_on_tap_outside:true
-    });
-    window.google.accounts.id.renderButton(el,{
-      type:'standard',
-      theme:'outline',
-      size:'large',
-      text:'sign_in_with',
-      shape:'rectangular',
-      logo_alignment:'left',
-      width:'260'
-    });
-    el.dataset.rendered='1';
-  });
-}
-
-// Called when user picks account via One Tap button
-function _onOneTapCredential(credResponse){
-  // Decode id_token to get user info
-  try{
-    const payload=JSON.parse(atob(credResponse.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-    gUser={name:payload.name,email:payload.email,pic:payload.picture};
-  }catch(e){}
-  // Now get access token for Drive — this is triggered by the button click so popup is allowed
-  if(_tokenClient){
-    _tokenClient.requestAccessToken({prompt:''});
-  }else{
-    _initTokenClient();
-    setTimeout(()=>{if(_tokenClient)_tokenClient.requestAccessToken({prompt:'select_account'});},200);
+    }catch(e){}
+    localStorage.removeItem('pm_gsession');
   }
+  updateProfileUI();
 }
 
-// Called when user clicks our fallback button directly
+// Sign in — called directly from button onclick (user gesture preserved)
 function signInGoogle(){
-  const cid=getClientId();
+  var cid=getClientId();
   if(!cid){updateGdriveOverlay();openOv('gdriveOverlay');return;}
-  if(!_gisLoaded||!window.google||!window.google.accounts){
-    toast('Google Sign-In loading… please try again in a moment');
-    loadGIS();return;
+  if(!GIS_LOADED||!GAPI_LOADED){
+    loadGoogleSDKs();
+    toast('Loading Google SDK… tap again in a moment');
+    return;
   }
-  if(!_tokenClient)_initTokenClient();
-  if(!_tokenClient){toast('Could not initialise Google Sign-In');return;}
-  // Direct call from click — popup will open fine
-  _tokenClient.requestAccessToken({prompt:'select_account'});
+  if(location.protocol==='file:'){
+    toast('⚠️ Google sign-in needs HTTPS. Host on GitHub Pages.');return;
+  }
+  try{
+    var tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:cid,
+      scope:GSCOPE,
+      callback:function(resp){
+        if(resp.error){toast('Sign-in error: '+resp.error,5000);return;}
+        gToken=resp.access_token;
+        fetchGoogleProfile(resp.access_token,resp.expires_in||3600);
+      }
+    });
+    tokenClient.requestAccessToken({prompt:''});
+  }catch(e){
+    toast('Sign-in error: '+e.message,5000);
+  }
 }
 
-function handleOAuthReturn(){/* not needed with GIS */}
+function fetchGoogleProfile(token,expiresIn){
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo',{
+    headers:{Authorization:'Bearer '+token}
+  }).then(function(r){return r.json();}).then(function(u){
+    gUser={name:u.name||u.email.split('@')[0],email:u.email,pic:u.picture||''};
+    // Save session (expires in 1hr)
+    localStorage.setItem('pm_gsession',JSON.stringify({
+      access_token:token,name:gUser.name,email:gUser.email,
+      photo:gUser.pic,expiry:Date.now()+(expiresIn*1000)
+    }));
+    saveGA();updateProfileUI();
+    closeOv('profileOverlay');closeOv('gdriveOverlay');
+    toast('✓ Signed in as '+gUser.name);
+  }).catch(function(e){toast('Profile fetch error: '+e.message,5000);});
+}
 
 function signOut(){
   if(!confirm('Sign out of Google?'))return;
-  if(window.google&&window.google.accounts&&window.google.accounts.oauth2&&gToken)
-    window.google.accounts.oauth2.revoke(gToken,()=>{});
-  if(window.google&&window.google.accounts&&window.google.accounts.id)
-    window.google.accounts.id.disableAutoSelect();
-  gUser=null;gToken=null;lastBackup=null;
-  // Reset rendered flags so buttons re-render after new client ID
-  ['gSignInBtnWrap','profileSignInBtnWrap'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)delete el.dataset.rendered;
-  });
+  gToken=null;gUser=null;lastBackup=null;
+  localStorage.removeItem('pm_gsession');
   localStorage.removeItem(GA);
+  if(typeof google!=='undefined'&&google.accounts&&google.accounts.oauth2){
+    var cid=getClientId();
+    if(cid)try{google.accounts.oauth2.revoke(gToken,function(){});}catch(e){}
+  }
   updateProfileUI();
   toast('Signed out');
 }
+
+function handleOAuthReturn(){/* not needed — using token client */}
 
 function showClientIdSetup(){
   updateGdriveOverlay();
   openOv('gdriveOverlay');
 }
-
 
 // ====== GOOGLE DRIVE ======
 const DRV_FILE='pm_backup.enc';
@@ -1364,8 +1348,13 @@ async function driveRestore(pass){
   }catch{toast('Restore failed — wrong passphrase?');}
 }
 
+// Official-style Google Sign-In button (same HTML as finance tracker)
+var GOOGLE_BTN_HTML='<button class="google-signin-btn" onclick="signInGoogle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 16px;border-radius:10px;background:#fff;border:1px solid #dadce0;color:#3c4043;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 2px 10px rgba(0,0,0,.25)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,.15)'">'
+  +'<svg width=18 height=18 viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>'
+  +'Sign in with Google</button>';
+
 function updateGdriveOverlay(){
-  const signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
+  var signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
   if(!signInSec)return;
   if(gUser&&gToken){
     signInSec.style.display='none';
@@ -1375,24 +1364,15 @@ function updateGdriveOverlay(){
   }else{
     signInSec.style.display='block';
     connSec.style.display='none';
-    const cid=getClientId();
-    const setupPanel=$('gClientSetupPanel');
-    const signActions=$('gSignInActions');
-    const wrap=$('gSignInBtnWrap');
+    var cid=getClientId();
+    var setupPanel=$('gClientSetupPanel');
+    var signActions=$('gSignInActions');
+    var wrap=$('gSignInBtnWrap');
     if(setupPanel)setupPanel.style.display=cid?'none':'block';
     if(signActions)signActions.style.display=cid?'flex':'none';
     if(!wrap)return;
     if(cid){
-      wrap.innerHTML='';
-      delete wrap.dataset.rendered;
-      if(_gisLoaded&&window.google&&window.google.accounts){
-        _renderGoogleButtons();
-      } else {
-        // Fallback button while GIS loads
-        wrap.innerHTML=`<button onclick="signInGoogle()" style="padding:12px 24px;border-radius:10px;background:#fff;border:1px solid #dadce0;color:#3c4043;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15)">
-          <svg width=18 height=18 viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Sign in with Google</button>`;
-      }
+      wrap.innerHTML=GOOGLE_BTN_HTML;
     }else{
       wrap.innerHTML='';
     }
@@ -1693,8 +1673,8 @@ function promptPass(title,desc,cb){
 // ====== EVENT WIRING ======
 document.addEventListener('DOMContentLoaded',()=>{
   loadAll();applySettings();buildPickers();buildThemeRow();buildFontRow();render();updateProfileUI();handleOAuthReturn();
-  // Load GIS eagerly so button renders before user taps
-  if(getClientId())loadGIS();
+  // Load Google SDKs eagerly (same as finance tracker)
+  if(getClientId())loadGoogleSDKs();
 
   // Search
   $('searchInput').addEventListener('input',e=>render(e.target.value));
@@ -1767,15 +1747,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);});
   });
   $('gSignOutBtn')&&$('gSignOutBtn').addEventListener('click',signOut);
-  $('saveClientIdBtn')&&$('saveClientIdBtn').addEventListener('click',()=>{
-    const val=$('gClientIdInput')&&$('gClientIdInput').value.trim();
+  $('saveClientIdBtn')&&$('saveClientIdBtn').addEventListener('click',function(){
+    var val=($('gClientIdInput')||{}).value.trim();
     if(!val){toast('Paste your Google Client ID');return;}
     if(!val.includes('.apps.googleusercontent.com')){toast('Invalid Client ID format');return;}
-    setClientId(val);toast('Client ID saved ✓');
-    _gisLoaded=false;_tokenClient=null;
-    // Reset button rendered flags
-    ['gSignInBtnWrap','profileSignInBtnWrap'].forEach(id=>{const el=$(id);if(el)delete el.dataset.rendered;});
-    loadGIS();
+    setClientId(val);
+    GIS_LOADED=false;GAPI_LOADED=false;
+    toast('Client ID saved ✓');
+    loadGoogleSDKs();
     updateGdriveOverlay();
     updateProfileUI();
   });

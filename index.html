@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" id="appleTouchIcon">
 <title>Password Manager</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=Space+Grotesk:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;900&family=Kaushan+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=Space+Grotesk:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;900&family=Kaushan+Script&family=Caladea:wght@400;700&display=swap');
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -36,6 +36,7 @@
 [data-font="grotesk"]{--font-ui:'Space Grotesk',sans-serif;}
 [data-font="dm"]{--font-ui:'DM Sans',sans-serif;}
 [data-font="kaushan"]{--font-ui:'Kaushan Script',cursive;}
+[data-font="caladea"]{--font-ui:'Caladea',serif;}
 
 html{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100%;overflow-x:hidden;transition:background .3s,color .3s;}
@@ -264,7 +265,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
-<body data-theme="dark" data-font="kaushan">
+<body data-theme="midnight" data-font="caladea">
 
 <!-- ===== LOCK SCREEN ===== -->
 <div id="lockScreen" class="lock-screen">
@@ -689,6 +690,17 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
   </div>
 </div>
 
+<!-- CUSTOM DIALOG (replaces native confirm/alert/prompt) -->
+<div id="cdOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px">
+  <div id="cdBox" style="background:var(--surface);border:1px solid var(--border-hover);border-radius:16px;padding:22px 20px 18px;width:100%;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+    <div id="cdIcon" style="font-size:28px;margin-bottom:10px;text-align:center"></div>
+    <div id="cdTitle" style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;text-align:center"></div>
+    <div id="cdMsg" style="font-size:13px;color:var(--text-dim);line-height:1.6;text-align:center;margin-bottom:16px"></div>
+    <input id="cdInput" class="form-input" type="text" style="display:none;margin-bottom:12px">
+    <div id="cdBtns" style="display:flex;gap:8px"></div>
+  </div>
+</div>
+
 <script>
 // ====== PWA MANIFEST + ICON (same as finance tracker) ======
 (function(){
@@ -795,7 +807,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 
 // ====== STATE ======
 const SK='vault_v2',SET='vault_set_v2',GA='vault_ga';
-let entries=[],settings={theme:'dark',font:'kaushan'},gUser=null,gToken=null,lastBackup=null;
+let entries=[],settings={theme:'midnight',font:'caladea'},gUser=null,gToken=null,lastBackup=null;
 let editId=null,viewId=null,revealed=false;
 let ppCb=null;
 
@@ -1058,8 +1070,8 @@ let selEmoji=ALL_BRANDS[0][0], selColor='#'+ALL_BRANDS[0][2];
 
 const COLORS=['#7c6aff','#ff6a9b','#6affdc','#ffa96a','#6ab8ff','#c96aff','#ff6a6a','#b4ff6a','#f4e04d','#ff9f43'];
 const THEMES=[{id:'dark',l:'Dark'},{id:'light',l:'Light'},{id:'midnight',l:'Midnight'},{id:'forest',l:'Forest'},{id:'rose',l:'Rose'},{id:'amber',l:'Amber'}];
-const FONTS=[{id:'syne',l:'Syne'},{id:'playfair',l:'Playfair'},{id:'grotesk',l:'Grotesk'},{id:'dm',l:'DM Sans'},{id:'fraunces',l:'Fraunces'},{id:'kaushan',l:'Kaushan'}];
-const FF={syne:'Syne',playfair:'Playfair Display',grotesk:'Space Grotesk',dm:'DM Sans',fraunces:'Fraunces',kaushan:'Kaushan Script'};
+const FONTS=[{id:'caladea',l:'Caladea'},{id:'syne',l:'Syne'},{id:'playfair',l:'Playfair'},{id:'grotesk',l:'Grotesk'},{id:'dm',l:'DM Sans'},{id:'fraunces',l:'Fraunces'},{id:'kaushan',l:'Kaushan'}];
+const FF={caladea:'Caladea',syne:'Syne',playfair:'Playfair Display',grotesk:'Space Grotesk',dm:'DM Sans',fraunces:'Fraunces',kaushan:'Kaushan Script'};
 
 // ====== STORAGE ======
 function loadAll(){
@@ -1072,6 +1084,55 @@ function saveSettings(){localStorage.setItem(SET,JSON.stringify(settings));}
 function saveGA(){localStorage.setItem(GA,JSON.stringify({u:gUser,t:gToken,b:lastBackup}));}
 
 // ====== UTILS ======
+// Custom themed dialog — replaces native confirm/alert/prompt
+function cdShow(icon,title,msg,buttons,inputCfg){
+  $('cdIcon').textContent=icon||'';
+  $('cdTitle').textContent=title||'';
+  $('cdMsg').textContent=msg||'';
+  var inp=$('cdInput');
+  if(inputCfg){
+    inp.style.display='block';
+    inp.placeholder=inputCfg.placeholder||'';
+    inp.type=inputCfg.type||'text';
+    inp.value='';
+    setTimeout(()=>inp.focus(),80);
+  } else {
+    inp.style.display='none';
+  }
+  var btns=$('cdBtns');
+  btns.innerHTML='';
+  buttons.forEach(function(b){
+    var el=document.createElement('button');
+    el.textContent=b.label;
+    el.className=b.primary?'btn btn-primary':'btn btn-ghost';
+    if(b.danger)el.style.cssText='flex:1;padding:13px;border-radius:var(--radius-sm);font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent)';
+    el.onclick=function(){
+      $('cdOverlay').style.display='none';
+      if(b.cb)b.cb(inputCfg?inp.value:undefined);
+    };
+    btns.appendChild(el);
+  });
+  $('cdOverlay').style.display='flex';
+}
+function cdConfirm(title,msg,onOk,icon){
+  cdShow(icon||'⚠️',title,msg,[
+    {label:'Cancel',primary:false,cb:null},
+    {label:'Confirm',primary:true,cb:function(){onOk();}}
+  ]);
+}
+function cdAlert(title,msg,icon){
+  cdShow(icon||'ℹ️',title,msg,[{label:'OK',primary:true,cb:null}]);
+}
+function cdPromptInput(title,msg,placeholder,onOk){
+  cdShow('✏️',title,msg,[
+    {label:'Cancel',primary:false,cb:null},
+    {label:'Save',primary:true,cb:function(val){if(val)onOk(val);}}
+  ],{placeholder:placeholder,type:'text'});
+}
+// Close on backdrop click
+document.addEventListener('click',function(e){
+  if(e.target===$('cdOverlay'))$('cdOverlay').style.display='none';
+});
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function gi(n){return n?n[0].toUpperCase():'?';}
 function fmtDate(ts){if(!ts)return'—';return new Date(ts).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}
@@ -1232,7 +1293,7 @@ function toggleReveal(){
   if(revealed){el.textContent=e.password;el.className='detail-field-text';$('revealBtn').innerHTML=EYE_SHUT;}
   else{el.textContent='••••••••';el.className='detail-field-text pw-hidden';$('revealBtn').innerHTML=EYE_OPEN;}
 }
-function deleteEntry(){const e=entries.find(x=>x.id===viewId);if(!e||!confirm(`Delete "${e.name}"?`))return;entries=entries.filter(x=>x.id!==viewId);saveEntries();render($('searchInput').value);closeDetail();toast('Entry deleted');}
+function deleteEntry(){const e=entries.find(x=>x.id===viewId);if(!e)return;cdConfirm('Delete Entry',`Delete "${e.name}"? This cannot be undone.`,function(){entries=entries.filter(x=>x.id!==viewId);saveEntries();render($('searchInput').value);closeDetail();toast('Entry deleted');},'🗑️');}
 function editEntry(){
   const e=entries.find(x=>x.id===viewId);if(!e)return;closeDetail();
   editId=e.id;
@@ -1392,7 +1453,7 @@ function fetchGoogleProfile(token,expiresIn){
 }
 
 function signOut(){
-  if(!confirm('Sign out of Google?'))return;
+  cdConfirm('Sign Out','Sign out of your Google account?',function(){
   gToken=null;gUser=null;lastBackup=null;
   localStorage.removeItem('pm_gsession');
   localStorage.removeItem(GA);
@@ -1402,6 +1463,7 @@ function signOut(){
   }
   updateProfileUI();
   toast('Signed out');
+  },'👋');
 }
 
 function showClientIdSetup(){
@@ -1439,8 +1501,9 @@ async function driveRestore(pass){
     const enc=await dlR.text();
     const plain=await decrypt(enc.trim(),pass);
     const data=JSON.parse(plain);if(!data.entries){toast('Invalid backup');return;}
-    if(!confirm(`Restore ${data.entries.length} entries? Current data will be replaced.`))return;
-    entries=data.entries;saveEntries();render($('searchInput').value);lastBackup=Date.now();saveGA();updateProfileUI();toast(`Restored ${entries.length} entries ✓`);closeOv('gdriveOverlay');
+    cdConfirm('Restore Backup',`Replace all current data with ${data.entries.length} entries from backup?`,function(){
+      entries=data.entries;saveEntries();render($('searchInput').value);lastBackup=Date.now();saveGA();updateProfileUI();toast(`Restored ${entries.length} entries ✓`);closeOv('gdriveOverlay');
+    },'🔄');
   }catch{toast('Restore failed — wrong passphrase?');}
 }
 
@@ -1465,19 +1528,6 @@ function updateGdriveOverlay(){
     if(signActions)signActions.style.display=cid?'flex':'none';
     if(btnWrap)btnWrap.style.display=cid?'block':'none';
   }
-}
-
-function showClientIdSetup(){
-  // Show a simple modal to enter client ID
-  const id=prompt('Paste your Google OAuth Client ID:\n(Get it from console.cloud.google.com → Credentials)\nOnly "Authorized JavaScript origins" needed — set it to: '+location.origin);
-  if(!id)return;
-  if(!id.includes('.apps.googleusercontent.com')){
-    alert('That does not look like a valid Client ID. It should end with .apps.googleusercontent.com');return;
-  }
-  setClientId(id);
-  toast('Client ID saved ✓');
-  updateGdriveOverlay();
-  updateProfileUI();
 }
 
 // ====== PIN LOCK SYSTEM ======
@@ -1638,11 +1688,11 @@ function initLockScreen(){
   });
   // Forgot PIN
   $('lockForgot').addEventListener('click',()=>{
-    if(confirm('This will delete your PIN. You will still need to re-enter it to set a new one. Continue?')){
+    cdConfirm('Reset PIN','This will delete your PIN. You will need to set a new one.',function(){
       removePIN();pinBuffer='';pinMode='setup1';
       updateLockUI();updatePinDots();$('lockError').textContent='';
       $('sPINsub').textContent='Set a 4-digit lock PIN';
-    }
+    },'🔑');
   });
   // Lock button in header
   $('lockBtn').addEventListener('click',()=>{
@@ -1770,7 +1820,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   $('sGdrive').addEventListener('click',()=>{updateGdriveOverlay();openOv('gdriveOverlay');});
   $('sImport').addEventListener('click',()=>{closeOv('settingsOverlay');openOv('ieOverlay');});
-  $('sClear').addEventListener('click',()=>{if(confirm('Delete ALL entries permanently? This cannot be undone.')){entries=[];saveEntries();render();toast('All data cleared');}});
+  $('sClear').addEventListener('click',()=>{cdConfirm('Clear All Data','Delete ALL passwords permanently? This cannot be undone.',function(){entries=[];saveEntries();render();toast('All data cleared');},'🗑️');});
 
   // Profile
   $('profileBtn').addEventListener('click',()=>{updateProfileUI();openOv('profileOverlay');});

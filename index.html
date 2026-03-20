@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Password Manager">
+<link rel="manifest" id="pwaManifest">
+<link rel="apple-touch-icon" id="appleTouchIcon">
 <title>Password Manager</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=Space+Grotesk:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Fraunces:wght@700;900&family=Kaushan+Script&display=swap');
@@ -122,8 +124,6 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 .emoji-btn.selected{border-color:#fff !important;box-shadow:0 0 0 3px var(--accent),0 4px 16px rgba(0,0,0,.5);transform:scale(1.1);}
 .emoji-btn img{width:24px;height:24px;object-fit:contain;display:block;}
 /* Brand icon in cards/detail */
-.brand-icon{width:24px;height:24px;object-fit:contain;display:block;}
-.brand-letter{font-size:18px;font-weight:800;color:#fff;}
 
 .modal-actions{display:flex;gap:9px;margin-top:20px;}
 .btn{flex:1;padding:13px;border-radius:var(--radius-sm);font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .15s;}
@@ -524,7 +524,12 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
       <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:14px;font-size:12px;color:var(--text-dim);line-height:1.6;text-align:center">
         Sign in to backup your passwords securely to Google Drive with AES-256 encryption.
       </div>
-      <div id="profileSignInBtnWrap" style="display:flex;justify-content:center;margin-bottom:10px"></div>
+      <div id="profileSignInBtnWrap">
+        <button class="g-signin-btn" onclick="signInGoogle()">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
     </div>
 
     <!-- SIGNED IN -->
@@ -563,10 +568,17 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
       <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:16px;font-size:12px;color:var(--text-dim);line-height:1.7">
         🔒 <strong style="color:var(--accent)">AES-256-GCM encrypted</strong> before upload. Google cannot read your passwords.
       </div>
-      <div id="gSignInBtnWrap" style="display:flex;justify-content:center;margin-bottom:16px"></div>
+
+      <!-- Button shown when client ID exists -->
+      <div id="gSignInBtnWrap" style="display:none;margin-bottom:12px">
+        <button class="g-signin-btn" onclick="signInGoogle()">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
 
       <!-- Setup panel (shown when no client ID) -->
-      <div id="gClientSetupPanel" style="display:none">
+      <div id="gClientSetupPanel">
         <div style="background:color-mix(in srgb,#FF9900 8%,transparent);border:1px solid color-mix(in srgb,#FF9900 25%,transparent);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text-dim);line-height:1.7">
           <strong style="color:#FF9900">One-time setup required.</strong> Create a free Google OAuth Client ID.
           <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
@@ -575,7 +587,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
               <div>1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent)">Google Cloud Console</a></div>
               <div>2. Create Credentials → OAuth Client ID → <strong style="color:var(--accent)">Web application</strong></div>
               <div>3. Under <strong style="color:var(--accent)">Authorized JavaScript origins</strong> add:</div>
-              <div style="background:var(--surface2);border-radius:4px;padding:6px 10px;margin-top:4px;font-family:var(--font-mono);color:var(--accent3);font-size:11px;word-break:break-all" id="jsOriginHint">https://jaisonjai29.github.io</div>
+              <div style="background:var(--surface2);border-radius:4px;padding:6px 10px;margin-top:4px;font-family:var(--font-mono);color:var(--accent3);font-size:11px;word-break:break-all">https://jaisonjai29.github.io</div>
               <div style="margin-top:6px;color:var(--success);font-size:11px">✓ No redirect URI needed — leave it empty</div>
             </div>
             <div>4. Copy the Client ID and paste below</div>
@@ -678,12 +690,108 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 </div>
 
 <script>
-// ====== PWA BOOTSTRAP ======
-(()=>{
-  const m={name:"Password Manager",short_name:"PassMgr",start_url:location.href,display:"standalone",background_color:"#0a0a0f",theme_color:"#0a0a0f",icons:[{src:"data:image/svg+xml,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%237c6aff'/><text y='140' x='28' font-size='120'>🔐</text></svg>`),sizes:"192x192",type:"image/svg+xml"}]};
-  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/json'}));document.head.appendChild(l);
+// ====== PWA MANIFEST + ICON (same as finance tracker) ======
+(function(){
+  // Generate app icon — purple gradient bg + 🔐 emoji
+  var iconSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#56c874"/><stop offset="1" stop-color="#1a7a3a"/></linearGradient></defs><rect width="512" height="512" rx="100" fill="url(#g)"/><text x="256" y="340" font-size="300" text-anchor="middle" font-family="Arial">🔐</text></svg>';
+  var iconUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(iconSvg);
+
+  // PNG icon via canvas for better compatibility (works in Google OAuth consent screen)
+  function makeIcon(size,cb){
+    try{
+      var canvas=document.createElement('canvas');
+      canvas.width=size; canvas.height=size;
+      var ctx=canvas.getContext('2d');
+      // Purple gradient background
+      var grad=ctx.createLinearGradient(0,0,size,size);
+      grad.addColorStop(0,'#56c874');
+      grad.addColorStop(1,'#1a7a3a');
+      ctx.fillStyle=grad;
+      // Rounded corners
+      var r=size*0.2;
+      ctx.beginPath();
+      ctx.moveTo(r,0);ctx.lineTo(size-r,0);ctx.arcTo(size,0,size,r,r);
+      ctx.lineTo(size,size-r);ctx.arcTo(size,size,size-r,size,r);
+      ctx.lineTo(r,size);ctx.arcTo(0,size,0,size-r,r);
+      ctx.lineTo(0,r);ctx.arcTo(0,0,r,0,r);
+      ctx.closePath();ctx.fill();
+      // Lock emoji
+      ctx.font='bold '+(size*0.58)+'px Arial';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.fillText('\uD83D\uDD10',size/2,size/2+size*0.04);
+      cb(canvas.toDataURL('image/png'));
+    }catch(e){ cb(iconUrl); }
+  }
+
+  function buildManifest(icon192,icon512){
+    return JSON.stringify({
+      name:'Password Manager',
+      short_name:'PassMgr',
+      description:'Secure local password manager with Google Drive backup',
+      start_url:location.pathname,
+      scope:location.pathname,
+      display:'standalone',
+      orientation:'portrait',
+      background_color:'#0a0a0f',
+      theme_color:'#56c874',
+      categories:['productivity','utilities'],
+      icons:[
+        {src:icon192,sizes:'192x192',type:'image/png',purpose:'any maskable'},
+        {src:icon512,sizes:'512x512',type:'image/png',purpose:'any maskable'},
+        {src:iconUrl,sizes:'any',type:'image/svg+xml'}
+      ]
+    });
+  }
+
+  makeIcon(512,function(icon512){
+    makeIcon(192,function(icon192){
+      var blob=new Blob([buildManifest(icon192,icon512)],{type:'application/manifest+json'});
+      var url=URL.createObjectURL(blob);
+      var link=document.getElementById('pwaManifest');
+      if(link){link.href=url;}
+      else{var l=document.createElement('link');l.rel='manifest';l.href=url;document.head.appendChild(l);}
+      // Apple touch icon (shows when adding to iOS home screen)
+      var al=document.getElementById('appleTouchIcon');
+      if(al){al.rel='apple-touch-icon';al.href=icon192;}
+      else{var a=document.createElement('link');a.rel='apple-touch-icon';a.href=icon192;document.head.appendChild(a);}
+    });
+  });
 })();
-if('serviceWorker'in navigator)navigator.serviceWorker.register(URL.createObjectURL(new Blob([`const C='v3';self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',()=>self.clients.claim());self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>new Response('Offline'))));`],{type:'application/javascript'})),{scope:'/'}).catch(()=>{});
+
+// ====== SERVICE WORKER (same base64 approach as finance tracker) ======
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  var swCode=[
+    "var CACHE='pm-v1';",
+    "self.addEventListener('install',function(e){ self.skipWaiting(); });",
+    "self.addEventListener('activate',function(e){ e.waitUntil(self.clients.claim()); });",
+    "self.addEventListener('fetch',function(e){",
+    "  if(e.request.method!=='GET') return;",
+    "  var url=e.request.url;",
+    "  if(url.indexOf('googleapis')>-1||url.indexOf('accounts.google')>-1) return;",
+    "  e.respondWith(",
+    "    caches.match(e.request).then(function(cached){",
+    "      var fetchPromise=fetch(e.request).then(function(resp){",
+    "        if(resp&&resp.status===200&&resp.type!=='opaque'){",
+    "          var clone=resp.clone();",
+    "          caches.open(CACHE).then(function(c){c.put(e.request,clone);});",
+    "        }",
+    "        return resp;",
+    "      }).catch(function(){ return cached; });",
+    "      return cached||fetchPromise;",
+    "    })",
+    "  );",
+    "});"
+  ].join('\n');
+  var b64=btoa(unescape(encodeURIComponent(swCode)));
+  var swDataUrl='data:application/javascript;base64,'+b64;
+  navigator.serviceWorker.register(swDataUrl,{scope:'./'}).then(function(){
+    console.log('SW registered');
+  }).catch(function(e){
+    console.log('SW not available (app still works):',e.message);
+  });
+})();
 
 // ====== STATE ======
 const SK='vault_v2',SET='vault_set_v2',GA='vault_ga';
@@ -730,14 +838,8 @@ const BRANDS=[
  ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24H5.398zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.712.606L9.398 13.54V0h4.489zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0h2.298z'],
  ['xiaomi','Xiaomi','FF6900','M9.608 4.8v14.4H14.4V4.8H9.608zm-4.8 0v14.4h4.792V4.8H4.808zM14.4 4.8v14.4h4.792V4.8H14.4zM0 0v24h24V0H0z'],
  ['samsung','Samsung','1428A0','M19.2 9.6a3.2 3.2 0 1 0-6.4 0 3.2 3.2 0 0 0 6.4 0zm-6.4 4.8A3.2 3.2 0 1 0 6.4 14.4a3.2 3.2 0 0 0 6.4 0zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 21.6A9.6 9.6 0 1 1 12 2.4a9.6 9.6 0 0 1 0 19.2z'],
- ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27l-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'],
- ['paymentwall','Paymentwall','0A84FF','M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0z'],
- ['airbnb','Airbnb','FF5A5F','M12 .5c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 10.503c-1.245 0-2.247-.997-2.247-2.24C9.752 7.518 10.755 6.52 12 6.52c1.244 0 2.245.997 2.245 2.242 0 1.244-1 2.24-2.245 2.24zM4.7 18.89c.024-.076.36-1.096 1.348-2.224 1.14-1.302 2.797-1.96 4.53-1.96.2 0 .41.01.617.032.46.05.917.143 1.36.28.053.016.1.04.15.06.496.178.97.41 1.39.7.42.29.79.63 1.07 1.01.11.15.22.31.31.47.04.073.075.147.107.22.187.41.266.87.196 1.294-.057.344-.2.672-.443.943-.33.37-.792.6-1.29.6h-.007c-.34-.005-.68-.07-1.01-.163-.36-.1-.71-.215-1.06-.34-.38-.132-.77-.28-1.17-.42-.4-.14-.8-.28-1.197-.37-.397-.09-.8-.14-1.21-.14-.71 0-1.43.17-2.06.53-.39.22-.73.52-.98.88-.08.114-.143.238-.2.366zm14.6 0c-.056-.13-.12-.253-.2-.366-.25-.36-.59-.66-.98-.88-.63-.36-1.35-.53-2.06-.53-.41 0-.813.05-1.21.14-.397.09-.797.23-1.197.37-.4.14-.79.288-1.17.42-.35.125-.7.24-1.06.34-.33.093-.67.158-1.01.163h-.007c-.498 0-.96-.23-1.29-.6-.243-.27-.386-.6-.443-.943-.07-.424.009-.884.196-1.294.032-.073.067-.147.107-.22.09-.16.2-.32.31-.47.28-.38.65-.72 1.07-1.01.42-.29.894-.522 1.39-.7.05-.02.097-.044.15-.06.443-.137.9-.23 1.36-.28.207-.022.417-.032.617-.032 1.733 0 3.39.658 4.53 1.96.988 1.128 1.324 2.148 1.348 2.224z'],
- ['uber','Uber','000000','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z'],
- ['netflix_n','Netflix','E50914','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm2.535 17.4L12 10.5l-2.535 6.9H7.35l3.33-9.3H9V6h6v1.8h-1.68l3.33 9.3h-2.115z'],
- ['aws','AWS','232F3E','M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576a.347.347 0 0 1 .056.176c0 .08-.048.16-.152.24l-.503.336a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311-.064.057-.168.08-.312.08h-.686c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32L12.55 7.793l-1.238 4.906c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08h-.685zm10.145.228c-.41 0-.82-.048-1.214-.144-.395-.096-.703-.2-.910-.32-.128-.071-.216-.151-.248-.224a.56.56 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.778.778 0 0 0-.215-.559c-.144-.151-.415-.287-.806-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .358.008.535.032.183.024.35.056.51.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167z'],
- ['netflix_full','Netflix','E50914','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm2.4 17.28L12 11.28l-2.4 6H7.92l3.12-8.64H9.6V6h4.8v2.64h-1.44l3.12 8.64H14.4z'],
- ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24H5.398zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.712.606L9.398 13.54V0h4.489zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0h2.298z'],
+ ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27l-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'], ['airbnb','Airbnb','FF5A5F','M12 .5c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 10.503c-1.245 0-2.247-.997-2.247-2.24C9.752 7.518 10.755 6.52 12 6.52c1.244 0 2.245.997 2.245 2.242 0 1.244-1 2.24-2.245 2.24zM4.7 18.89c.024-.076.36-1.096 1.348-2.224 1.14-1.302 2.797-1.96 4.53-1.96.2 0 .41.01.617.032.46.05.917.143 1.36.28.053.016.1.04.15.06.496.178.97.41 1.39.7.42.29.79.63 1.07 1.01.11.15.22.31.31.47.04.073.075.147.107.22.187.41.266.87.196 1.294-.057.344-.2.672-.443.943-.33.37-.792.6-1.29.6h-.007c-.34-.005-.68-.07-1.01-.163-.36-.1-.71-.215-1.06-.34-.38-.132-.77-.28-1.17-.42-.4-.14-.8-.28-1.197-.37-.397-.09-.8-.14-1.21-.14-.71 0-1.43.17-2.06.53-.39.22-.73.52-.98.88-.08.114-.143.238-.2.366zm14.6 0c-.056-.13-.12-.253-.2-.366-.25-.36-.59-.66-.98-.88-.63-.36-1.35-.53-2.06-.53-.41 0-.813.05-1.21.14-.397.09-.797.23-1.197.37-.4.14-.79.288-1.17.42-.35.125-.7.24-1.06.34-.33.093-.67.158-1.01.163h-.007c-.498 0-.96-.23-1.29-.6-.243-.27-.386-.6-.443-.943-.07-.424.009-.884.196-1.294.032-.073.067-.147.107-.22.09-.16.2-.32.31-.47.28-.38.65-.72 1.07-1.01.42-.29.894-.522 1.39-.7.05-.02.097-.044.15-.06.443-.137.9-.23 1.36-.28.207-.022.417-.032.617-.032 1.733 0 3.39.658 4.53 1.96.988 1.128 1.324 2.148 1.348 2.224z'],
+ ['uber','Uber','000000','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z'], ['aws','AWS','232F3E','M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576a.347.347 0 0 1 .056.176c0 .08-.048.16-.152.24l-.503.336a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311-.064.057-.168.08-.312.08h-.686c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32L12.55 7.793l-1.238 4.906c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08h-.685zm10.145.228c-.41 0-.82-.048-1.214-.144-.395-.096-.703-.2-.910-.32-.128-.071-.216-.151-.248-.224a.56.56 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.778.778 0 0 0-.215-.559c-.144-.151-.415-.287-.806-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .358.008.535.032.183.024.35.056.51.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167z'], ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24H5.398zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.712.606L9.398 13.54V0h4.489zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0h2.298z'],
  ['xiaomi','Xiaomi','FF6900','M9.608 4.8v14.4H14.4V4.8H9.608zm-4.8 0v14.4h4.792V4.8H4.808zM14.4 4.8v14.4h4.792V4.8H14.4zM0 0v24h24V0H0z'],
  ['samsung','Samsung','1428A0','M12 2.4A9.6 9.6 0 1 0 12 21.6 9.6 9.6 0 0 0 12 2.4zm2.4 11.2a3.2 3.2 0 1 1-6.4 0V10.4a3.2 3.2 0 1 1 6.4 0v3.2z'],
  ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27l-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'],
@@ -1149,11 +1251,7 @@ function updateProfileUI(){
   $('statEntries').textContent=entries.length;
   $('statBackup').textContent=lastBackup?fmtDate(lastBackup):'—';
   // Render Google sign-in button in profile overlay
-  var pWrap=$('profileSignInBtnWrap');
-  if(pWrap&&!gUser){
-    var cid2=getClientId();
-    pWrap.innerHTML=cid2?GOOGLE_BTN_HTML:'<button onclick="showClientIdSetup()" style="padding:12px 22px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>';
-  }
+  // profileSignInBtnWrap now has static HTML button — nothing to inject
   $('sGdriveSub').textContent=gUser
     ?gUser.email||'Connected'
     :getClientId()?'Client ID saved — tap to sign in':'Setup required';
@@ -1205,8 +1303,6 @@ function getClientId(){
 function setClientId(id){
   localStorage.setItem(GCLIENT_KEY,id.trim());
 }
-function getRedirectUri(){return location.origin+location.pathname;}
-
 // Load both GIS + GAPI SDKs (same as finance tracker)
 function loadGoogleSDKs(){
   if(GIS_LOADED&&GAPI_LOADED)return;
@@ -1308,8 +1404,6 @@ function signOut(){
   toast('Signed out');
 }
 
-function handleOAuthReturn(){/* not needed — using token client */}
-
 function showClientIdSetup(){
   updateGdriveOverlay();
   openOv('gdriveOverlay');
@@ -1351,10 +1445,6 @@ async function driveRestore(pass){
 }
 
 // Official-style Google Sign-In button (same HTML as finance tracker)
-var GOOGLE_BTN_HTML='<button class="g-signin-btn" onclick="signInGoogle()">'
-  +'<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>'
-  +'Sign in with Google'
-  +'</button>';
 
 function updateGdriveOverlay(){
   var signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
@@ -1370,15 +1460,10 @@ function updateGdriveOverlay(){
     var cid=getClientId();
     var setupPanel=$('gClientSetupPanel');
     var signActions=$('gSignInActions');
-    var wrap=$('gSignInBtnWrap');
+    var btnWrap=$('gSignInBtnWrap');
     if(setupPanel)setupPanel.style.display=cid?'none':'block';
     if(signActions)signActions.style.display=cid?'flex':'none';
-    if(!wrap)return;
-    if(cid){
-      wrap.innerHTML=GOOGLE_BTN_HTML;
-    }else{
-      wrap.innerHTML='';
-    }
+    if(btnWrap)btnWrap.style.display=cid?'block':'none';
   }
 }
 
@@ -1595,49 +1680,7 @@ function initLockScreen(){
   }
 }
 
-// Patch processPIN to handle verify-change
-const _origProcess=processPIN;
-async function processPIN(){
-  $('lockError').textContent='';
-  if(pinMode==='verify-change'){
-    const ok=await verifyPIN(pinBuffer);
-    if(ok){pinBuffer='';pinMode='setup1';updateLockUI();updatePinDots();}
-    else{pinDotError();$('lockError').textContent='Incorrect PIN.';pinBuffer='';updatePinDots();}
-    return;
-  }
-  if(pinMode==='unlock'){
-    const ok=await verifyPIN(pinBuffer);
-    if(ok){hideLockScreen();}
-    else{pinDotError();$('lockError').textContent='Incorrect PIN. Try again.';pinBuffer='';updatePinDots();}
-  } else if(pinMode==='setup1'){
-    pinSetupFirst=pinBuffer;pinBuffer='';pinMode='setup2';updateLockUI();updatePinDots();
-  } else if(pinMode==='setup2'){
-    if(pinBuffer===pinSetupFirst){
-      await storePIN(pinBuffer);
-      $('sPINsub').textContent='PIN is set';
-      hideLockScreen();toast('PIN set successfully 🔒');
-    } else {
-      pinDotError();$('lockError').textContent='PINs do not match. Start over.';
-      pinBuffer='';pinSetupFirst='';pinMode='setup1';
-      setTimeout(()=>{updateLockUI();updatePinDots();$('lockError').textContent='';},700);
-    }
-  }
-}
 
-
-function exportJSON(){dl(`pm_backup_${Date.now()}.json`,JSON.stringify({pm_version:2,exportedAt:new Date().toISOString(),count:entries.length,entries},null,2),'application/json');toast('JSON exported ✓');}
-function exportCSV(){
-  const rows=[['Name','Username','Password','Description','Created']];
-  entries.forEach(e=>rows.push([`"${(e.name||'').replace(/"/g,'""')}"`,`"${(e.username||'').replace(/"/g,'""')}"`,`"${(e.password||'').replace(/"/g,'""')}"`,`"${(e.desc||'').replace(/"/g,'""')}"`,e.created?new Date(e.created).toISOString():'']));
-  dl(`pm_backup_${Date.now()}.csv`,rows.map(r=>r.join(',')).join('\n'),'text/csv');toast('CSV exported ✓');
-}
-async function exportVault(){
-  promptPass('Encrypt Export','Enter a passphrase to protect this export:',async pass=>{
-    if(!pass)return;
-    try{const enc=await encrypt(JSON.stringify({entries,ts:Date.now()}),pass);dl(`pm_backup_${Date.now()}.vault`,enc,'application/octet-stream');toast('Encrypted export done ✓');}
-    catch{toast('Encryption failed');}
-  });
-}
 function handleImport(file){
   if(!file)return;
   const name=file.name.toLowerCase();
@@ -1675,7 +1718,7 @@ function promptPass(title,desc,cb){
 
 // ====== EVENT WIRING ======
 document.addEventListener('DOMContentLoaded',()=>{
-  loadAll();applySettings();buildPickers();buildThemeRow();buildFontRow();render();updateProfileUI();handleOAuthReturn();
+  loadAll();applySettings();buildPickers();buildThemeRow();buildFontRow();render();updateProfileUI();
   // Load Google SDKs eagerly (same as finance tracker)
   if(getClientId())loadGoogleSDKs();
 

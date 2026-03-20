@@ -520,18 +520,9 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
     <!-- NOT SIGNED IN -->
     <div id="signInSection">
       <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:14px;font-size:12px;color:var(--text-dim);line-height:1.6;text-align:center">
-        Sign in to sync & backup your passwords securely to Google Drive with end-to-end encryption.
+        Sign in to backup your passwords securely to Google Drive with AES-256 encryption.
       </div>
-      <!-- Official-style Google Sign-In button -->
-      <button id="googleSignInBtn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 16px;border-radius:var(--radius-sm);background:#fff;border:1px solid #dadce0;color:#3c4043;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;transition:box-shadow .2s,background .2s;margin-bottom:10px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        <span style="letter-spacing:.1px">Sign in with Google</span>
-      </button>
+      <div id="profileSignInBtnWrap" style="display:flex;justify-content:center;margin-bottom:10px"></div>
     </div>
 
     <!-- SIGNED IN -->
@@ -561,119 +552,55 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" style="display:flex;align-items:center;gap:10px">
-      <svg width="20" height="20" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066DA"/>
-        <path d="M43.65 25L29.9 0c-1.35.8-2.5 1.9-3.3 3.3L1.2 48.5A9 9 0 0 0 0 53h27.5z" fill="#00AC47"/>
-        <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75L86.1 57.5c.8-1.4 1.2-2.95 1.2-4.5H59.8L73.55 76.8z" fill="#EA4335"/>
-        <path d="M43.65 25L57.4 0H29.9z" fill="#00832D"/>
-        <path d="M59.8 53H87.3L73.55 76.8 57.4 53z" fill="#2684FC"/>
-        <path d="M43.65 25L57.4 0 27.5 53h32.3z" fill="#00AC47"/>
-      </svg>
-      Google Drive Sync
+      <svg width="20" height="20" viewBox="0 0 87.3 78" fill="none"><path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066DA"/><path d="M43.65 25L29.9 0c-1.35.8-2.5 1.9-3.3 3.3L1.2 48.5A9 9 0 0 0 0 53h27.5z" fill="#00AC47"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75L86.1 57.5c.8-1.4 1.2-2.95 1.2-4.5H59.8L73.55 76.8z" fill="#EA4335"/><path d="M43.65 25L57.4 0H29.9z" fill="#00832D"/><path d="M59.8 53H87.3L73.55 76.8 57.4 53z" fill="#2684FC"/><path d="M43.65 25L57.4 0 27.5 53h32.3z" fill="#00AC47"/></svg>
+      Google Drive Backup
     </div>
 
-    <!-- Status bar -->
-    <div class="gdrive-status-box">
-      <div class="status-dot off" id="gdriveDot"></div>
-      <div>
-        <div id="gdriveStatusMain" style="font-size:13px;font-weight:700">Not connected</div>
-        <div id="gdriveStatusSub" style="font-size:11px;color:var(--text-dim);margin-top:2px">Sign in to enable cloud backup</div>
+    <!-- NOT signed in -->
+    <div id="gdriveSignInSection">
+      <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:16px;font-size:12px;color:var(--text-dim);line-height:1.7">
+        🔒 <strong style="color:var(--accent)">Zero-knowledge encryption.</strong> Passwords are encrypted with AES-256-GCM before upload — Google cannot read them.
       </div>
-    </div>
-
-    <!-- SETUP REQUIRED (no client ID) -->
-    <div id="gdriveSetupSection">
-      <div style="background:color-mix(in srgb,#FF9900 8%,transparent);border:1px solid color-mix(in srgb,#FF9900 30%,transparent);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:#FF9900;margin-bottom:6px">⚠️ Setup Required</div>
-        <div style="font-size:12px;color:var(--text-dim);line-height:1.7">Google Sign-In requires a free Google OAuth Client ID. Follow the exact steps below — the URLs must match precisely.</div>
-      </div>
-
-      <!-- Live URL display -->
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">Your App URL (copy this exactly)</div>
-        <div id="appOriginDisplay" style="font-family:var(--font-mono);font-size:11px;color:var(--accent);background:var(--surface3);padding:8px 10px;border-radius:6px;word-break:break-all;cursor:pointer;border:1px solid var(--border)" title="Tap to copy"></div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:6px">⚠️ If this shows <span style="color:var(--danger);font-family:var(--font-mono)">file://</span> — you must host this file on a server (HTTPS). Google OAuth does not work with local files.</div>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 1 — Create a Google Cloud project</div>
-          Go to <strong style="color:var(--accent)">console.cloud.google.com</strong> → New Project → give it any name
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 2 — Enable Google Drive API</div>
-          APIs &amp; Services → Library → search <strong style="color:var(--accent)">Google Drive API</strong> → Enable
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 3 — OAuth Consent Screen</div>
-          APIs &amp; Services → OAuth consent screen → <strong style="color:var(--accent)">External</strong> → fill App name → Save &amp; Continue.<br>
-          On <strong style="color:var(--accent)">Test users</strong> step, click Add users → add <strong style="color:var(--accent)">your own Gmail address</strong> → Save.
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 4 — Create OAuth Client ID</div>
-          Credentials → Create Credentials → OAuth Client ID → <strong style="color:var(--accent)">Web application</strong><br>
-          <div style="margin-top:8px;padding:8px 10px;background:var(--surface3);border-radius:6px">
-            <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px">Add to Authorized JavaScript origins ONLY:</div>
-            <div id="setupOriginHint" style="font-family:var(--font-mono);color:var(--accent3);font-size:12px;cursor:pointer;word-break:break-all" title="Tap to copy"></div>
-            <div style="font-size:10px;color:var(--text-dim);margin-top:4px">⚠️ Do NOT add a redirect URI — leave it empty</div>
-          </div>
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 5 — Paste your Client ID below</div>
-          Copy the Client ID (looks like: <span style="color:var(--accent);font-family:var(--font-mono)">123456789-xxxx.apps.googleusercontent.com</span>)
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Google OAuth Client ID</label>
-        <input class="form-input" id="gClientIdInput" type="text" placeholder="123456789-xxxx.apps.googleusercontent.com" style="font-size:12px">
-      </div>
+      <div id="gSignInBtnWrap" style="display:flex;justify-content:center;margin-bottom:12px"></div>
+      <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:14px">Uses Google One Tap — no app setup needed</div>
       <div class="modal-actions">
         <button class="btn btn-ghost" id="closeGdriveBtn">Close</button>
-        <button class="btn btn-primary" id="saveClientIdBtn">Save &amp; Sign In</button>
       </div>
     </div>
 
-    <!-- NOT signed in: show Google button -->
-    <div id="gdriveSignInSection" style="display:none">
-      <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:16px;font-size:12px;color:var(--text-dim);line-height:1.7">
-        🔒 <strong style="color:var(--accent)">Zero-knowledge encryption.</strong> Passwords are AES-256-GCM encrypted with your passphrase before upload — Google cannot read them.
-      </div>
-      <button class="google-btn" id="gdriveSignInBtn" style="border:1px solid var(--border-hover);padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:10px">
-        <svg width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Sign in with Google
-      </button>
-      <button class="btn btn-ghost" style="width:100%;font-size:12px" id="changeClientIdBtn">Change Client ID</button>
-      <div class="modal-actions" style="margin-top:12px">
-        <button class="btn btn-ghost" id="closeGdriveBtn2">Close</button>
-      </div>
-    </div>
-
-    <!-- Signed in: show backup controls -->
+    <!-- Signed in -->
     <div id="gdriveConnectedSection" style="display:none">
-      <div class="encrypt-info">🔒 <strong>End-to-End Encrypted.</strong> Passwords are AES-256-GCM encrypted with your passphrase before upload. Google cannot read them.</div>
+      <div class="gdrive-status-box" style="margin-bottom:14px">
+        <div class="status-dot on"></div>
+        <div>
+          <div id="gdriveUserName" style="font-size:13px;font-weight:700"></div>
+          <div id="gdriveUserEmail" style="font-size:11px;color:var(--text-dim);margin-top:2px"></div>
+        </div>
+        <button class="btn btn-ghost" id="gSignOutBtn" style="flex:unset;padding:6px 12px;font-size:12px;margin-left:auto">Sign out</button>
+      </div>
+      <div class="encrypt-info">🔒 <strong>AES-256-GCM encrypted</strong> before upload. Google cannot read your passwords.</div>
       <div class="form-group">
         <label class="form-label">Encryption Passphrase</label>
         <div class="pw-wrap">
-          <input class="form-input" id="drivePassphrase" type="password" placeholder="Strong master passphrase…">
+          <input class="form-input" id="drivePassphrase" type="password" placeholder="Strong passphrase — store it safely">
           <button class="pw-action" id="toggleDrivePass">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:6px">⚠️ This passphrase cannot be recovered. Store it safely.</div>
+        <div style="font-size:11px;color:var(--danger);margin-top:5px">⚠️ Cannot be recovered if forgotten.</div>
       </div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="closeGdriveBtnC">Close</button>
-        <button class="btn btn-primary" id="gdriveMainBtn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Backup Now
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-primary" id="gdriveMainBtn" style="flex:unset">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Backup to Google Drive
         </button>
+        <button class="btn btn-ghost" id="restoreNowBtn" style="flex:unset;display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          Restore from Drive
+        </button>
+        <button class="btn btn-ghost" id="closeGdriveBtnC">Close</button>
       </div>
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px" id="driveExtraActions"></div>
+      <div id="driveExtraActions"></div>
     </div>
   </div>
 </div>
@@ -1191,6 +1118,21 @@ const PROFILE_SVG=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" s
 function updateProfileUI(){
   $('statEntries').textContent=entries.length;
   $('statBackup').textContent=lastBackup?fmtDate(lastBackup):'—';
+  // Render Google sign-in button in profile overlay
+  const pWrap=$('profileSignInBtnWrap');
+  if(pWrap&&!gUser){
+    pWrap.innerHTML='';
+    const cid=getClientId();
+    if(cid){
+      loadGIS().then(()=>{
+        if(!window.google||!window.google.accounts){pWrap.innerHTML='<button onclick="signInGoogle()" style="padding:11px 20px;border-radius:8px;background:#fff;border:1px solid #dadce0;color:#3c4043;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px"><svg width=18 height=18 viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Sign in with Google</button>';return;}
+        window.google.accounts.id.initialize({client_id:cid,callback:handleCredentialResponse,auto_select:false});
+        window.google.accounts.id.renderButton(pWrap,{type:'standard',theme:'outline',size:'large',text:'sign_in_with',shape:'rectangular',width:260});
+      });
+    } else {
+      pWrap.innerHTML=`<button onclick="showClientIdSetup()" style="padding:11px 20px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>`;
+    }
+  }
   $('sGdriveSub').textContent=gUser
     ?gUser.email||'Connected'
     :getClientId()?'Client ID saved — tap to sign in':'Setup required';
@@ -1227,79 +1169,160 @@ function updateProfileUI(){
   updateGdriveOverlay();
 }
 
-// ====== GOOGLE SIGN-IN via Google Identity Services (GIS) ======
-// Uses popup flow — no redirect URI config needed in Google Cloud Console
-const GSCOPE='https://www.googleapis.com/auth/drive.appdata';
-const GCLIENT_KEY='pm_gclient';
+// ====== GOOGLE SIGN-IN — One Tap + Token Client ======
+// Uses Google's official GSI library with One Tap UI
+// Requires: client_id registered at console.cloud.google.com
+// Only needs "Authorized JavaScript origins" — NO redirect URI needed
+const GCLIENT_KEY = 'pm_gclient';
+const GSCOPE = 'https://www.googleapis.com/auth/drive.appdata';
 function getClientId(){return localStorage.getItem(GCLIENT_KEY)||'';}
 function setClientId(id){localStorage.setItem(GCLIENT_KEY,id.trim());}
-function getRedirectUri(){return location.origin+location.pathname;}
 
-let _tokenClient=null;
+let _gisReady = false;
+let _tokenClient = null;
 
 function loadGIS(){
-  return new Promise((resolve)=>{
-    if(window.google&&window.google.accounts){resolve();return;}
+  return new Promise(resolve=>{
+    if(_gisReady){resolve();return;}
+    if(window.google&&window.google.accounts){_gisReady=true;resolve();return;}
     const s=document.createElement('script');
     s.src='https://accounts.google.com/gsi/client';
-    s.async=true;s.defer=true;
-    s.onload=()=>resolve();
-    s.onerror=()=>resolve();
+    s.async=true;
+    s.onload=()=>{_gisReady=true;resolve();};
+    s.onerror=()=>{console.warn('GIS load failed');resolve();};
     document.head.appendChild(s);
   });
+}
+
+// Renders the official Google Sign-In button into a container element
+async function renderGoogleBtn(containerId){
+  const cid=getClientId();
+  const container=$(containerId);
+  if(!container)return;
+  if(!cid){
+    container.innerHTML=`<button onclick="openOv('gdriveOverlay')" style="padding:10px 18px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>`;
+    return;
+  }
+  await loadGIS();
+  if(!window.google||!window.google.accounts){
+    container.innerHTML=`<div style="font-size:12px;color:var(--danger)">Could not load Google Sign-In. Check your connection.</div>`;
+    return;
+  }
+  container.innerHTML='';
+  // Render the official Google button
+  window.google.accounts.id.initialize({
+    client_id: cid,
+    callback: handleCredentialResponse,
+    auto_select: false,
+    cancel_on_tap_outside: true,
+  });
+  window.google.accounts.id.renderButton(container, {
+    type: 'standard',
+    theme: 'outline',
+    size: 'large',
+    text: 'sign_in_with',
+    shape: 'rectangular',
+    logo_alignment: 'left',
+    width: 280,
+  });
+}
+
+// Called when user picks a Google account from One Tap or button
+function handleCredentialResponse(response){
+  if(!response||!response.credential){toast('Sign-in failed');return;}
+  // Decode JWT id_token to get user info (no server needed)
+  try{
+    const payload=JSON.parse(atob(response.credential.split('.')[1]));
+    gUser={name:payload.name,email:payload.email,pic:payload.picture,sub:payload.sub};
+    // Now get an access token for Drive API
+    getAccessToken();
+  }catch(e){toast('Sign-in error: '+e.message);}
+}
+
+function getAccessToken(){
+  const cid=getClientId();
+  if(!cid||!window.google)return;
+  _tokenClient=window.google.accounts.oauth2.initTokenClient({
+    client_id:cid,
+    scope:GSCOPE,
+    hint:gUser?gUser.email:'',
+    callback:(resp)=>{
+      if(resp.error){
+        toast('Drive access error: '+resp.error,4000);
+        return;
+      }
+      gToken=resp.access_token;
+      saveGA();updateProfileUI();
+      closeOv('profileOverlay');closeOv('gdriveOverlay');
+      toast('✓ Signed in as '+gUser.name);
+    },
+    error_callback:(err)=>{
+      if(err&&err.type==='popup_closed')return;
+      toast('Drive access error: '+(err&&err.type||'unknown'),4000);
+    }
+  });
+  _tokenClient.requestAccessToken({prompt:'none'});
 }
 
 async function signInGoogle(){
   const cid=getClientId();
   if(!cid){updateGdriveOverlay();openOv('gdriveOverlay');return;}
   if(location.protocol==='file:'){
-    toast('\u26a0\ufe0f Host on HTTPS to use Google Sign-In');
-    updateGdriveOverlay();openOv('gdriveOverlay');return;
+    toast('⚠️ Host on HTTPS to use Google Sign-In');return;
   }
   await loadGIS();
   if(!window.google||!window.google.accounts){
-    toast('\u26a0\ufe0f Could not load Google Sign-In library. Check your connection.');return;
+    toast('⚠️ Could not load Google Sign-In');return;
   }
-  _tokenClient=window.google.accounts.oauth2.initTokenClient({
+  // If we have user info, skip re-consent and just get access token
+  if(gUser&&gUser.email){
+    getAccessToken();return;
+  }
+  // Use One Tap prompt
+  window.google.accounts.id.initialize({
     client_id:cid,
-    scope:GSCOPE+' https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-    callback:(resp)=>{
-      if(resp.error){
-        let msg='Sign-in failed: '+resp.error;
-        if(resp.error==='idpiframe_initialization_failed')
-          msg='Client ID not found — check it in Google Cloud Console. Also add your origin: '+location.origin+' to Authorized JavaScript origins.';
-        if(resp.error==='access_denied')
-          msg='Access denied — add your Google email as a Test User in the OAuth consent screen.';
-        if(resp.error==='invalid_client')
-          msg='Invalid Client ID — ensure Authorized JavaScript origins includes: '+location.origin;
-        toast('\u26a0\ufe0f '+msg,6000);
-        return;
-      }
-      gToken=resp.access_token;
-      fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}})
-        .then(r=>r.json()).then(u=>{
-          gUser={name:u.name,email:u.email,pic:u.picture};
-          saveGA();updateProfileUI();
-          closeOv('profileOverlay');closeOv('gdriveOverlay');
-          toast('\u2713 Signed in as '+u.name);
-        }).catch(()=>toast('Sign-in succeeded but profile load failed'));
-    },
-    error_callback:(err)=>{
-      if(err&&err.type==='popup_closed')return;
-      toast('\u26a0\ufe0f Sign-in error: '+(err&&err.type||'unknown'),4000);
+    callback:handleCredentialResponse,
+    auto_select:false,
+  });
+  window.google.accounts.id.prompt((notification)=>{
+    if(notification.isNotDisplayed()||notification.isSkippedMoment()){
+      // Fallback: use token client directly
+      _tokenClient=window.google.accounts.oauth2.initTokenClient({
+        client_id:cid,
+        scope:GSCOPE+' https://www.googleapis.com/auth/userinfo.profile openid email',
+        callback:(resp)=>{
+          if(resp.error){toast('Sign-in failed: '+resp.error,4000);return;}
+          gToken=resp.access_token;
+          fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}})
+            .then(r=>r.json()).then(u=>{
+              gUser={name:u.name,email:u.email,pic:u.picture};
+              saveGA();updateProfileUI();
+              closeOv('profileOverlay');closeOv('gdriveOverlay');
+              toast('✓ Signed in as '+u.name);
+            }).catch(()=>toast('Profile load failed'));
+        },
+        error_callback:(err)=>{
+          if(err&&err.type==='popup_closed')return;
+          toast('Sign-in error: '+(err&&err.type||'unknown'),4000);
+        }
+      });
+      _tokenClient.requestAccessToken({prompt:'select_account'});
     }
   });
-  _tokenClient.requestAccessToken({prompt:'select_account'});
 }
 
-function handleOAuthReturn(){/* no-op with GIS popup flow */}
+function handleOAuthReturn(){/* no-op — using popup/One Tap */}
 
 function signOut(){
   if(!confirm('Sign out of Google?'))return;
-  if(window.google&&window.google.accounts&&gToken)
-    window.google.accounts.oauth2.revoke(gToken,()=>{});
+  if(window.google&&window.google.accounts){
+    if(window.google.accounts.id)window.google.accounts.id.disableAutoSelect();
+    if(gToken)window.google.accounts.oauth2.revoke(gToken,()=>{});
+  }
   gUser=null;gToken=null;lastBackup=null;
-  localStorage.removeItem(GA);updateProfileUI();toast('Signed out');
+  localStorage.removeItem(GA);
+  updateProfileUI();
+  toast('Signed out');
 }
 
 // ====== GOOGLE DRIVE ======
@@ -1338,60 +1361,34 @@ async function driveRestore(pass){
 }
 
 function updateGdriveOverlay(){
-  const dot=$('gdriveDot'),main=$('gdriveStatusMain'),sub=$('gdriveStatusSub');
-  const setupSec=$('gdriveSetupSection'),signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
-  if(!dot)return;
-  const cid=getClientId();
-
-  if(gUser){
-    // State 3: Signed in
-    dot.className='status-dot on';
-    main.textContent='Connected — '+gUser.email;
-    sub.textContent=lastBackup?'Last backup: '+fmtDate(lastBackup):'No backup yet';
-    setupSec.style.display='none';signInSec.style.display='none';connSec.style.display='block';
-    const ea=$('driveExtraActions');
-    ea.innerHTML=`
-      <button class="btn btn-ghost" id="restoreNowBtn" style="display:flex;align-items:center;justify-content:center;gap:6px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Restore from Drive
-      </button>
-      <button class="btn btn-ghost" id="gdriveSignOutBtn2" style="color:var(--danger);border-color:color-mix(in srgb,var(--danger) 30%,transparent);margin-top:4px">Sign out of Google</button>`;
-    $('restoreNowBtn').addEventListener('click',()=>promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);}));
-    $('gdriveSignOutBtn2').addEventListener('click',signOut);
-
-  } else if(cid){
-    // State 2: Client ID saved but not signed in
-    dot.className='status-dot off';
-    main.textContent='Not signed in';
-    sub.textContent='Client ID configured — tap to sign in';
-    setupSec.style.display='none';signInSec.style.display='block';connSec.style.display='none';
-    $('driveExtraActions').innerHTML='';
-
+  const signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
+  if(!signInSec)return;
+  if(gUser&&gToken){
+    signInSec.style.display='none';connSec.style.display='block';
+    if($('gdriveUserName'))$('gdriveUserName').textContent=gUser.name||'Google User';
+    if($('gdriveUserEmail'))$('gdriveUserEmail').textContent=gUser.email||'';
   } else {
-    // State 1: No Client ID — show setup guide
-    dot.className='status-dot off';
-    main.textContent='Setup required';
-    sub.textContent='Add your Google Client ID to enable sync';
-    setupSec.style.display='block';signInSec.style.display='none';connSec.style.display='none';
-    $('driveExtraActions').innerHTML='';
-    // Show live URLs
-    const origin=location.origin;
-    const isFile=origin.startsWith('file');
-    if($('appOriginDisplay')){
-      $('appOriginDisplay').textContent=isFile?origin+' ⚠️ file:// — host on HTTPS!':origin;
-      $('appOriginDisplay').style.borderColor=isFile?'var(--danger)':'var(--border)';
+    signInSec.style.display='block';connSec.style.display='none';
+    // Render the sign-in button
+    const cid=getClientId();
+    const wrap=$('gSignInBtnWrap');
+    if(wrap){
+      if(!cid){
+        wrap.innerHTML=`<button onclick="closeOv('gdriveOverlay');showClientIdSetup()" style="padding:11px 20px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Client ID</button>`;
+      } else {
+        wrap.innerHTML='';
+        loadGIS().then(()=>{
+          if(!window.google||!window.google.accounts){
+            wrap.innerHTML=`<div style="font-size:12px;color:var(--danger)">Could not load Google Sign-In</div>`;return;
+          }
+          window.google.accounts.id.initialize({client_id:cid,callback:handleCredentialResponse,auto_select:false});
+          window.google.accounts.id.renderButton(wrap,{type:'standard',theme:'outline',size:'large',text:'sign_in_with',shape:'rectangular',width:260});
+        });
+      }
     }
-    if($('setupOriginHint')){
-      $('setupOriginHint').textContent=isFile?'⚠️ file:// not supported — host on HTTPS':origin;
-      if(!isFile)$('setupOriginHint').onclick=()=>{copyTxt(origin);toast('Origin copied ✓');};
-    }
-    // Tap to copy the whole URL
-    const disp=$('appOriginDisplay');
-    if(disp&&!isFile)disp.onclick=()=>{copyTxt(origin);toast('Origin copied ✓');};
-    // Pre-fill
-    const inp=$('gClientIdInput');
-    if(inp)inp.value=getClientId();
   }
 }
+
 
 // ====== PIN LOCK SYSTEM ======
 const PIN_KEY='pm_pin_hash';
@@ -1409,6 +1406,19 @@ async function hashPIN(pin){
   const hash=await crypto.subtle.digest('SHA-256',data);
   return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
+function showClientIdSetup(){
+  // Show a simple modal to enter client ID
+  const id=prompt('Paste your Google OAuth Client ID:\n(Get it from console.cloud.google.com → Credentials)\nOnly "Authorized JavaScript origins" needed — set it to: '+location.origin);
+  if(!id)return;
+  if(!id.includes('.apps.googleusercontent.com')){
+    alert('That does not look like a valid Client ID. It should end with .apps.googleusercontent.com');return;
+  }
+  setClientId(id);
+  toast('Client ID saved ✓');
+  updateGdriveOverlay();
+  updateProfileUI();
+}
+
 function hasPIN(){return!!localStorage.getItem(PIN_KEY);}
 async function verifyPIN(pin){
   const stored=localStorage.getItem(PIN_KEY);
@@ -1716,16 +1726,10 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('settingsClose').addEventListener('click',()=>closeOv('settingsOverlay'));
   $('settingsOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('settingsOverlay');});
   // Google Sign-In row in settings
-  $('sGoogleSignIn').addEventListener('click',()=>{
+  $('sGoogleSignIn')&&$('sGoogleSignIn').addEventListener('click',()=>{
     closeOv('settingsOverlay');
-    if(gUser){
-      // Already signed in — open profile
-      updateProfileUI();openOv('profileOverlay');
-    } else if(getClientId()){
-      signInGoogle();
-    } else {
-      updateGdriveOverlay();openOv('gdriveOverlay');
-    }
+    if(gUser){updateProfileUI();openOv('profileOverlay');}
+    else{updateGdriveOverlay();openOv('gdriveOverlay');}
   });
   $('sGdrive').addEventListener('click',()=>{updateGdriveOverlay();openOv('gdriveOverlay');});
   $('sImport').addEventListener('click',()=>{closeOv('settingsOverlay');openOv('ieOverlay');});
@@ -1735,40 +1739,22 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('profileBtn').addEventListener('click',()=>{updateProfileUI();openOv('profileOverlay');});
   $('profileOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('profileOverlay');});
   $('closeProfileBtn').addEventListener('click',()=>closeOv('profileOverlay'));
-  $('googleSignInBtn').addEventListener('click',signInGoogle);
-  $('googleSignOutBtn').addEventListener('click',signOut);
-  $('driveBackupBtn').addEventListener('click',()=>promptPass('Backup','Enter your encryption passphrase for this backup:',p=>{if(p)driveBackup(p);}));
-  $('driveRestoreBtn').addEventListener('click',()=>promptPass('Restore','Enter the passphrase used when the backup was created:',p=>{if(p)driveRestore(p);}));
+  $('googleSignOutBtn')&&$('googleSignOutBtn').addEventListener('click',signOut);
+  $('driveBackupBtn')&&$('driveBackupBtn').addEventListener('click',()=>promptPass('Backup','Enter your encryption passphrase:',p=>{if(p)driveBackup(p);}));
+  $('driveRestoreBtn')&&$('driveRestoreBtn').addEventListener('click',()=>promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);}));
 
   // GDrive overlay
   $('gdriveOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('gdriveOverlay');});
-  $('closeGdriveBtn').addEventListener('click',()=>closeOv('gdriveOverlay'));
-  $('closeGdriveBtn2')&&$('closeGdriveBtn2').addEventListener('click',()=>closeOv('gdriveOverlay'));
+  $('closeGdriveBtn')&&$('closeGdriveBtn').addEventListener('click',()=>closeOv('gdriveOverlay'));
   $('closeGdriveBtnC')&&$('closeGdriveBtnC').addEventListener('click',()=>closeOv('gdriveOverlay'));
-  $('toggleDrivePass').addEventListener('click',function(){togglePwVis('drivePassphrase',this);});
-  $('gdriveSignInBtn').addEventListener('click',signInGoogle);
-  // Save Client ID button
-  $('saveClientIdBtn').addEventListener('click',()=>{
-    const val=$('gClientIdInput').value.trim();
-    if(!val){toast('Paste your Google Client ID first');return;}
-    if(!val.includes('.apps.googleusercontent.com')){
-      toast('❌ That doesn\'t look like a valid Client ID (should end in .apps.googleusercontent.com)');return;
-    }
-    if(location.protocol==='file:'){
-      toast('⚠️ Host this file on HTTPS before using Google Sign-In');return;
-    }
-    setClientId(val);
-    toast('✓ Client ID saved — redirecting to Google…');
-    setTimeout(signInGoogle, 800);
-  });
-  // Change Client ID
-  $('changeClientIdBtn')&&$('changeClientIdBtn').addEventListener('click',()=>{
-    localStorage.removeItem(GCLIENT_KEY);
-    updateGdriveOverlay();
-  });
-  $('gdriveMainBtn').addEventListener('click',()=>{
+  $('toggleDrivePass')&&$('toggleDrivePass').addEventListener('click',function(){togglePwVis('drivePassphrase',this);});
+  $('gdriveMainBtn')&&$('gdriveMainBtn').addEventListener('click',()=>{
     const p=$('drivePassphrase').value;if(!p){toast('Enter passphrase first');return;}driveBackup(p);
   });
+  $('restoreNowBtn')&&$('restoreNowBtn').addEventListener('click',()=>{
+    promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);});
+  });
+  $('gSignOutBtn')&&$('gSignOutBtn').addEventListener('click',signOut);
 
   // Import/Export
   $('ieOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('ieOverlay');});

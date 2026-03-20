@@ -559,12 +559,40 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
     <!-- NOT signed in -->
     <div id="gdriveSignInSection">
       <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:16px;font-size:12px;color:var(--text-dim);line-height:1.7">
-        🔒 <strong style="color:var(--accent)">Zero-knowledge encryption.</strong> Passwords are encrypted with AES-256-GCM before upload — Google cannot read them.
+        🔒 <strong style="color:var(--accent)">AES-256-GCM encrypted</strong> before upload. Google cannot read your passwords.
       </div>
-      <div id="gSignInBtnWrap" style="display:flex;justify-content:center;margin-bottom:12px"></div>
-      <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:14px">Uses Google One Tap — no app setup needed</div>
-      <div class="modal-actions">
-        <button class="btn btn-ghost" id="closeGdriveBtn">Close</button>
+      <div id="gSignInBtnWrap" style="display:flex;justify-content:center;margin-bottom:16px"></div>
+
+      <!-- Setup panel (shown when no client ID) -->
+      <div id="gClientSetupPanel" style="display:none">
+        <div style="background:color-mix(in srgb,#FF9900 8%,transparent);border:1px solid color-mix(in srgb,#FF9900 25%,transparent);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text-dim);line-height:1.7">
+          <strong style="color:#FF9900">One-time setup required.</strong> Create a free Google OAuth Client ID.
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+            <div style="background:var(--surface3);border-radius:6px;padding:10px 12px">
+              <div style="font-weight:700;color:var(--text);margin-bottom:6px">Steps:</div>
+              <div>1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent)">Google Cloud Console</a></div>
+              <div>2. Create Credentials → OAuth Client ID → <strong style="color:var(--accent)">Web application</strong></div>
+              <div>3. Under <strong style="color:var(--accent)">Authorized JavaScript origins</strong> add:</div>
+              <div style="background:var(--surface2);border-radius:4px;padding:6px 10px;margin-top:4px;font-family:var(--font-mono);color:var(--accent3);font-size:11px;word-break:break-all" id="jsOriginHint">https://jaisonjai29.github.io</div>
+              <div style="margin-top:6px;color:var(--success);font-size:11px">✓ No redirect URI needed — leave it empty</div>
+            </div>
+            <div>4. Copy the Client ID and paste below</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Google Client ID</label>
+          <input class="form-input" id="gClientIdInput" type="text" placeholder="xxxx.apps.googleusercontent.com" style="font-size:12px">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="closeGdriveBtn">Close</button>
+          <button class="btn btn-primary" id="saveClientIdBtn">Save &amp; Sign In</button>
+        </div>
+      </div>
+      <div id="gSignInActions" style="display:none">
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="closeGdriveBtn2">Close</button>
+          <button class="btn btn-ghost" id="changeClientIdBtn" style="font-size:12px">Change Client ID</button>
+        </div>
       </div>
     </div>
 
@@ -1121,17 +1149,10 @@ function updateProfileUI(){
   // Render Google sign-in button in profile overlay
   const pWrap=$('profileSignInBtnWrap');
   if(pWrap&&!gUser){
-    pWrap.innerHTML='';
     const cid=getClientId();
-    if(cid){
-      loadGIS().then(()=>{
-        if(!window.google||!window.google.accounts){pWrap.innerHTML='<button onclick="signInGoogle()" style="padding:11px 20px;border-radius:8px;background:#fff;border:1px solid #dadce0;color:#3c4043;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px"><svg width=18 height=18 viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Sign in with Google</button>';return;}
-        window.google.accounts.id.initialize({client_id:cid,callback:handleCredentialResponse,auto_select:false});
-        window.google.accounts.id.renderButton(pWrap,{type:'standard',theme:'outline',size:'large',text:'sign_in_with',shape:'rectangular',width:260});
-      });
-    } else {
-      pWrap.innerHTML=`<button onclick="showClientIdSetup()" style="padding:11px 20px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>`;
-    }
+    pWrap.innerHTML=cid
+      ?`<button onclick="signInGoogle()" style="padding:12px 22px;border-radius:10px;background:#fff;border:1px solid #dadce0;color:#3c4043;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15)"><svg width=18 height=18 viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Sign in with Google</button>`
+      :`<button onclick="showClientIdSetup()" style="padding:12px 22px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>`;
   }
   $('sGdriveSub').textContent=gUser
     ?gUser.email||'Connected'
@@ -1169,160 +1190,81 @@ function updateProfileUI(){
   updateGdriveOverlay();
 }
 
-// ====== GOOGLE SIGN-IN — One Tap + Token Client ======
-// Uses Google's official GSI library with One Tap UI
-// Requires: client_id registered at console.cloud.google.com
-// Only needs "Authorized JavaScript origins" — NO redirect URI needed
-const GCLIENT_KEY = 'pm_gclient';
-const GSCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+// ====== GOOGLE SIGN-IN — GIS Token Client (no redirect URI needed) ======
+// Only requires: Authorized JavaScript origins in Google Cloud Console
+// NO redirect URI needed — uses popup/token flow same as finance tracker
+
+const GCLIENT_KEY='pm_gclient';
+const GSCOPE='https://www.googleapis.com/auth/drive.appdata';
 function getClientId(){return localStorage.getItem(GCLIENT_KEY)||'';}
 function setClientId(id){localStorage.setItem(GCLIENT_KEY,id.trim());}
+function getRedirectUri(){return location.origin+location.pathname;}
 
-let _gisReady = false;
-let _tokenClient = null;
+let _tokenClient=null;
 
 function loadGIS(){
   return new Promise(resolve=>{
-    if(_gisReady){resolve();return;}
-    if(window.google&&window.google.accounts){_gisReady=true;resolve();return;}
+    if(window.google&&window.google.accounts){resolve();return;}
     const s=document.createElement('script');
     s.src='https://accounts.google.com/gsi/client';
     s.async=true;
-    s.onload=()=>{_gisReady=true;resolve();};
-    s.onerror=()=>{console.warn('GIS load failed');resolve();};
+    s.onload=resolve;
+    s.onerror=resolve;
     document.head.appendChild(s);
   });
-}
-
-// Renders the official Google Sign-In button into a container element
-async function renderGoogleBtn(containerId){
-  const cid=getClientId();
-  const container=$(containerId);
-  if(!container)return;
-  if(!cid){
-    container.innerHTML=`<button onclick="openOv('gdriveOverlay')" style="padding:10px 18px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer">⚙️ Set up Google Sync</button>`;
-    return;
-  }
-  await loadGIS();
-  if(!window.google||!window.google.accounts){
-    container.innerHTML=`<div style="font-size:12px;color:var(--danger)">Could not load Google Sign-In. Check your connection.</div>`;
-    return;
-  }
-  container.innerHTML='';
-  // Render the official Google button
-  window.google.accounts.id.initialize({
-    client_id: cid,
-    callback: handleCredentialResponse,
-    auto_select: false,
-    cancel_on_tap_outside: true,
-  });
-  window.google.accounts.id.renderButton(container, {
-    type: 'standard',
-    theme: 'outline',
-    size: 'large',
-    text: 'sign_in_with',
-    shape: 'rectangular',
-    logo_alignment: 'left',
-    width: 280,
-  });
-}
-
-// Called when user picks a Google account from One Tap or button
-function handleCredentialResponse(response){
-  if(!response||!response.credential){toast('Sign-in failed');return;}
-  // Decode JWT id_token to get user info (no server needed)
-  try{
-    const payload=JSON.parse(atob(response.credential.split('.')[1]));
-    gUser={name:payload.name,email:payload.email,pic:payload.picture,sub:payload.sub};
-    // Now get an access token for Drive API
-    getAccessToken();
-  }catch(e){toast('Sign-in error: '+e.message);}
-}
-
-function getAccessToken(){
-  const cid=getClientId();
-  if(!cid||!window.google)return;
-  _tokenClient=window.google.accounts.oauth2.initTokenClient({
-    client_id:cid,
-    scope:GSCOPE,
-    hint:gUser?gUser.email:'',
-    callback:(resp)=>{
-      if(resp.error){
-        toast('Drive access error: '+resp.error,4000);
-        return;
-      }
-      gToken=resp.access_token;
-      saveGA();updateProfileUI();
-      closeOv('profileOverlay');closeOv('gdriveOverlay');
-      toast('✓ Signed in as '+gUser.name);
-    },
-    error_callback:(err)=>{
-      if(err&&err.type==='popup_closed')return;
-      toast('Drive access error: '+(err&&err.type||'unknown'),4000);
-    }
-  });
-  _tokenClient.requestAccessToken({prompt:'none'});
 }
 
 async function signInGoogle(){
   const cid=getClientId();
   if(!cid){updateGdriveOverlay();openOv('gdriveOverlay');return;}
-  if(location.protocol==='file:'){
-    toast('⚠️ Host on HTTPS to use Google Sign-In');return;
-  }
   await loadGIS();
   if(!window.google||!window.google.accounts){
-    toast('⚠️ Could not load Google Sign-In');return;
+    toast('Could not load Google Sign-In. Check internet connection.');return;
   }
-  // If we have user info, skip re-consent and just get access token
-  if(gUser&&gUser.email){
-    getAccessToken();return;
-  }
-  // Use One Tap prompt
-  window.google.accounts.id.initialize({
+  _tokenClient=window.google.accounts.oauth2.initTokenClient({
     client_id:cid,
-    callback:handleCredentialResponse,
-    auto_select:false,
-  });
-  window.google.accounts.id.prompt((notification)=>{
-    if(notification.isNotDisplayed()||notification.isSkippedMoment()){
-      // Fallback: use token client directly
-      _tokenClient=window.google.accounts.oauth2.initTokenClient({
-        client_id:cid,
-        scope:GSCOPE+' https://www.googleapis.com/auth/userinfo.profile openid email',
-        callback:(resp)=>{
-          if(resp.error){toast('Sign-in failed: '+resp.error,4000);return;}
-          gToken=resp.access_token;
-          fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}})
-            .then(r=>r.json()).then(u=>{
-              gUser={name:u.name,email:u.email,pic:u.picture};
-              saveGA();updateProfileUI();
-              closeOv('profileOverlay');closeOv('gdriveOverlay');
-              toast('✓ Signed in as '+u.name);
-            }).catch(()=>toast('Profile load failed'));
-        },
-        error_callback:(err)=>{
-          if(err&&err.type==='popup_closed')return;
-          toast('Sign-in error: '+(err&&err.type||'unknown'),4000);
-        }
-      });
-      _tokenClient.requestAccessToken({prompt:'select_account'});
+    scope:GSCOPE+' https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    callback:(tokenResponse)=>{
+      if(tokenResponse.error){
+        toast('Sign-in error: '+tokenResponse.error,5000);return;
+      }
+      gToken=tokenResponse.access_token;
+      // Fetch user info with the access token
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo',{
+        headers:{Authorization:'Bearer '+gToken}
+      })
+      .then(r=>r.json())
+      .then(u=>{
+        gUser={name:u.name,email:u.email,pic:u.picture};
+        saveGA();
+        updateProfileUI();
+        closeOv('profileOverlay');
+        closeOv('gdriveOverlay');
+        toast('\u2713 Signed in as '+u.name);
+      })
+      .catch(()=>toast('Signed in but failed to load profile'));
     }
   });
+  // This opens Google account picker popup — no redirect needed
+  _tokenClient.requestAccessToken({prompt:'select_account'});
 }
 
-function handleOAuthReturn(){/* no-op — using popup/One Tap */}
+function handleOAuthReturn(){/* not needed with token client */}
 
 function signOut(){
   if(!confirm('Sign out of Google?'))return;
-  if(window.google&&window.google.accounts){
-    if(window.google.accounts.id)window.google.accounts.id.disableAutoSelect();
-    if(gToken)window.google.accounts.oauth2.revoke(gToken,()=>{});
+  if(window.google&&window.google.accounts&&window.google.accounts.oauth2&&gToken){
+    window.google.accounts.oauth2.revoke(gToken,()=>{});
   }
   gUser=null;gToken=null;lastBackup=null;
   localStorage.removeItem(GA);
   updateProfileUI();
   toast('Signed out');
+}
+
+function showClientIdSetup(){
+  updateGdriveOverlay();
+  openOv('gdriveOverlay');
 }
 
 // ====== GOOGLE DRIVE ======
@@ -1364,48 +1306,34 @@ function updateGdriveOverlay(){
   const signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
   if(!signInSec)return;
   if(gUser&&gToken){
-    signInSec.style.display='none';connSec.style.display='block';
-    if($('gdriveUserName'))$('gdriveUserName').textContent=gUser.name||'Google User';
+    signInSec.style.display='none';
+    connSec.style.display='block';
+    if($('gdriveUserName'))$('gdriveUserName').textContent=gUser.name||'';
     if($('gdriveUserEmail'))$('gdriveUserEmail').textContent=gUser.email||'';
-  } else {
-    signInSec.style.display='block';connSec.style.display='none';
-    // Render the sign-in button
+  }else{
+    signInSec.style.display='block';
+    connSec.style.display='none';
     const cid=getClientId();
+    const setupPanel=$('gClientSetupPanel');
+    const signActions=$('gSignInActions');
     const wrap=$('gSignInBtnWrap');
-    if(wrap){
-      if(!cid){
-        wrap.innerHTML=`<button onclick="closeOv('gdriveOverlay');showClientIdSetup()" style="padding:11px 20px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer">⚙️ Set up Google Client ID</button>`;
-      } else {
-        wrap.innerHTML='';
-        loadGIS().then(()=>{
-          if(!window.google||!window.google.accounts){
-            wrap.innerHTML=`<div style="font-size:12px;color:var(--danger)">Could not load Google Sign-In</div>`;return;
-          }
-          window.google.accounts.id.initialize({client_id:cid,callback:handleCredentialResponse,auto_select:false});
-          window.google.accounts.id.renderButton(wrap,{type:'standard',theme:'outline',size:'large',text:'sign_in_with',shape:'rectangular',width:260});
-        });
-      }
+    if(setupPanel)setupPanel.style.display=cid?'none':'block';
+    if(signActions)signActions.style.display=cid?'flex':'none';
+    if(!wrap)return;
+    if(cid){
+      wrap.innerHTML=`<button onclick="signInGoogle()" style="padding:12px 24px;border-radius:10px;background:#fff;border:1px solid #dadce0;color:#3c4043;font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.15)">
+        <svg width=18 height=18 viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>Sign in with Google</button>`;
+    }else{
+      wrap.innerHTML='';
     }
   }
 }
 
-
-// ====== PIN LOCK SYSTEM ======
-const PIN_KEY='pm_pin_hash';
-const PIN_LEN=4;
-let pinBuffer='';
-let pinMode='unlock'; // 'unlock' | 'setup1' | 'setup2'
-let pinSetupFirst='';
-let isLocked=true;
-let autoLockTimer=null;
-
-// Hash PIN with SHA-256 + salt for storage
-async function hashPIN(pin){
-  const salt='pm_salt_9f3a';
-  const data=new TextEncoder().encode(salt+pin);
-  const hash=await crypto.subtle.digest('SHA-256',data);
-  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
 function showClientIdSetup(){
   // Show a simple modal to enter client ID
   const id=prompt('Paste your Google OAuth Client ID:\n(Get it from console.cloud.google.com → Credentials)\nOnly "Authorized JavaScript origins" needed — set it to: '+location.origin);
@@ -1417,6 +1345,22 @@ function showClientIdSetup(){
   toast('Client ID saved ✓');
   updateGdriveOverlay();
   updateProfileUI();
+}
+
+// ====== PIN LOCK SYSTEM ======
+const PIN_KEY='pm_pin_hash';
+const PIN_LEN=4;
+let pinBuffer='';
+let pinMode='unlock'; // 'unlock' | 'setup1' | 'setup2' | 'verify-change'
+let pinSetupFirst='';
+let isLocked=true;
+let autoLockTimer=null;
+
+async function hashPIN(pin){
+  const salt='pm_salt_9f3a';
+  const data=new TextEncoder().encode(salt+pin);
+  const hash=await crypto.subtle.digest('SHA-256',data);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
 function hasPIN(){return!!localStorage.getItem(PIN_KEY);}
@@ -1746,6 +1690,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // GDrive overlay
   $('gdriveOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('gdriveOverlay');});
   $('closeGdriveBtn')&&$('closeGdriveBtn').addEventListener('click',()=>closeOv('gdriveOverlay'));
+  $('closeGdriveBtn2')&&$('closeGdriveBtn2').addEventListener('click',()=>closeOv('gdriveOverlay'));
   $('closeGdriveBtnC')&&$('closeGdriveBtnC').addEventListener('click',()=>closeOv('gdriveOverlay'));
   $('toggleDrivePass')&&$('toggleDrivePass').addEventListener('click',function(){togglePwVis('drivePassphrase',this);});
   $('gdriveMainBtn')&&$('gdriveMainBtn').addEventListener('click',()=>{
@@ -1755,6 +1700,17 @@ document.addEventListener('DOMContentLoaded',()=>{
     promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);});
   });
   $('gSignOutBtn')&&$('gSignOutBtn').addEventListener('click',signOut);
+  $('saveClientIdBtn')&&$('saveClientIdBtn').addEventListener('click',()=>{
+    const val=$('gClientIdInput')&&$('gClientIdInput').value.trim();
+    if(!val){toast('Paste your Google Client ID');return;}
+    if(!val.includes('.apps.googleusercontent.com')){toast('Invalid Client ID format');return;}
+    setClientId(val);toast('Client ID saved ✓');
+    updateGdriveOverlay();
+    setTimeout(signInGoogle,400);
+  });
+  $('changeClientIdBtn')&&$('changeClientIdBtn').addEventListener('click',()=>{
+    localStorage.removeItem(GCLIENT_KEY);updateGdriveOverlay();
+  });
 
   // Import/Export
   $('ieOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('ieOverlay');});

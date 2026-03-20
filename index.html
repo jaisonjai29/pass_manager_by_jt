@@ -585,30 +585,45 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
     <div id="gdriveSetupSection">
       <div style="background:color-mix(in srgb,#FF9900 8%,transparent);border:1px solid color-mix(in srgb,#FF9900 30%,transparent);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
         <div style="font-size:13px;font-weight:700;color:#FF9900;margin-bottom:6px">⚠️ Setup Required</div>
-        <div style="font-size:12px;color:var(--text-dim);line-height:1.7">Google Sign-In requires a free Google OAuth Client ID. Follow these steps:</div>
+        <div style="font-size:12px;color:var(--text-dim);line-height:1.7">Google Sign-In requires a free Google OAuth Client ID. Follow the exact steps below — the URLs must match precisely.</div>
       </div>
+
+      <!-- Live URL display -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">Your App URL (copy this exactly)</div>
+        <div id="appOriginDisplay" style="font-family:var(--font-mono);font-size:11px;color:var(--accent);background:var(--surface3);padding:8px 10px;border-radius:6px;word-break:break-all;cursor:pointer;border:1px solid var(--border)" title="Tap to copy"></div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:6px">⚠️ If this shows <span style="color:var(--danger);font-family:var(--font-mono)">file://</span> — you must host this file on a server (HTTPS). Google OAuth does not work with local files.</div>
+      </div>
+
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 1 — Create a project</div>
-          Go to <span style="color:var(--accent);font-family:var(--font-mono)">console.cloud.google.com</span> → New Project → any name
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 1 — Create a Google Cloud project</div>
+          Go to <strong style="color:var(--accent)">console.cloud.google.com</strong> → New Project → give it any name
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 2 — Enable Drive API</div>
-          APIs &amp; Services → Library → search <span style="color:var(--accent);font-family:var(--font-mono)">Google Drive API</span> → Enable
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 2 — Enable Google Drive API</div>
+          APIs &amp; Services → Library → search <strong style="color:var(--accent)">Google Drive API</strong> → Enable
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 3 — Create OAuth credentials</div>
-          Credentials → Create Credentials → OAuth Client ID → Web application
-          <br>Add your app URL to <span style="color:var(--accent);font-family:var(--font-mono)">Authorized JS origins</span>
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 3 — Configure OAuth Consent Screen</div>
+          APIs &amp; Services → OAuth consent screen → External → fill App name → Save. Add your Google email as a <strong style="color:var(--accent)">Test user</strong>.
         </div>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
-          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 4 — Paste your Client ID below</div>
-          Copy the Client ID (ends in <span style="color:var(--accent);font-family:var(--font-mono)">.apps.googleusercontent.com</span>)
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 4 — Create OAuth 2.0 Client ID</div>
+          Credentials → Create Credentials → OAuth Client ID → <strong style="color:var(--accent)">Web application</strong><br>
+          <div style="margin-top:6px">Add to <strong style="color:var(--accent)">Authorized JavaScript origins</strong>:<br>
+          <span id="setupOriginHint" style="font-family:var(--font-mono);color:var(--accent3);font-size:11px"></span></div>
+          <div style="margin-top:6px">Add to <strong style="color:var(--accent)">Authorized redirect URIs</strong>:<br>
+          <span id="setupRedirectHint" style="font-family:var(--font-mono);color:var(--accent3);font-size:11px"></span></div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.7;color:var(--text-dim)">
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Step 5 — Paste your Client ID below</div>
+          Copy the Client ID (looks like: <span style="color:var(--accent);font-family:var(--font-mono)">123456.apps.googleusercontent.com</span>)
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Google OAuth Client ID</label>
-        <input class="form-input" id="gClientIdInput" type="text" placeholder="xxxx.apps.googleusercontent.com" style="font-size:12px">
+        <input class="form-input" id="gClientIdInput" type="text" placeholder="123456789-xxxx.apps.googleusercontent.com" style="font-size:12px">
       </div>
       <div class="modal-actions">
         <button class="btn btn-ghost" id="closeGdriveBtn">Close</button>
@@ -1216,22 +1231,60 @@ const GCLIENT_KEY='pm_gclient';
 function getClientId(){return localStorage.getItem(GCLIENT_KEY)||'';}
 function setClientId(id){localStorage.setItem(GCLIENT_KEY,id.trim());}
 
+function getRedirectUri(){
+  // Must exactly match what's in Google Cloud Console
+  return location.origin+location.pathname;
+}
+
 function signInGoogle(){
   const cid=getClientId();
   if(!cid){
-    closeOv('gdriveOverlay');
-    openOv('gdriveOverlay'); // re-open to show setup
+    updateGdriveOverlay();openOv('gdriveOverlay');
     return;
   }
-  const p=new URLSearchParams({client_id:cid,redirect_uri:location.origin+location.pathname,response_type:'token',scope:GSCOPE,prompt:'select_account'});
+  if(location.protocol==='file:'){
+    toast('⚠️ Cannot use Google OAuth from a local file. Host on HTTPS first.');
+    updateGdriveOverlay();openOv('gdriveOverlay');
+    return;
+  }
+  const p=new URLSearchParams({
+    client_id:cid,
+    redirect_uri:getRedirectUri(),
+    response_type:'token',
+    scope:GSCOPE,
+    prompt:'select_account'
+  });
   location.href='https://accounts.google.com/o/oauth2/v2/auth?'+p;
 }
+
 function handleOAuthReturn(){
-  const h=new URLSearchParams(location.hash.slice(1));const tok=h.get('access_token');if(!tok)return;
-  history.replaceState(null,'',location.pathname);gToken=tok;
+  // Check for OAuth error first
+  const params=new URLSearchParams(location.hash.slice(1));
+  const searchParams=new URLSearchParams(location.search);
+  const error=params.get('error')||searchParams.get('error');
+  if(error){
+    history.replaceState(null,'',location.pathname);
+    let msg='Google sign-in failed.';
+    if(error==='access_denied')msg='Access denied — did you add your email as a Test User in the OAuth consent screen?';
+    else if(error==='redirect_uri_mismatch')msg='Redirect URI mismatch — the URL in Google Console must exactly match: '+getRedirectUri();
+    else if(error==='invalid_client')msg='Invalid Client ID — check the Client ID you entered.';
+    else msg='OAuth error: '+error+'. Check your Google Cloud Console settings.';
+    setTimeout(()=>{
+      updateGdriveOverlay();openOv('gdriveOverlay');
+      toast('⚠️ '+msg, 5000);
+    },300);
+    return;
+  }
+  const tok=params.get('access_token');
+  if(!tok)return;
+  history.replaceState(null,'',location.pathname);
+  gToken=tok;
   fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}})
-    .then(r=>r.json()).then(u=>{gUser={name:u.name,email:u.email,pic:u.picture};saveGA();updateProfileUI();toast('Signed in as '+u.name+' ✓');})
-    .catch(()=>toast('Sign in failed'));
+    .then(r=>r.json()).then(u=>{
+      gUser={name:u.name,email:u.email,pic:u.picture};
+      saveGA();updateProfileUI();
+      toast('Signed in as '+u.name+' ✓');
+    }).catch(()=>toast('Sign in failed — check your connection'));
 }
 function signOut(){if(!confirm('Sign out?'))return;gUser=null;gToken=null;lastBackup=null;localStorage.removeItem(GA);updateProfileUI();toast('Signed out');}
 
@@ -1306,9 +1359,22 @@ function updateGdriveOverlay(){
     sub.textContent='Add your Google Client ID to enable sync';
     setupSec.style.display='block';signInSec.style.display='none';connSec.style.display='none';
     $('driveExtraActions').innerHTML='';
-    // Pre-fill if something was typed
+    // Show live URLs
+    const origin=location.origin;
+    const redirect=location.origin+location.pathname;
+    const isFile=origin.startsWith('file');
+    if($('appOriginDisplay')){
+      $('appOriginDisplay').textContent=redirect;
+      $('appOriginDisplay').style.borderColor=isFile?'var(--danger)':'var(--border)';
+    }
+    if($('setupOriginHint'))$('setupOriginHint').textContent=isFile?'⚠️ file:// not supported — host on HTTPS':origin;
+    if($('setupRedirectHint'))$('setupRedirectHint').textContent=isFile?'⚠️ file:// not supported — host on HTTPS':redirect;
+    // Tap to copy
+    const disp=$('appOriginDisplay');
+    if(disp)disp.onclick=()=>{copyTxt(redirect);toast('URL copied ✓');};
+    // Pre-fill
     const inp=$('gClientIdInput');
-    if(inp)inp.value=cid;
+    if(inp)inp.value=getClientId();
   }
 }
 
@@ -1670,9 +1736,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('saveClientIdBtn').addEventListener('click',()=>{
     const val=$('gClientIdInput').value.trim();
     if(!val){toast('Paste your Google Client ID first');return;}
-    if(!val.includes('.apps.googleusercontent.com')){toast('That doesn\'t look like a valid Client ID');return;}
+    if(!val.includes('.apps.googleusercontent.com')){
+      toast('❌ That doesn\'t look like a valid Client ID (should end in .apps.googleusercontent.com)');return;
+    }
+    if(location.protocol==='file:'){
+      toast('⚠️ Host this file on HTTPS before using Google Sign-In');return;
+    }
     setClientId(val);
-    toast('Client ID saved ✓ — signing in…');
+    toast('✓ Client ID saved — redirecting to Google…');
     setTimeout(signInGoogle, 800);
   });
   // Change Client ID

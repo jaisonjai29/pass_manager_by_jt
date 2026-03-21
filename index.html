@@ -649,6 +649,11 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
           Restore from Drive
         </button>
+        <button class="btn btn-ghost" id="viewBackupFileBtn" style="flex:unset;display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          View Backup File Info
+        </button>
+        <div id="backupFileInfo" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.8"></div>
         <button class="btn btn-ghost" id="closeGdriveBtnC">Close</button>
       </div>
       <div id="driveExtraActions"></div>
@@ -1564,12 +1569,14 @@ function updateProfileUI(){
 // NO redirect URI needed
 
 const GCLIENT_KEY='pm_gclient';
+// Built-in Client ID — safe to embed publicly (domain-restricted by Google)
+const BUILTIN_CLIENT_ID='YOUR_CLIENT_ID.apps.googleusercontent.com';
 const GSCOPE='https://www.googleapis.com/auth/drive.appdata email profile';
 var GIS_LOADED=false;
 var GAPI_LOADED=false;
 
 function getClientId(){
-  return localStorage.getItem(GCLIENT_KEY)||'';
+  return localStorage.getItem(GCLIENT_KEY)||BUILTIN_CLIENT_ID||'';
 }
 function setClientId(id){
   localStorage.setItem(GCLIENT_KEY,id.trim());
@@ -1719,6 +1726,39 @@ async function driveRestore(pass){
 
 // Official-style Google Sign-In button (same HTML as finance tracker)
 
+async function viewBackupFileInfo(){
+  const info=$('backupFileInfo');
+  if(!gToken){toast('Sign in to Google first');return;}
+  if(info)info.style.display='none';
+  toast('⏳ Checking Drive…');
+  try{
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%22${DRV_FILE}%22&fields=files(id,name,size,modifiedTime,createdTime)`,{headers:{Authorization:'Bearer '+gToken}});
+    const d=await r.json();
+    if(!d.files||!d.files[0]){
+      toast('No backup file found on Drive');
+      if(info){info.style.display='block';info.innerHTML='<span style="color:var(--text-dim)">No backup file found on your Google Drive yet. Create one using "Backup to Google Drive".</span>';}
+      return;
+    }
+    const f=d.files[0];
+    const sizeKB=f.size?(Math.round(f.size/102.4)/10)+' KB':'unknown';
+    const created=f.createdTime?new Date(f.createdTime).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'—';
+    const modified=f.modifiedTime?new Date(f.modifiedTime).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'—';
+    if(info){
+      info.style.display='block';
+      info.innerHTML=`
+        <div style="display:grid;gap:5px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">File name</span><strong>${f.name}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Size</span><strong>${sizeKB}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Created</span><strong>${created}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Last backup</span><strong>${modified}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Location</span><strong>Drive App Data</strong></div>
+          <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">📌 This file is in Google Drive's hidden "App Data" folder — not visible in regular Drive UI. Only this app can read it.</div>
+        </div>`;
+    }
+    toast('Backup file found ✓');
+  }catch(err){toast('Error: '+(err.message||'unknown'));}
+}
+
 function updateGdriveOverlay(){
   var signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
   if(!signInSec)return;
@@ -1727,16 +1767,18 @@ function updateGdriveOverlay(){
     connSec.style.display='block';
     if($('gdriveUserName'))$('gdriveUserName').textContent=gUser.name||'';
     if($('gdriveUserEmail'))$('gdriveUserEmail').textContent=gUser.email||'';
+    if($('backupFileInfo'))$('backupFileInfo').style.display='none';
   }else{
     signInSec.style.display='block';
     connSec.style.display='none';
-    var cid=getClientId();
+    var cid=getClientId(); // will always return built-in ID if no custom one saved
     var setupPanel=$('gClientSetupPanel');
     var signActions=$('gSignInActions');
     var btnWrap=$('gSignInBtnWrap');
-    if(setupPanel)setupPanel.style.display=cid?'none':'block';
-    if(signActions)signActions.style.display=cid?'flex':'none';
-    if(btnWrap)btnWrap.style.display=cid?'block':'none';
+    // Always hide setup panel since built-in ID is always available
+    if(setupPanel)setupPanel.style.display='none';
+    if(signActions)signActions.style.display='flex';
+    if(btnWrap)btnWrap.style.display='block';
   }
 }
 
@@ -1993,7 +2035,7 @@ function promptPass(title,desc,cb){
 document.addEventListener('DOMContentLoaded',()=>{
   loadAll();applySettings();buildPickers();buildThemeRow();buildFontRow();render();updateProfileUI();
   // Load Google SDKs eagerly (same as finance tracker)
-  if(getClientId())loadGoogleSDKs();
+  loadGoogleSDKs(); // always load — built-in Client ID is always available
 
   // Search
   $('searchInput').addEventListener('input',e=>render(e.target.value));
@@ -2066,6 +2108,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('restoreNowBtn')&&$('restoreNowBtn').addEventListener('click',()=>{
     promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);});
   });
+  $('viewBackupFileBtn')&&$('viewBackupFileBtn').addEventListener('click',viewBackupFileInfo);
   $('gSignOutBtn')&&$('gSignOutBtn').addEventListener('click',signOut);
   $('saveClientIdBtn')&&$('saveClientIdBtn').addEventListener('click',function(){
     var val=($('gClientIdInput')||{}).value.trim();

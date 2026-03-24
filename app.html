@@ -1,0 +1,2460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Password Manager">
+<link rel="manifest" id="pwaManifest">
+<link rel="apple-touch-icon" id="appleTouchIcon">
+<title>Password Manager</title>
+<meta name="description" content="Password Manager — secure local password manager with Google Drive backup. Store and manage all your passwords safely.">
+<meta name="application-name" content="Password Manager">
+<!-- Replace the content value below with your actual Google verification code -->
+<meta name="google-site-verification" content="aMaMhJS3skJbyufJ2uiTEDJE605ykb5L9IEl9Djf-EE">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&family=Kaushan+Script&family=Caladea:wght@400;700&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ===== THEMES ===== */
+:root{
+  --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--surface3:#22222f;
+  --border:#ffffff0f;--border-hover:#ffffff22;
+  --accent:#7c6aff;--accent2:#ff6a9b;--accent3:#6affdc;
+  --text:#f0f0f8;--text-dim:#6b6b84;--text-muted:#3a3a52;
+  --danger:#ff4d6a;--success:#4dff9e;
+  --radius:16px;--radius-sm:10px;
+  --font-ui:'DM Sans',sans-serif;--font-mono:'JetBrains Mono',monospace;
+}
+[data-theme="light"]{--bg:#f2f1ff;--surface:#ffffff;--surface2:#eeedfc;--surface3:#e0defa;--border:#00000010;--border-hover:#00000020;--accent:#5a4de8;--accent2:#d93b70;--accent3:#0fa882;--text:#16162a;--text-dim:#6464a0;--text-muted:#aaa8d0;--danger:#d92d48;--success:#0fa864;}
+[data-theme="midnight"]{--bg:#000814;--surface:#010e26;--surface2:#04183a;--surface3:#0a2048;--border:#ffffff08;--border-hover:#3a7bd520;--accent:#4a8ff5;--accent2:#00d2ff;--accent3:#00ffa3;--text:#ddeeff;--text-dim:#4a6ea0;--text-muted:#0e2a4a;}
+[data-theme="forest"]{--bg:#060d08;--surface:#0d1810;--surface2:#152018;--surface3:#1d2a20;--border:#ffffff08;--border-hover:#56c87420;--accent:#56c874;--accent2:#a8e063;--accent3:#00e5ff;--text:#daffdf;--text-dim:#4a8058;--text-muted:#18301e;}
+[data-theme="rose"]{--bg:#0d0608;--surface:#160d10;--surface2:#1e1318;--surface3:#271a20;--border:#ffffff08;--border-hover:#e91e6320;--accent:#e91e63;--accent2:#ff6090;--accent3:#ffd740;--text:#ffddea;--text-dim:#804860;--text-muted:#30121e;}
+[data-theme="amber"]{--bg:#0c0900;--surface:#181200;--surface2:#201a00;--surface3:#2a2400;--border:#ffffff08;--border-hover:#ffb30020;--accent:#ffb300;--accent2:#ff6d00;--accent3:#69f0ae;--text:#fff8de;--text-dim:#80700a;--text-muted:#302800;}
+
+[data-font="playfair"]{--font-ui:'Playfair Display',serif;}
+[data-font="dm"]{--font-ui:'DM Sans',sans-serif;}
+[data-font="kaushan"]{--font-ui:'Kaushan Script',cursive;}
+[data-font="caladea"]{--font-ui:'Caladea',serif;}
+
+html{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100%;overflow-x:hidden;transition:background .3s,color .3s;}
+body::before{content:'';position:fixed;top:-40%;left:-20%;width:80vw;height:80vw;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 10%,transparent) 0%,transparent 60%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:60vw;background:radial-gradient(circle,color-mix(in srgb,var(--accent2) 8%,transparent) 0%,transparent 60%);pointer-events:none;z-index:0;}
+
+#app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 0 100px;}
+
+/* HEADER */
+.header{padding:44px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:linear-gradient(to bottom,var(--bg) 65%,transparent);}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.logo-text{font-size:21px;font-weight:800;letter-spacing:-.5px;}
+.header-actions{display:flex;align-items:center;gap:6px;}
+.icon-btn{width:38px;height:38px;background:var(--surface2);border:1px solid var(--border-hover);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);transition:background .2s,border-color .2s,transform .15s;flex-shrink:0;}
+.icon-btn:hover{background:var(--surface3);border-color:var(--accent);color:var(--accent);}
+.icon-btn:active{transform:scale(.92);}
+.icon-btn svg{stroke:var(--text);}
+.icon-btn:hover svg{stroke:var(--accent);}
+.profile-btn{width:38px;height:38px;border-radius:10px;border:2px solid var(--accent);background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;font-weight:800;color:#fff;overflow:hidden;transition:transform .15s,box-shadow .2s;}
+.profile-btn:hover{transform:scale(1.06);box-shadow:0 4px 16px color-mix(in srgb,var(--accent) 40%,transparent);}
+.profile-btn img{width:100%;height:100%;object-fit:cover;border-radius:8px;}
+.profile-btn svg{stroke:#fff;}
+
+/* SEARCH */
+.search-wrap{padding:0 20px 14px;}
+.search-box{position:relative;}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:15px;pointer-events:none;}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px 11px 38px;color:var(--text);font-family:var(--font-ui);font-size:14px;outline:none;transition:border-color .2s,background .2s;}
+.search-input::placeholder{color:var(--text-muted);}
+.search-input:focus{border-color:var(--accent);background:var(--surface2);}
+
+.section-label{padding:0 20px 10px;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
+
+/* CARDS */
+.cards-list{padding:0 20px;display:flex;flex-direction:column;gap:8px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:13px;transition:border-color .2s,transform .15s;position:relative;overflow:hidden;animation:fadeIn .3s ease both;}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 7%,transparent),transparent);opacity:0;transition:opacity .2s;}
+.card:hover{border-color:var(--border-hover);transform:translateY(-1px);}
+.card:hover::before{opacity:1;}
+.card:active{transform:scale(.98);}
+.card-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-user{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-arrow{color:var(--text-muted);font-size:13px;flex-shrink:0;}
+
+.empty{text-align:center;padding:60px 24px;color:var(--text-dim);}
+.empty-icon{font-size:48px;margin-bottom:16px;}
+.empty-title{font-size:18px;font-weight:700;margin-bottom:8px;}
+.empty-sub{font-size:14px;color:var(--text-muted);}
+
+/* FAB */
+.fab{position:fixed;bottom:28px;right:50%;transform:translateX(50%);max-width:440px;width:calc(100% - 40px);background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--radius);padding:15px;color:#fff;font-family:var(--font-ui);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 28px color-mix(in srgb,var(--accent) 40%,transparent);transition:transform .15s,box-shadow .15s;z-index:10;}
+.fab:hover{transform:translateX(50%) translateY(-2px);box-shadow:0 12px 36px color-mix(in srgb,var(--accent) 55%,transparent);}
+.fab:active{transform:translateX(50%) scale(.97);}
+
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.overlay.active{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:24px 24px 0 0;padding:24px 20px 48px;width:100%;max-width:480px;transform:translateY(60px);transition:transform .32s cubic-bezier(.34,1.4,.64,1);max-height:92vh;overflow-y:auto;}
+.overlay.active .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--text-muted);border-radius:2px;margin:0 auto 22px;}
+.modal-title{font-size:20px;font-weight:800;margin-bottom:20px;letter-spacing:-.3px;}
+
+/* FORM */
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px;}
+.form-input,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;transition:border-color .2s;resize:none;}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text-muted);}
+.form-input:focus,.form-textarea:focus{border-color:var(--accent);}
+.form-textarea{height:72px;}
+.pw-wrap{position:relative;}
+.pw-wrap .form-input{padding-right:40px;}
+.pw-action{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-dim);padding:4px;transition:color .15s;}
+.pw-action:hover{color:var(--accent);}
+
+.icon-picker-wrap{display:flex;flex-direction:column;gap:8px;}
+.icon-cat-tabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+.icon-cat-tabs::-webkit-scrollbar{display:none;}
+.icon-cat-tab{flex-shrink:0;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.icon-cat-tab.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);}
+.emoji-row{display:flex;gap:6px;flex-wrap:wrap;max-height:200px;overflow-y:auto;padding:4px 2px;}
+.emoji-btn{width:46px;height:46px;border:2.5px solid transparent;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,border-color .15s,box-shadow .15s;padding:0;flex-shrink:0;}
+.emoji-btn:hover{transform:scale(1.12);box-shadow:0 4px 14px rgba(0,0,0,.4);}
+.emoji-btn.selected{border-color:#fff !important;box-shadow:0 0 0 3px var(--accent),0 4px 16px rgba(0,0,0,.5);transform:scale(1.1);}
+.emoji-btn img{width:24px;height:24px;object-fit:contain;display:block;}
+.custom-icon-btn{background:var(--surface2);border:2px dashed var(--border-hover);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:border-color .15s,background .15s;width:46px;height:46px;flex-shrink:0;padding:0;}
+.custom-icon-btn:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);}
+.custom-icon-btn span{font-size:9px;color:var(--text-dim);font-weight:700;}
+
+.modal-actions{display:flex;gap:9px;margin-top:20px;}
+.btn{flex:1;padding:13px;border-radius:var(--radius-sm);font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.btn-ghost{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);}
+.btn-full{width:100%;flex:unset;display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* DETAIL */
+.detail-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;}
+.detail-avatar{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.detail-app-name{font-size:21px;font-weight:800;letter-spacing:-.4px;}
+.detail-app-sub{font-size:12px;color:var(--text-dim);margin-top:2px;font-family:var(--font-mono);}
+.detail-field{margin-bottom:14px;}
+.detail-field-label{font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;}
+.detail-field-value{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;font-family:var(--font-mono);font-size:13px;display:flex;align-items:center;gap:8px;word-break:break-all;}
+.detail-field-text{flex:1;}
+.pw-hidden{letter-spacing:4px;color:var(--text-dim);}
+.icon-action{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:color .15s,background .15s;flex-shrink:0;}
+.icon-action:hover{color:var(--accent3);background:color-mix(in srgb,var(--accent3) 12%,transparent);}
+.icon-action.copied{color:var(--success);}
+.detail-desc{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;font-family:var(--font-mono);font-size:12px;color:var(--text-dim);line-height:1.7;white-space:pre-wrap;}
+.detail-actions{display:flex;gap:9px;margin-top:22px;}
+.btn-danger{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent);flex:1;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);flex:2;}
+
+/* SETTINGS SLIDE */
+.settings-overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);z-index:300;display:flex;align-items:stretch;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;}
+.settings-overlay.active{opacity:1;pointer-events:all;}
+.settings-panel{background:var(--surface);border-left:1px solid var(--border);width:min(360px,100vw);height:100%;transform:translateX(100%);transition:transform .32s cubic-bezier(.34,1.2,.64,1);overflow-y:auto;padding:56px 20px 48px;display:flex;flex-direction:column;gap:22px;position:relative;}
+.settings-overlay.active .settings-panel{transform:translateX(0);}
+.settings-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--text-dim);transition:background .2s;}
+.settings-close:hover{background:var(--surface3);}
+.settings-title{font-size:22px;font-weight:800;letter-spacing:-.4px;}
+.s-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;}
+.chip-row{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{padding:7px 12px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid transparent;cursor:pointer;transition:all .2s;background:var(--surface2);color:var(--text-dim);}
+.chip.selected{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);}
+.s-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:8px;cursor:pointer;transition:background .2s,border-color .2s;}
+.s-row:hover{background:var(--surface3);border-color:var(--border-hover);}
+.s-row:last-child{margin-bottom:0;}
+.s-row-l{display:flex;align-items:center;gap:12px;}
+.s-icon{font-size:18px;width:28px;text-align:center;}
+.s-title{font-size:14px;font-weight:700;}
+.s-sub{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.s-arrow{color:var(--text-muted);font-size:13px;}
+
+/* PROFILE */
+.profile-header-section{text-align:center;margin-bottom:20px;}
+.profile-avatar-lg{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:#fff;margin:0 auto 14px;overflow:hidden;}
+.profile-avatar-lg img{width:100%;height:100%;object-fit:cover;border-radius:18px;}
+.profile-name{font-size:20px;font-weight:800;}
+.profile-email{font-size:12px;color:var(--text-dim);margin-top:4px;font-family:var(--font-mono);}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;}
+.stat-number{font-size:26px;font-weight:800;color:var(--accent);}
+.stat-label{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:rgba(255,255,255,.03);border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-ui);font-size:14px;font-weight:800;color:var(--text);transition:all .2s;margin-bottom:10px;}
+.google-btn:hover{border-color:var(--accent);}
+.g-signin-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:rgba(255,255,255,.03);border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-ui);font-size:14px;font-weight:800;color:var(--text);transition:all .2s;}
+.g-signin-btn:hover{border-color:var(--accent);}
+.release-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.release-row:last-child{border-bottom:none;padding-bottom:0;}
+.release-dot{width:10px;height:10px;border-radius:50%;background:var(--text-muted);flex-shrink:0;margin-top:4px;}
+.release-dot.new{background:var(--accent);box-shadow:0 0 6px color-mix(in srgb,var(--accent) 60%,transparent);}
+.release-info{flex:1;min-width:0;}
+.release-ver{font-size:12px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px;margin-bottom:3px;}
+.release-badge{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);padding:2px 6px;border-radius:10px;border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);}
+.release-notes{font-size:11px;color:var(--text-dim);line-height:1.8;}
+
+
+.signout-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:color-mix(in srgb,var(--danger) 6%,transparent);border:1px solid color-mix(in srgb,var(--danger) 25%,transparent);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-ui);font-size:14px;font-weight:700;color:var(--danger);transition:background .2s,border-color .2s;margin-bottom:0;}
+.signout-btn svg{stroke:var(--danger);}
+.signout-btn:hover{background:color-mix(in srgb,var(--danger) 14%,transparent);border-color:color-mix(in srgb,var(--danger) 45%,transparent);}
+
+/* GDRIVE */
+.gdrive-status-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.status-dot.on{background:var(--success);box-shadow:0 0 8px var(--success);}
+.status-dot.off{background:var(--text-muted);}
+.encrypt-info{background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text-dim);line-height:1.6;margin-bottom:14px;}
+.encrypt-info strong{color:var(--accent);}
+
+/* IMPORT/EXPORT */
+.export-list{display:flex;flex-direction:column;gap:8px;}
+.import-zone{border:2px dashed var(--border-hover);border-radius:var(--radius-sm);padding:32px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:14px;}
+.import-zone:hover,.import-zone.drag-over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent);}
+.import-zone-icon{font-size:36px;margin-bottom:10px;}
+.import-zone-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.import-zone-sub{font-size:12px;color:var(--text-dim);}
+
+/* TOAST */
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border-hover);border-radius:100px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:999;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* INSTALL */
+.install-banner{margin:0 20px 14px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,transparent),color-mix(in srgb,var(--accent2) 7%,transparent));border:1px solid var(--border-hover);border-radius:var(--radius-sm);padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.ib-icon{font-size:22px;}
+.ib-text{flex:1;}
+.ib-title{font-size:13px;font-weight:700;}
+.ib-sub{font-size:11px;color:var(--text-dim);margin-top:1px;}
+.ib-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px;}
+.divider{height:1px;background:var(--border);margin:8px 0 16px;}
+
+/* GOOGLE LOGO SVG */
+.g-logo{width:18px;height:18px;flex-shrink:0;}
+
+/* ===== LOCK SCREEN ===== */
+.lock-screen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:opacity .3s;}
+.lock-screen.hidden{opacity:0;pointer-events:none;}
+.lock-bg-orb1{position:absolute;top:-20%;left:-20%;width:70vw;height:70vw;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 18%,transparent),transparent 70%);pointer-events:none;}
+.lock-bg-orb2{position:absolute;bottom:-20%;right:-20%;width:55vw;height:55vw;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--accent2) 14%,transparent),transparent 70%);pointer-events:none;}
+.lock-icon{font-size:52px;margin-bottom:16px;animation:lockPulse 3s ease-in-out infinite;color:var(--accent);display:flex;align-items:center;justify-content:center;}
+.lock-title{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:6px;}
+.lock-sub{font-size:13px;color:var(--text-dim);margin-bottom:36px;text-align:center;padding:0 20px;}
+/* PIN dots */
+.pin-dots{display:flex;gap:14px;margin-bottom:32px;justify-content:center;}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border-hover);background:transparent;transition:background .15s,border-color .15s,transform .15s;}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);transform:scale(1.15);}
+.pin-dot.error{background:var(--danger);border-color:var(--danger);animation:dotShake .4s ease;}
+/* Numpad */
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(280px,86vw);}
+.numpad-btn{height:70px;border-radius:16px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font-ui);font-size:22px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:background .15s,border-color .15s,transform .12s;-webkit-tap-highlight-color:transparent;user-select:none;}
+.numpad-btn:hover{background:var(--surface2);border-color:var(--border-hover);}
+.numpad-btn:active{background:var(--surface3);transform:scale(.93);}
+.numpad-btn.wide{grid-column:span 1;}
+.numpad-btn.action{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 25%,transparent);color:var(--accent);}
+.numpad-btn.del{background:color-mix(in srgb,var(--danger) 10%,transparent);border-color:color-mix(in srgb,var(--danger) 22%,transparent);color:var(--danger);}
+.numpad-btn.zero{grid-column:2;}
+.numpad-sub{font-size:9px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;}
+.lock-error{font-size:13px;color:var(--danger);font-weight:700;margin-top:-22px;margin-bottom:10px;min-height:20px;text-align:center;transition:opacity .2s;}
+.lock-forgot{margin-top:20px;font-size:12px;color:var(--text-dim);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.lock-forgot:hover{color:var(--text);}
+
+/* Lock icon in header */
+.lock-btn{width:38px;height:38px;background:color-mix(in srgb,var(--accent) 16%,var(--surface2));border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);transition:background .2s,border-color .2s,transform .15s;flex-shrink:0;}
+.lock-btn:hover{background:color-mix(in srgb,var(--accent) 28%,var(--surface2));border-color:var(--accent);}
+.lock-btn:active{transform:scale(.92);}
+.lock-btn svg{stroke:var(--accent);}
+
+/* PIN setup */
+.setup-steps{display:flex;gap:6px;margin-bottom:24px;justify-content:center;}
+.setup-step{width:8px;height:8px;border-radius:50%;background:var(--text-muted);transition:background .2s;}
+.setup-step.active{background:var(--accent);}
+.setup-step.done{background:var(--success);}
+
+@keyframes lockPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+@keyframes dotShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.privacy-footer{text-align:center;padding:20px 20px 8px;font-size:11px;color:var(--text-muted);}
+.privacy-footer a{color:var(--text-dim);text-decoration:underline;}
+.privacy-footer a:hover{color:var(--accent);}
+</style>
+</head>
+<body data-theme="midnight" data-font="caladea">
+
+<!-- ===== LOCK SCREEN ===== -->
+<noscript>
+  <div style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:24px;background:#0a0a0f;color:#e0e0f0;border-radius:12px">
+    <h1 style="color:#7c6aff;margin-bottom:12px">Password Manager</h1>
+    <p style="color:#b0b0cc;margin-bottom:12px">A secure, local-first password manager. All passwords are stored on your device. Optional AES-256 encrypted backup to your own Google Drive.</p>
+    <p style="color:#b0b0cc;margin-bottom:16px">No server &nbsp;·&nbsp; No tracking &nbsp;·&nbsp; Open source</p>
+    <a href="privacy.html" style="color:#7c6aff">Privacy Policy</a>
+  </div>
+</noscript>
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-bg-orb1"></div>
+  <div class="lock-bg-orb2"></div>
+  <div class="lock-icon" id="lockIcon">🔐</div>
+  <div class="lock-title" id="lockTitle">Password Manager</div>
+  <div class="lock-sub" id="lockSub">Enter your PIN to unlock</div>
+  <!-- Setup steps indicator (shown only during PIN setup) -->
+  <div class="setup-steps" id="setupSteps" style="display:none">
+    <div class="setup-step active" id="step0"></div>
+    <div class="setup-step" id="step1"></div>
+  </div>
+  <!-- PIN dots -->
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="dot0"></div>
+    <div class="pin-dot" id="dot1"></div>
+    <div class="pin-dot" id="dot2"></div>
+    <div class="pin-dot" id="dot3"></div>
+  </div>
+  <div class="lock-error" id="lockError"></div>
+  <!-- Numpad -->
+  <div class="numpad" id="numpad">
+    <button class="numpad-btn" data-n="1">1<span class="numpad-sub"></span></button>
+    <button class="numpad-btn" data-n="2">2<span class="numpad-sub">ABC</span></button>
+    <button class="numpad-btn" data-n="3">3<span class="numpad-sub">DEF</span></button>
+    <button class="numpad-btn" data-n="4">4<span class="numpad-sub">GHI</span></button>
+    <button class="numpad-btn" data-n="5">5<span class="numpad-sub">JKL</span></button>
+    <button class="numpad-btn" data-n="6">6<span class="numpad-sub">MNO</span></button>
+    <button class="numpad-btn" data-n="7">7<span class="numpad-sub">PQRS</span></button>
+    <button class="numpad-btn" data-n="8">8<span class="numpad-sub">TUV</span></button>
+    <button class="numpad-btn" data-n="9">9<span class="numpad-sub">WXYZ</span></button>
+    <button class="numpad-btn" data-n="" id="numpadEmpty" style="opacity:0;pointer-events:none"></button>
+    <button class="numpad-btn zero" data-n="0">0</button>
+    <button class="numpad-btn del" id="numpadDel">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+    </button>
+  </div>
+  <div class="lock-forgot" id="lockForgot" style="display:none">Forgot PIN? Answer security question</div>
+  <!-- Open exported file directly from lock screen -->
+  <div style="margin-top:18px;text-align:center">
+    <label for="lockFileOpen" style="font-size:11px;color:var(--text-muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px dashed var(--border-hover);border-radius:20px;transition:border-color .2s" id="lockFileOpenLabel">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Open exported file
+    </label>
+    <input type="file" id="lockFileOpen" accept=".json,.csv,.vault" style="display:none">
+  </div>
+</div>
+
+<!-- Security Question Panel (shown over lock screen) -->
+<div id="secQOverlay" style="position:fixed;inset:0;z-index:1100;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:18px">
+  <div style="font-size:36px">🔐</div>
+  <div style="font-size:20px;font-weight:800;text-align:center">Security Question</div>
+  <div id="secQText" style="font-size:14px;color:var(--text-dim);text-align:center;line-height:1.6;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;width:100%;max-width:360px"></div>
+  <div style="width:100%;max-width:360px">
+    <input id="secQInput" class="form-input" type="text" placeholder="Your answer…" style="width:100%;margin-bottom:10px">
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" id="secQCancel" style="flex:1">Cancel</button>
+      <button class="btn btn-primary" id="secQSubmit" style="flex:2">Verify Answer</button>
+    </div>
+  </div>
+  <div id="secQError" style="font-size:12px;color:var(--danger);min-height:16px;text-align:center"></div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🔐</div>
+      <span class="logo-text">Password Manager</span>
+    </div>
+    <div class="header-actions">
+      <button class="lock-btn" id="lockBtn" title="Lock">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="profile-btn" id="profileBtn" title="Profile">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search apps…">
+    </div>
+  </div>
+  <div id="installBanner" class="install-banner" style="display:none">
+    <span class="ib-icon">📲</span>
+    <div class="ib-text"><div class="ib-title">Install Password Manager</div><div class="ib-sub">Add to home screen for offline access</div></div>
+    <button class="ib-close" id="dismissInstall">✕</button>
+  </div>
+  <div class="section-label" id="sectionLabel">All Passwords</div>
+  <div class="cards-list" id="cardsList"></div>
+  <div class="empty" id="emptyState" style="display:none">
+    <div class="empty-icon">🗝️</div>
+    <div class="empty-title">No passwords yet</div>
+    <div class="empty-sub">Tap the button below to add your first entry</div>
+  </div>
+  <!-- Privacy policy footer — visible to Google verification bot -->
+  <div class="privacy-footer">
+    <strong>Password Manager</strong> &nbsp;·&nbsp;
+    <a href="privacy.html" target="_blank">Privacy Policy</a> &nbsp;·&nbsp;
+    All passwords stored locally on your device
+  </div>
+</div>
+
+<button class="fab" id="addBtn">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  Add Password
+</button>
+<div class="toast" id="toast"></div>
+
+<!-- ADD/EDIT OVERLAY -->
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">New Entry</div>
+    <div class="form-group">
+      <label class="form-label">App / Site Name</label>
+      <input class="form-input" id="f-name" placeholder="e.g. Gmail, Instagram…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Brand Icon</label>
+      <div class="icon-picker-wrap">
+        <div class="icon-cat-tabs" id="iconCatTabs"></div>
+        <div class="emoji-row" id="emojiRow"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Username / Email</label>
+      <input class="form-input" id="f-user" placeholder="user@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="pw-wrap">
+        <input class="form-input" id="f-pass" type="password" placeholder="••••••••">
+        <button class="pw-action" id="genPassBtn" title="Generate password">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="16" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description (optional)</label>
+      <textarea class="form-textarea" id="f-desc" placeholder="Notes, hints, 2FA info…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelAddBtn">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="detail-header">
+      <div class="detail-avatar" id="d-avatar"></div>
+      <div><div class="detail-app-name" id="d-name"></div><div class="detail-app-sub" id="d-sub"></div></div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Username / Email</div>
+      <div class="detail-field-value">
+        <span class="detail-field-text" id="d-user"></span>
+        <button class="icon-action" id="copyUserBtn" title="Copy">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Password</div>
+      <div class="detail-field-value">
+        <span class="detail-field-text pw-hidden" id="d-pass">••••••••</span>
+        <button class="icon-action" id="revealBtn" title="Reveal">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button class="icon-action" id="copyPassBtn" title="Copy">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="detail-field" id="d-desc-wrap">
+      <div class="detail-field-label">Description</div>
+      <div class="detail-desc" id="d-desc"></div>
+    </div>
+    <div class="detail-field" id="d-ts-wrap" style="display:none">
+      <div class="detail-field-label">Last Modified</div>
+      <div class="detail-field-value"><span class="detail-field-text" id="d-ts"></span></div>
+    </div>
+    <div class="detail-actions">
+      <button class="btn btn-danger" id="deleteBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete
+      </button>
+      <button class="btn btn-edit" id="editBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-panel">
+    <button class="settings-close" id="settingsClose">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="settings-title">Settings</div>
+
+    <div>
+      <div class="s-label">Theme</div>
+      <div class="chip-row" id="themeRow"></div>
+    </div>
+
+    <div>
+      <div class="s-label">Font</div>
+      <div class="chip-row" id="fontRow"></div>
+    </div>
+
+    <div>
+      <div class="s-label">Account</div>
+      <div class="s-row" id="sGoogleSignIn">
+        <div class="s-row-l">
+          <span class="s-icon" style="display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+          </span>
+          <div>
+            <div class="s-title" id="sGoogleTitle">Sign in with Google</div>
+            <div class="s-sub" id="sGoogleSub">Backup passwords to Drive</div>
+          </div>
+        </div>
+        <span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </div>
+    </div>
+
+    <div>
+      <div class="s-label">Data & Backup</div>
+      <div class="s-row" id="sGdrive">
+        <div class="s-row-l"><span class="s-icon">☁️</span><div><div class="s-title">Google Drive Sync</div><div class="s-sub" id="sGdriveSub">Not connected</div></div></div>
+        <span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </div>
+      <div class="s-row" id="sImport">
+        <div class="s-row-l"><span class="s-icon">📦</span><div><div class="s-title">Import / Export</div><div class="s-sub">JSON · CSV · Encrypted</div></div></div>
+        <span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </div>
+    </div>
+
+    <div>
+      <div class="s-label">Share</div>
+      <div class="s-row" id="sShareApp">
+        <div class="s-row-l"><span class="s-icon">🔗</span><div><div class="s-title">Share App</div><div class="s-sub">Send install link to others</div></div></div>
+        <span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </div>
+    </div>
+
+    <div>
+      <div class="s-label">Security</div>
+      <div class="s-row" id="sChangePIN">
+        <div class="s-row-l"><span class="s-icon">🔢</span><div><div class="s-title">Change PIN</div><div class="s-sub" id="sPINsub">Set a 4-digit lock PIN</div></div></div>
+        <span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </div>
+      <div class="s-row" id="sClear">
+        <div class="s-row-l"><span class="s-icon">🗑</span><div><div class="s-title" style="color:var(--danger)">Clear All Data</div><div class="s-sub">Wipes all local entries permanently</div></div></div>
+        <span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Fix 5: Manual Refresh -->
+    <div>
+      <div class="s-label">App</div>
+      <div class="s-row" id="sRefresh">
+        <div class="s-row-l"><span class="s-icon">🔄</span><div><div class="s-title">Refresh App</div><div class="s-sub">Reload to apply latest changes</div></div></div>
+        <span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></span>
+      </div>
+    </div>
+
+    <!-- Fix 4: Build Version only -->
+    <div>
+      <div class="s-label">About</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:14px;font-weight:700">Password Manager</div>
+          <div style="font-size:11px;font-family:var(--font-mono);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:3px 8px;border-radius:20px">v2.1.0</div>
+        </div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">Release History</div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 6px color-mix(in srgb,var(--accent) 60%,transparent)"></div>
+            <div style="font-size:13px;font-weight:700;flex:1">v2.1.0</div>
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:2px 7px;border-radius:10px">Latest</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);flex-shrink:0"></div>
+            <div style="font-size:13px;font-weight:700;color:var(--text-dim)">v2.0.0</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:7px 0">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);flex-shrink:0"></div>
+            <div style="font-size:13px;font-weight:700;color:var(--text-dim)">v1.0.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PROFILE OVERLAY -->
+<div class="overlay" id="profileOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="profile-header-section">
+      <div class="profile-avatar-lg" id="profileAvatarLg">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="profile-name" id="profileName">Guest User</div>
+      <div class="profile-email" id="profileEmail">Not signed in</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-number" id="statEntries">0</div><div class="stat-label">Passwords</div></div>
+      <div class="stat-card"><div class="stat-number" id="statBackup">—</div><div class="stat-label">Last Backup</div></div>
+    </div>
+
+    <!-- NOT SIGNED IN -->
+    <div id="signInSection">
+      <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:14px;font-size:12px;color:var(--text-dim);line-height:1.6;text-align:center">
+        Sign in to backup your passwords securely to Google Drive with AES-256 encryption.
+      </div>
+      <div id="profileSignInBtnWrap">
+        <button class="g-signin-btn" onclick="signInGoogle()">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- SIGNED IN -->
+    <div id="signedInSection" style="display:none">
+      <button class="google-btn" id="driveBackupBtn" style="gap:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Backup to Google Drive
+      </button>
+      <button class="google-btn" id="driveRestoreBtn" style="gap:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        Restore from Drive
+      </button>
+      <button class="signout-btn" id="googleSignOutBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost btn-full" id="closeProfileBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- GDRIVE OVERLAY -->
+<div class="overlay" id="gdriveOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="display:flex;align-items:center;gap:10px">
+      <svg width="20" height="20" viewBox="0 0 87.3 78" fill="none"><path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3L27.5 53H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066DA"/><path d="M43.65 25L29.9 0c-1.35.8-2.5 1.9-3.3 3.3L1.2 48.5A9 9 0 0 0 0 53h27.5z" fill="#00AC47"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75L86.1 57.5c.8-1.4 1.2-2.95 1.2-4.5H59.8L73.55 76.8z" fill="#EA4335"/><path d="M43.65 25L57.4 0H29.9z" fill="#00832D"/><path d="M59.8 53H87.3L73.55 76.8 57.4 53z" fill="#2684FC"/><path d="M43.65 25L57.4 0 27.5 53h32.3z" fill="#00AC47"/></svg>
+      Google Drive Backup
+    </div>
+
+    <!-- NOT signed in -->
+    <div id="gdriveSignInSection">
+      <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:16px;font-size:12px;color:var(--text-dim);line-height:1.7">
+        🔒 <strong style="color:var(--accent)">AES-256-GCM encrypted</strong> before upload. Google cannot read your passwords.
+      </div>
+
+      <!-- Button shown when client ID exists -->
+      <div id="gSignInBtnWrap" style="display:none;margin-bottom:12px">
+        <button class="g-signin-btn" onclick="signInGoogle()">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+
+      <!-- Setup panel (shown when no client ID) -->
+      <div id="gClientSetupPanel">
+        <div style="background:color-mix(in srgb,#FF9900 8%,transparent);border:1px solid color-mix(in srgb,#FF9900 25%,transparent);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text-dim);line-height:1.7">
+          <strong style="color:#FF9900">One-time setup required.</strong> Create a free Google OAuth Client ID.
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+            <div style="background:var(--surface3);border-radius:6px;padding:10px 12px">
+              <div style="font-weight:700;color:var(--text);margin-bottom:6px">Steps:</div>
+              <div>1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent)">Google Cloud Console</a></div>
+              <div>2. Create Credentials → OAuth Client ID → <strong style="color:var(--accent)">Web application</strong></div>
+              <div>3. Under <strong style="color:var(--accent)">Authorized JavaScript origins</strong> add:</div>
+              <div style="background:var(--surface2);border-radius:4px;padding:6px 10px;margin-top:4px;font-family:var(--font-mono);color:var(--accent3);font-size:11px;word-break:break-all">https://jaisonjai29.github.io</div>
+              <div style="margin-top:6px;color:var(--success);font-size:11px">✓ No redirect URI needed — leave it empty</div>
+              <div style="margin-top:6px;color:var(--success);font-size:11px">✓ Also enable the <strong>Google Drive API</strong> in APIs &amp; Services → Library</div>
+            </div>
+            <div>4. Copy the Client ID and paste below</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Google Client ID</label>
+          <input class="form-input" id="gClientIdInput" type="text" placeholder="xxxx.apps.googleusercontent.com" style="font-size:12px">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="closeGdriveBtn">Close</button>
+          <button class="btn btn-primary" id="saveClientIdBtn">Save &amp; Sign In</button>
+        </div>
+      </div>
+      <div id="gSignInActions" style="display:none">
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="closeGdriveBtn2">Close</button>
+          <button class="btn btn-ghost" id="changeClientIdBtn" style="font-size:12px">Change Client ID</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signed in -->
+    <div id="gdriveConnectedSection" style="display:none">
+      <div class="gdrive-status-box" style="margin-bottom:14px">
+        <div class="status-dot on"></div>
+        <div>
+          <div id="gdriveUserName" style="font-size:13px;font-weight:700"></div>
+          <div id="gdriveUserEmail" style="font-size:11px;color:var(--text-dim);margin-top:2px"></div>
+        </div>
+        <button class="btn btn-ghost" id="gSignOutBtn" style="flex:unset;padding:6px 12px;font-size:12px;margin-left:auto">Sign out</button>
+      </div>
+      <div class="encrypt-info">🔒 <strong>AES-256-GCM encrypted</strong> before upload. Google cannot read your passwords.</div>
+      <div class="form-group">
+        <label class="form-label">Encryption Passphrase</label>
+        <div class="pw-wrap">
+          <input class="form-input" id="drivePassphrase" type="password" placeholder="Strong passphrase — store it safely">
+          <button class="pw-action" id="toggleDrivePass">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div style="font-size:11px;color:var(--danger);margin-top:5px">⚠️ Cannot be recovered if forgotten.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-primary" id="gdriveMainBtn" style="flex:unset">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Backup to Google Drive
+        </button>
+        <button class="btn btn-ghost" id="restoreNowBtn" style="flex:unset;display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+          Restore from Drive
+        </button>
+        <button class="btn btn-ghost" id="viewBackupFileBtn" style="flex:unset;display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          View Backup File Info
+        </button>
+        <div id="backupFileInfo" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;line-height:1.8"></div>
+        <button class="btn btn-ghost" id="closeGdriveBtnC">Close</button>
+      </div>
+      <div id="driveExtraActions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT/EXPORT OVERLAY -->
+<div class="overlay" id="ieOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📦 Import / Export</div>
+    <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:11px;color:var(--text-dim);line-height:1.7">
+      🔒 <strong style="color:var(--text)">All exports are encrypted.</strong> You set a key when exporting — the same key is required to import or open the file.
+    </div>
+    <div class="s-label">Export</div>
+    <div class="export-list">
+      <div class="s-row" id="exportJSON"><div class="s-row-l"><span class="s-icon">📄</span><div><div class="s-title">Export as JSON</div><div class="s-sub">Encrypted — requires key to import</div></div></div><span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
+      <div class="s-row" id="exportCSV"><div class="s-row-l"><span class="s-icon">📊</span><div><div class="s-title">Export as CSV</div><div class="s-sub">Encrypted — requires key to import</div></div></div><span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
+      <div class="s-row" id="exportVault"><div class="s-row-l"><span class="s-icon">🔒</span><div><div class="s-title">Export as Vault</div><div class="s-sub">Encrypted — requires key to import</div></div></div><span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="s-label">Import</div>
+    <div style="background:color-mix(in srgb,var(--accent) 6%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:10px;font-size:11px;color:var(--text-dim);line-height:1.7">
+      🔑 Drop any exported file (.json / .csv / .vault) — you will be asked for the encryption key.
+    </div>
+    <div class="import-zone" id="importZone">
+      <div class="import-zone-icon">📂</div>
+      <div class="import-zone-title">Drop file or tap to browse</div>
+      <div class="import-zone-sub">Supports .json · .csv · .vault</div>
+      <input type="file" id="importFile" accept=".json,.csv,.vault" style="display:none">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="closeIeBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSPHRASE PROMPT OVERLAY -->
+<div class="overlay" id="ppOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="ppTitle">🔒 Passphrase</div>
+    <div style="font-size:13px;color:var(--text-dim);margin-bottom:16px;line-height:1.6" id="ppDesc"></div>
+    <div class="form-group">
+      <label class="form-label">Passphrase</label>
+      <div class="pw-wrap"><input class="form-input" id="ppInput" type="password" placeholder="Enter passphrase…"><button class="pw-action" id="togglePp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="ppCancel">Cancel</button>
+      <button class="btn btn-primary" id="ppOk">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM DIALOG (replaces native confirm/alert/prompt) -->
+<div id="cdOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px">
+  <div id="cdBox" style="background:var(--surface);border:1px solid var(--border-hover);border-radius:16px;padding:22px 20px 18px;width:100%;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+    <div id="cdIcon" style="font-size:28px;margin-bottom:10px;text-align:center"></div>
+    <div id="cdTitle" style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;text-align:center"></div>
+    <div id="cdMsg" style="font-size:13px;color:var(--text-dim);line-height:1.6;text-align:center;margin-bottom:16px"></div>
+    <input id="cdInput" class="form-input" type="text" style="display:none;margin-bottom:12px">
+    <div id="cdBtns" style="display:flex;gap:8px"></div>
+  </div>
+</div>
+
+<!-- SHARE APP OVERLAY -->
+<div class="overlay" id="shareOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:22px">🔗</span> Share & Install
+    </div>
+
+    <!-- Install tip box -->
+    <div style="background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text-dim);line-height:1.7">
+      📲 <strong style="color:var(--accent)">How to install:</strong> Open the link in Chrome/Safari → tap the browser menu → <em>"Add to Home Screen"</em> → Install. Works on Android &amp; iPhone.
+    </div>
+
+    <!-- Link box -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <span id="shareUrlText" style="flex:1;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+      <button class="icon-action" id="copyShareLinkBtn" title="Copy link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
+
+    <!-- Share channels -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+      <button class="btn btn-full" id="shareWhatsApp" style="background:#075e54;color:#fff;justify-content:flex-start;gap:12px;padding:12px 16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        WhatsApp
+      </button>
+      <button class="btn btn-full" id="shareTelegram" style="background:#0088cc;color:#fff;justify-content:flex-start;gap:12px;padding:12px 16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Telegram
+      </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-full" id="shareEmail" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);justify-content:flex-start;gap:8px;padding:12px 14px;font-size:13px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Email
+        </button>
+        <button class="btn btn-full" id="shareSMS" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);justify-content:flex-start;gap:8px;padding:12px 14px;font-size:13px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          SMS
+        </button>
+      </div>
+      <button class="btn btn-full btn-primary" id="shareNative" style="justify-content:center;gap:10px;padding:13px 16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share via Phone (all apps)
+      </button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-full" id="closeShareBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== PWA MANIFEST + ICON (same as finance tracker) ======
+(function(){
+  // Generate app icon — purple gradient bg + 🔐 emoji
+  var iconSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#56c874"/><stop offset="1" stop-color="#1a7a3a"/></linearGradient></defs><rect width="512" height="512" rx="100" fill="url(#g)"/><text x="256" y="340" font-size="300" text-anchor="middle" font-family="Arial">🔐</text></svg>';
+  var iconUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(iconSvg);
+
+  // PNG icon via canvas for better compatibility (works in Google OAuth consent screen)
+  function makeIcon(size,cb){
+    try{
+      var canvas=document.createElement('canvas');
+      canvas.width=size; canvas.height=size;
+      var ctx=canvas.getContext('2d');
+      // Purple gradient background
+      var grad=ctx.createLinearGradient(0,0,size,size);
+      grad.addColorStop(0,'#56c874');
+      grad.addColorStop(1,'#1a7a3a');
+      ctx.fillStyle=grad;
+      // Rounded corners
+      var r=size*0.2;
+      ctx.beginPath();
+      ctx.moveTo(r,0);ctx.lineTo(size-r,0);ctx.arcTo(size,0,size,r,r);
+      ctx.lineTo(size,size-r);ctx.arcTo(size,size,size-r,size,r);
+      ctx.lineTo(r,size);ctx.arcTo(0,size,0,size-r,r);
+      ctx.lineTo(0,r);ctx.arcTo(0,0,r,0,r);
+      ctx.closePath();ctx.fill();
+      // Lock emoji
+      ctx.font='bold '+(size*0.58)+'px Arial';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.fillText('\uD83D\uDD10',size/2,size/2+size*0.04);
+      cb(canvas.toDataURL('image/png'));
+    }catch(e){ cb(iconUrl); }
+  }
+
+  function buildManifest(icon192,icon512){
+    return JSON.stringify({
+      name:'Password Manager',
+      short_name:'PassMgr',
+      description:'Secure local password manager with Google Drive backup',
+      start_url:location.pathname,
+      scope:location.pathname,
+      display:'standalone',
+      orientation:'portrait',
+      background_color:'#0a0a0f',
+      theme_color:'#56c874',
+      categories:['productivity','utilities'],
+      icons:[
+        {src:icon192,sizes:'192x192',type:'image/png',purpose:'any maskable'},
+        {src:icon512,sizes:'512x512',type:'image/png',purpose:'any maskable'},
+        {src:iconUrl,sizes:'any',type:'image/svg+xml'}
+      ]
+    });
+  }
+
+  makeIcon(512,function(icon512){
+    makeIcon(192,function(icon192){
+      var blob=new Blob([buildManifest(icon192,icon512)],{type:'application/manifest+json'});
+      var url=URL.createObjectURL(blob);
+      var link=document.getElementById('pwaManifest');
+      if(link){link.href=url;}
+      else{var l=document.createElement('link');l.rel='manifest';l.href=url;document.head.appendChild(l);}
+      // Apple touch icon (shows when adding to iOS home screen)
+      var al=document.getElementById('appleTouchIcon');
+      if(al){al.rel='apple-touch-icon';al.href=icon192;}
+      else{var a=document.createElement('link');a.rel='apple-touch-icon';a.href=icon192;document.head.appendChild(a);}
+    });
+  });
+})();
+
+// ====== SERVICE WORKER (same base64 approach as finance tracker) ======
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  var swCode=[
+    "var CACHE='pm-v1';",
+    "self.addEventListener('install',function(e){ self.skipWaiting(); });",
+    "self.addEventListener('activate',function(e){ e.waitUntil(self.clients.claim()); });",
+    "self.addEventListener('fetch',function(e){",
+    "  if(e.request.method!=='GET') return;",
+    "  var url=e.request.url;",
+    "  if(url.indexOf('googleapis')>-1||url.indexOf('accounts.google')>-1) return;",
+    "  e.respondWith(",
+    "    caches.match(e.request).then(function(cached){",
+    "      var fetchPromise=fetch(e.request).then(function(resp){",
+    "        if(resp&&resp.status===200&&resp.type!=='opaque'){",
+    "          var clone=resp.clone();",
+    "          caches.open(CACHE).then(function(c){c.put(e.request,clone);});",
+    "        }",
+    "        return resp;",
+    "      }).catch(function(){ return cached; });",
+    "      return cached||fetchPromise;",
+    "    })",
+    "  );",
+    "});"
+  ].join('\n');
+  var b64=btoa(unescape(encodeURIComponent(swCode)));
+  var swDataUrl='data:application/javascript;base64,'+b64;
+  navigator.serviceWorker.register(swDataUrl,{scope:'./'}).then(function(){
+    console.log('SW registered');
+  }).catch(function(e){
+    console.log('SW not available (app still works):',e.message);
+  });
+})();
+
+// ====== STATE ======
+const SK='vault_v2',SET='vault_set_v2',GA='vault_ga';
+let entries=[],settings={theme:'midnight',font:'caladea'},gUser=null,gToken=null,lastBackup=null;
+let editId=null,viewId=null,revealed=false;
+let ppCb=null;
+
+// ====== BRAND ICONS — inline SVG paths, no CDN needed ======
+// Format: [id, label, bgColor, svgPath]
+const BRANDS=[
+ ['google','Google','4285F4','M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z'],
+ ['facebook','Facebook','1877F2','M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z'],
+ ['instagram','Instagram','E4405F','M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z'],
+ ['whatsapp','WhatsApp','25D366','M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z'],
+ ['telegram','Telegram','26A5E4','M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z'],
+ ['youtube','YouTube','FF0000','M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z'],
+ ['twitter','Twitter','1D9BF0','M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z'],
+ ['linkedin','LinkedIn','0A66C2','M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z'],
+ ['discord','Discord','5865F2','M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z'],
+ ['github','GitHub','24292e','M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'],
+ ['gitlab','GitLab','FC6D26','M23.955 13.587l-1.342-4.135-2.664-8.189a.455.455 0 0 0-.867 0L16.418 9.45H7.582L4.918 1.263a.455.455 0 0 0-.867 0L1.386 9.45.044 13.587a.924.924 0 0 0 .331 1.023L12 23.054l11.625-8.443a.92.92 0 0 0 .33-1.024'],
+ ['stackoverflow','Stack Overflow','F58025','M15.725 0l-1.72 1.277 6.39 8.588 1.716-1.277zm-3.94 3.418l-1.369 1.644 8.225 6.85 1.369-1.644zm-3.15 4.465l-.905 1.94 9.702 4.517.904-1.94zm-1.85 6.043l-.3 2.088 10.573 1.517.3-2.088zM1.216 23.148h12.492v-2.082H1.216zM1.819 18.9l10.565 2.17.422-2.057-10.565-2.17zm3.798-7.68L2.332 14.04l1.187 1.817 3.285-2.82z'],
+ ['vscode','VS Code','007ACC','M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.705.29l-9.46 8.63-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.46 8.63a1.492 1.492 0 0 0 1.704.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-5.146 14.861L10.826 12l7.178-5.448v10.896z'],
+ ['docker','Docker','2496ED','M13.983 11.078h2.119a.186.186 0 0 0 .186-.185V9.006a.186.186 0 0 0-.186-.186h-2.119a.185.185 0 0 0-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 0 0 .186-.186V3.574a.186.186 0 0 0-.186-.185h-2.118a.185.185 0 0 0-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 0 0 .186-.186V6.29a.186.186 0 0 0-.186-.185h-2.118a.185.185 0 0 0-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 0 0 .184-.186V6.29a.185.185 0 0 0-.185-.185H8.1a.185.185 0 0 0-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 0 0 .185-.186V6.29a.185.185 0 0 0-.185-.185H5.136a.186.186 0 0 0-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 0 0 .186-.185V9.006a.186.186 0 0 0-.186-.186h-2.118a.185.185 0 0 0-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 0 0 .184-.185V9.006a.185.185 0 0 0-.184-.186h-2.12a.185.185 0 0 0-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 0 0 .185-.185V9.006a.185.185 0 0 0-.184-.186h-2.12a.186.186 0 0 0-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.186.186 0 0 0 .184-.185V9.006a.185.185 0 0 0-.184-.186h-2.12a.185.185 0 0 0-.184.185v1.888c0 .102.083.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 0 0-.75.748 11.376 11.376 0 0 0 .692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 0 0 3.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288z'],
+ ['linux','Linux','FCC624','M12.504 0c-.155 0-.315.008-.48.021C7.309.28 5.746.888 4.58 1.385c-1.169.499-2.113 1.026-2.752 1.651C.77 4.069.005 5.73.004 7.62c0 1.894.765 3.564 1.824 4.585 1.059 1.02 2.34 1.523 3.618 1.523.965 0 1.926-.264 2.794-.786.869-.523 1.645-1.303 2.194-2.38.274-.537.516-1.108.716-1.699l.244-.645c.1-.255.19-.49.269-.703.217-.59.368-.925.459-1.057.138-.19.316-.276.51-.276s.369.086.51.276c.09.132.24.466.46 1.057.079.213.17.448.268.703l.244.645c.2.591.443 1.162.717 1.699.549 1.077 1.325 1.857 2.193 2.38.869.522 1.83.786 2.795.786 1.277 0 2.558-.503 3.617-1.523 1.06-1.021 1.825-2.69 1.825-4.585 0-1.888-.766-3.549-1.826-4.584-.638-.625-1.582-1.151-2.751-1.651-1.165-.497-2.728-1.105-7.443-1.364C12.82.008 12.66 0 12.504 0zm-1.004 5.088c.592 0 .951.449.951 1.005 0 .555-.359 1.003-.95 1.003-.591 0-.951-.448-.951-1.003 0-.556.36-1.005.95-1.005zm2.008 0c.591 0 .951.449.951 1.005 0 .555-.36 1.003-.95 1.003-.592 0-.951-.448-.951-1.003 0-.556.359-1.005.95-1.005z'],
+ ['android','Android','3DDC84','M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4483-.9993.9993-.9993c.5511 0 .9993.4483.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4483.9993.9993 0 .5511-.4483.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 0 0-.1521-.5676.416.416 0 0 0-.5676.1521l-2.0223 3.503C15.5902 8.2439 13.8533 7.8508 12 7.8508s-3.5902.3931-5.1367 1.0989L4.841 5.4467a.4161.4161 0 0 0-.5677-.1521.4157.4157 0 0 0-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3435-4.1021-2.6892-7.5743-6.1185-9.4396'],
+ ['apple','Apple','555555','M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.54 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701'],
+ ['windows','Windows','0078D4','M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13-1.801'],
+ ['amazon','Amazon','FF9900','M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.73-2.55 1.278-3.918 1.602-1.372.324-2.8.485-4.283.485-2.18 0-4.24-.35-6.18-1.046-1.94-.696-3.677-1.69-5.21-2.982-.27-.227-.306-.478-.082-.602zm6.96-2.876c0-.068.027-.12.08-.157.053-.036.116-.044.19-.025l1.43.352c.133.033.207.11.224.23.025.144-.06.236-.255.277l-1.43.352c-.133.033-.23-.01-.293-.132a.5.5 0 0 1-.07-.237c-.028-.125.056-.235.124-.31zm5.52 0c-.028.125-.11.194-.25.208l-1.43.352c-.168.04-.266-.016-.293-.17-.028-.125.056-.235.124-.31l1.43-.352c.133-.033.228.013.285.136a.5.5 0 0 1 .07.237h.064zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-3.697 7.07C9.67 6.025 11.02 5.5 12.696 5.5c1.005 0 1.857.2 2.56.6.7.4 1.2.95 1.5 1.65.3.7.45 1.6.45 2.7V13c0 .3.15.45.45.45h.697c.3 0 .45.15.45.45v.6c0 .3-.15.45-.45.45h-.697c-.6 0-1.05-.15-1.35-.45-.3-.3-.45-.75-.45-1.35-.3.6-.75 1.05-1.35 1.35-.6.3-1.2.45-1.8.45-.9 0-1.65-.25-2.25-.75s-.9-1.15-.9-1.95c0-.9.3-1.6.9-2.1.6-.5 1.5-.75 2.7-.75h1.8v-.6c0-.6-.15-1.05-.45-1.35-.3-.3-.75-.45-1.35-.45-.5 0-.9.1-1.2.3s-.45.45-.45.75h-1.5c.05-.75.35-1.35.85-1.8zm3.547 7.43c.55 0 1-.15 1.35-.45.35-.3.525-.7.525-1.2V12h-1.5c-.6 0-1.05.125-1.35.375S10.5 13 10.5 13.5c0 .4.125.725.375.975s.575.375.975.375z'],
+ ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.bookmarks.606L9.398 13.54V0zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0z'],
+ ['spotify','Spotify','1DB954','M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z'],
+ ['disneyplus','Disney+','113CCF','M11.803 3.256c-4.89.008-9.26 2.39-9.26 5.324 0 1.565 1.025 2.973 2.696 3.99l.107.065c1.578.946 3.657 1.491 5.857 1.508.006 0 .012.001.018.001h.037c2.338 0 4.535-.62 6.142-1.685l.094-.066c1.56-1.019 2.522-2.373 2.522-3.813 0-2.793-3.585-5.193-8.15-5.324h-.063zm0 1.312h.067c3.83.11 6.836 2.06 6.836 4.012 0 1.018-.74 2.014-2.022 2.794-1.376.882-3.297 1.426-5.393 1.436h-.03c-1.915-.016-3.713-.501-5.058-1.361-1.19-.762-1.864-1.73-1.864-2.709 0-2.087 3.187-4.091 7.464-4.172z'],
+ ['snapchat','Snapchat','FFFC00','M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.379 4.045l-.004.03a.5.5 0 0 0 .134.402c.972-.104 1.99-.372 2.483-.576a.272.272 0 0 1 .11-.024c.07 0 .14.028.194.078a.333.333 0 0 1 .081.228.468.468 0 0 1-.036.185c-.28.77-1.444 1.372-2.77 1.663l-.043.01-.011.032c-.08.231-.148.55-.2.798l-.008.028c-.148.593-.414.79-.756.79a1.11 1.11 0 0 1-.395-.077 3.32 3.32 0 0 0-1.208-.218c-.433 0-.854.08-1.249.226-.24.087-.45.13-.637.13-.627 0-1.2-.296-1.714-.836-.61-.644-1.14-1.684-2.078-3.16a4.25 4.25 0 0 0-1.044-1.037l-.06-.046-.033.07c-.16.365-.336.888-.33 1.655 0 .14-.01.45-.014.58l.004.03c.018.22.067.524.2.824.13.293.246.382.327.408.064.02.103.04.103.04v.003c.1.103.027.25-.107.303a3.55 3.55 0 0 1-.56.11 3.91 3.91 0 0 1-.576.045c-.438 0-.815-.105-1.06-.31-.24-.2-.38-.5-.38-.86 0-.03.003-.06.005-.09.007-.09.013-.17.013-.268 0-.11-.005-.23-.023-.35-.023-.143-.07-.255-.14-.32a.396.396 0 0 0-.267-.097c-.148 0-.353.067-.62.202-.27.135-.513.2-.764.2-.363 0-.627-.153-.773-.43a.636.636 0 0 1-.068-.29c0-.258.143-.497.405-.676.278-.19.63-.376 1.076-.548 1.045-.404 1.716-1.157 2.03-1.835L4.9 5.97c-.217-.47-.283-1-.283-1.56 0-2.73 2.183-4.88 4.877-4.88h.002c.113 0 .226.004.337.01.25.015.499.053.742.112a5.474 5.474 0 0 1 1.631.14zm-.001 17.41c-.006 0-.013 0-.02-.001a7.65 7.65 0 0 1-3.666-.87c-.53.13-1.093.22-1.695.252h-.003a.362.362 0 0 0-.264.133.45.45 0 0 0-.08.29c0 .004 0 .008.001.012.01.136.073.353.217.573.163.25.375.467.626.644.248.177.525.316.818.412.317.1.648.148.983.148.45 0 .883-.068 1.285-.202.28-.093.55-.22.8-.375.248-.153.48-.33.69-.53.178-.17.328-.36.447-.555a2.97 2.97 0 0 0 .236-.5.48.48 0 0 0 .028-.16.32.32 0 0 0-.094-.24.37.37 0 0 0-.264-.106.38.38 0 0 0-.046.003z'],
+ ['reddit','Reddit','FF4500','M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z'],
+ ['pinterest','Pinterest','E60023','M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z'],
+ ['twitch','Twitch','9146FF','M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z'],
+ ['slack','Slack','4A154B','M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z'],
+ ['zoom','Zoom','2D8CFF','M24 12c0 6.627-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0s12 5.373 12 12zM9.25 7.75A1.25 1.25 0 0 0 8 9v4.5a2.75 2.75 0 0 0 2.75 2.75h5.5c.69 0 1.25-.56 1.25-1.25V10.5a2.75 2.75 0 0 0-2.75-2.75H9.25zM16 9.5l2.4-1.75c.26-.19.6 0 .6.31v7.88c0 .3-.34.5-.6.31L16 14.5V9.5z'],
+ ['notion','Notion','000000','M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z'],
+ ['figma','Figma','F24E1E','M5.809 23.5c1.842 0 3.341-1.498 3.341-3.341V16.82H5.809a3.341 3.341 0 0 0 0 6.681zm0-8.45h3.341V8.452H5.809a3.341 3.341 0 0 0 0 6.598zm0-8.276h3.341V3.341a3.34 3.34 0 0 0-3.341 3.34 3.34 3.34 0 0 0 3.341 3.093zm6.848 0h3.34V3.341H12.657V6.774zm3.34 1.678h-3.34v6.598h3.34a3.299 3.299 0 0 0 0-6.598zm0 8.276h-3.34v3.34a3.341 3.341 0 1 0 3.34-3.34z'],
+ ['canva','Canva','00C4CC','M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm-.1 18.1c-2.4 0-4.3-1.2-5.5-3.1L4.3 16.5 3.1 13.7l2-.5C5 12.9 5 12.5 5 12s0-.9.1-1.3l-2-.5 1.2-2.8 2.1 1.5c1.2-1.9 3.1-3.1 5.5-3.1 2 0 3.8.9 5 2.4l-2 1.4c-.8-1-1.9-1.6-3-1.6-1.8 0-3.3 1.3-3.7 3.1H11v2h-3c.4 1.8 1.9 3.1 3.7 3.1 1.2 0 2.2-.6 3-1.6l2 1.4c-1.2 1.5-3 2.4-4.8 2.1z'],
+ ['paypal','PayPal','003087','M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.996 5.973-8.81 5.973H9.089l-1.297 8.23H4.722l-.085.534A.36.36 0 0 0 5 27h3.22l2.063-13.09h1.952c4.814 0 7.617-1.783 8.832-5.432zm-2.96-6.46c.764 1.999.567 4.196-.558 5.847C15.432 9.81 13.056 11 10.204 11H7.022L5.318 21H1.92l-.033.21A.389.389 0 0 0 2.271 22h2.927L7.014 8.93h2.953c4.61 0 7.614-2.056 8.673-5.934.247-.922.315-1.773.275-2.557-.078-.27-.18-.526-.312-.77a8.432 8.432 0 0 0-.496-.651z'],
+ ['stripe','Stripe','635BFF','M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z'],
+ ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24H5.398zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.712.606L9.398 13.54V0h4.489zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0h2.298z'],
+ ['xiaomi','Xiaomi','FF6900','M9.608 4.8v14.4H14.4V4.8H9.608zm-4.8 0v14.4h4.792V4.8H4.808zM14.4 4.8v14.4h4.792V4.8H14.4zM0 0v24h24V0H0z'],
+ ['samsung','Samsung','1428A0','M19.2 9.6a3.2 3.2 0 1 0-6.4 0 3.2 3.2 0 0 0 6.4 0zm-6.4 4.8A3.2 3.2 0 1 0 6.4 14.4a3.2 3.2 0 0 0 6.4 0zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 21.6A9.6 9.6 0 1 1 12 2.4a9.6 9.6 0 0 1 0 19.2z'],
+ ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27l-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'], ['airbnb','Airbnb','FF5A5F','M12 .5c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 10.503c-1.245 0-2.247-.997-2.247-2.24C9.752 7.518 10.755 6.52 12 6.52c1.244 0 2.245.997 2.245 2.242 0 1.244-1 2.24-2.245 2.24zM4.7 18.89c.024-.076.36-1.096 1.348-2.224 1.14-1.302 2.797-1.96 4.53-1.96.2 0 .41.01.617.032.46.05.917.143 1.36.28.053.016.1.04.15.06.496.178.97.41 1.39.7.42.29.79.63 1.07 1.01.11.15.22.31.31.47.04.073.075.147.107.22.187.41.266.87.196 1.294-.057.344-.2.672-.443.943-.33.37-.792.6-1.29.6h-.007c-.34-.005-.68-.07-1.01-.163-.36-.1-.71-.215-1.06-.34-.38-.132-.77-.28-1.17-.42-.4-.14-.8-.28-1.197-.37-.397-.09-.8-.14-1.21-.14-.71 0-1.43.17-2.06.53-.39.22-.73.52-.98.88-.08.114-.143.238-.2.366zm14.6 0c-.056-.13-.12-.253-.2-.366-.25-.36-.59-.66-.98-.88-.63-.36-1.35-.53-2.06-.53-.41 0-.813.05-1.21.14-.397.09-.797.23-1.197.37-.4.14-.79.288-1.17.42-.35.125-.7.24-1.06.34-.33.093-.67.158-1.01.163h-.007c-.498 0-.96-.23-1.29-.6-.243-.27-.386-.6-.443-.943-.07-.424.009-.884.196-1.294.032-.073.067-.147.107-.22.09-.16.2-.32.31-.47.28-.38.65-.72 1.07-1.01.42-.29.894-.522 1.39-.7.05-.02.097-.044.15-.06.443-.137.9-.23 1.36-.28.207-.022.417-.032.617-.032 1.733 0 3.39.658 4.53 1.96.988 1.128 1.324 2.148 1.348 2.224z'],
+ ['uber','Uber','000000','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z'], ['aws','AWS','232F3E','M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576a.347.347 0 0 1 .056.176c0 .08-.048.16-.152.24l-.503.336a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311-.064.057-.168.08-.312.08h-.686c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32L12.55 7.793l-1.238 4.906c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08h-.685zm10.145.228c-.41 0-.82-.048-1.214-.144-.395-.096-.703-.2-.910-.32-.128-.071-.216-.151-.248-.224a.56.56 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.778.778 0 0 0-.215-.559c-.144-.151-.415-.287-.806-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .358.008.535.032.183.024.35.056.51.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167z'], ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24H5.398zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.712.606L9.398 13.54V0h4.489zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0h2.298z'],
+ ['xiaomi','Xiaomi','FF6900','M9.608 4.8v14.4H14.4V4.8H9.608zm-4.8 0v14.4h4.792V4.8H4.808zM14.4 4.8v14.4h4.792V4.8H14.4zM0 0v24h24V0H0z'],
+ ['samsung','Samsung','1428A0','M12 2.4A9.6 9.6 0 1 0 12 21.6 9.6 9.6 0 0 0 12 2.4zm2.4 11.2a3.2 3.2 0 1 1-6.4 0V10.4a3.2 3.2 0 1 1 6.4 0v3.2z'],
+ ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27l-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'],
+ ['zoom','Zoom','2D8CFF','M24 12c0 6.627-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0s12 5.373 12 12zM9.25 7.75A1.25 1.25 0 0 0 8 9v4.5a2.75 2.75 0 0 0 2.75 2.75h5.5c.69 0 1.25-.56 1.25-1.25V10.5a2.75 2.75 0 0 0-2.75-2.75H9.25zM16 9.5l2.4-1.75c.26-.19.6 0 .6.31v7.88c0 .3-.34.5-.6.31L16 14.5V9.5z'],
+ ['medium','Medium','000000','M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z'],
+ ['uber','Uber','000000','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z'],
+ ['firefox','Firefox','FF7139','M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm3.885 15.9c-1.065.63-2.295.96-3.6.99-3.96 0-7.2-3.24-7.2-7.2 0-.33.03-.66.075-.975 1.02 2.175 3.165 3.675 5.625 3.675.39 0 .78-.045 1.155-.12-.42-.525-.675-1.2-.675-1.92 0-1.725 1.395-3.12 3.12-3.12.285 0 .555.045.81.12A7.154 7.154 0 0 1 16.8 10.8c0 1.905-.735 3.63-1.935 4.92a5.16 5.16 0 0 0 1.02-1.35c.06-.15.09-.3.09-.45 0-.555-.225-1.065-.6-1.44A4.945 4.945 0 0 1 12 14.4c-2.76 0-5.04-2.04-5.37-4.71a5.175 5.175 0 0 0-.03.51c0 2.925 2.37 5.295 5.295 5.295.99 0 1.92-.27 2.7-.75z'],
+ ['stripe','Stripe','635BFF','M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z'],
+ ['opera','Opera','FF1B2D','M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.8 17.4c-2.994-.36-5.4-2.994-5.4-6 0-3.006 2.406-5.64 5.4-6 .6-.06 1.2-.06 1.8 0 2.994.36 5.4 2.994 5.4 6 0 3.006-2.406 5.64-5.4 6-.6.06-1.2.06-1.8 0z'],
+ ['airbnb','Airbnb','FF5A5F','M12 .5c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 10.503c-1.245 0-2.247-.997-2.247-2.24C9.752 7.518 10.755 6.52 12 6.52c1.244 0 2.245.997 2.245 2.242 0 1.244-1 2.24-2.245 2.24zm9.322 8.386c-.444 1.292-1.992 1.989-4.037 2.128l-.056.003-1.077-1.56c-.555-.804-1.01-1.463-1.31-1.857-.15-.199-.34-.44-.579-.44-.238 0-.424.241-.575.44-.302.394-.757 1.053-1.31 1.857l-1.078 1.56-.056-.003c-2.045-.14-3.593-.836-4.037-2.128-.26-.76-.171-1.58.266-2.364.81-1.45 2.677-2.97 4.717-3.805l.044-.018.023.048a2.985 2.985 0 0 0 3.993 0l.023-.048.044.018c2.04.835 3.907 2.356 4.717 3.805.437.783.526 1.604.266 2.364z'],
+];
+
+// Government & Indian services brands
+const GOV_BRANDS=[
+ // SBI — State Bank of India keyhole/shield logo
+ ['sbi','SBI','2D4FA1','M12 2C9.5 2 7.5 3.5 7.5 5.5c0 1.5.9 2.8 2.2 3.4C8.1 9.6 7 11 7 12.5c0 2 1.8 3.7 4.2 4.3L10 22h4l-.2-5.2c2.4-.6 4.2-2.3 4.2-4.3 0-1.5-1.1-2.9-2.7-3.6 1.3-.6 2.2-1.9 2.2-3.4C17.5 3.5 15.5 2 12 2zm0 2.5c1.7 0 3 .9 3 2s-1.3 2-3 2-3-.9-3-2 1.3-2 3-2zm0 6c2.2 0 4 1.1 4 2.5s-1.8 2.5-4 2.5-4-1.1-4-2.5 1.8-2.5 4-2.5z'],
+ // HDFC — H letter mark
+ ['hdfc','HDFC','004C8F','M4 4h4v7h8V4h4v16h-4v-6H8v6H4z'],
+ // ICICI — two vertical bars with arc
+ ['icici','ICICI','F7A800','M6 4h3v16H6zm9 0h3v16h-3zM8.5 11.5h7v1h-7z'],
+ // Axis Bank — A with bar
+ ['axis','Axis Bank','800000','M12 3L2 20h4l2-4h8l2 4h4zm0 5l3 6H9z'],
+ // Kotak — K letter bold
+ ['kotak','Kotak','ED1C24','M5 4h3v6.5l5.5-6.5H18l-6 7 6.5 9H14l-5-7.5-.5.5V20H5z'],
+ // IRCTC — train icon
+ ['irctc','IRCTC','1A3A6E','M4 11V8a8 8 0 0 1 16 0v3h1v5H4v-5h-1zm2 0h12V8A6 6 0 0 0 6 8zm-1 3h14v1H5zm2 2h2v2H7zm6 0h2v2h-2zM7 7h10v2H7z'],
+ // Rail One (Indian Railways wheel)
+ ['railone','Rail One','E30613','M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 3a7 7 0 0 1 0 14A7 7 0 0 1 12 5zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM4 11h2.1a6 6 0 0 0 0 2H4zm13.9 0H20v2h-2.1a6 6 0 0 0 0-2zM11 4v2.1a6 6 0 0 0 2 0V4zm0 13.9V20h2v-2.1a6 6 0 0 0-2 0z'],
+ // Income Tax India — hand holding coin
+ ['incometax','Income Tax','FF6600','M12 2a5 5 0 0 1 5 5v1h2v2h-2v2h2v2h-2v1a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5v-1H1v-2h2v-2H1V9h2V8a5 5 0 0 1 5-5h4zm0 2H8a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-2 6h4v1H10z'],
+ // EPFO — umbrella/shield protection mark
+ ['epfo','EPFO','1A5276','M12 2L3 7v5c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V7zm0 2.4L19 9v3c0 3.8-2.9 7.4-7 8.6-4.1-1.2-7-4.8-7-8.6V9zm-1 3.6v6h2v-6zm0 7h2v2h-2z'],
+ // Aadhaar — fingerprint
+ ['aadhaar','Aadhaar','084D95','M12 1C7 1 3 5.5 3 11c0 4 2.2 7.4 5.5 9.1L10 22h4l1.5-1.9C18.8 18.4 21 15 21 11c0-5.5-4-10-9-10zm0 2c3.9 0 7 3.6 7 8 0 3.3-1.9 6.2-4.8 7.6L13 20h-2l-1.2-1.4C6.9 17.2 5 14.3 5 11c0-4.4 3.1-8 7-8zm0 2c-2.8 0-5 2.7-5 6 0 2.3 1.2 4.3 3 5.4V15a3 3 0 0 1 0-6v-2c-2.8.6-5 3.2-5 6.3 0 2.6 1.4 4.9 3.5 6.1l.5.6h2l.5-.6C12.6 18.2 14 15.9 14 13.3c0-3.1-2.2-5.7-5-6.3V9a3 3 0 0 1 0 6v1.4c1.8-1.1 3-3.1 3-5.4 0-3.3-2.2-6-5-6z'],
+ // DigiLocker — folder with lock
+ ['digilocker','DigiLocker','FF8C00','M2 6h8l2 2h10v12H2V6zm9 5a1 1 0 0 0-1 1v1h-1v4h6v-4h-1v-1a1 1 0 0 0-1-1h-2zm0 1h2v1h-2v-1zm-1 2h4v2h-4z'],
+ // UMANG — smartphone with India tri-color
+ ['umang','UMANG','0059A3','M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v5h10V4H7zm0 5v5h10V9H7zm0 5v4h10v-4H7zm5 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2z'],
+ // BHIM — wheel/chakra
+ ['bhim','BHIM','0B3EDE','M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 0 16A8 8 0 0 1 12 4zm0 3a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-8 3h2v2H4zm14 0h2v2h-2zM11 4h2v2h-2zm0 14h2v2h-2z'],
+ // Google Pay — G letter
+ ['gpay','Google Pay','4285F4','M12 11.5v2.5H17.4a5.5 5.5 0 1 1-1.5-5.9L17.8 6A8 8 0 1 0 20 12v-0.5z'],
+ // PhonePe — phone with Pe
+ ['phonepe','PhonePe','5F259F','M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-5 17a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm3-4H9V6h6a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2v3h2zm0-5h-4V8h4z'],
+ // Paytm — P letter in square
+ ['paytm','Paytm','002970','M4 4h16v16H4zm2 2v12h5V12h3a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H6zm2 2h4v2H8z'],
+ // Jio — J letter modern
+ ['jio','Jio','0B3EDE','M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 13c0 2.2-1.3 4-4 4.5V17c1.2-.4 2-1.3 2-2.5V7h2v8z'],
+ // Airtel — A with signal arc
+ ['airtel','Airtel','E40000','M12 3C7 3 3 7 3 12l2 .5C5 8.4 8.1 5 12 5s7 3.4 7 7.5l2-.5C21 7 17 3 12 3zm0 4c-2.8 0-5 2.2-5 5l2 .5c0-1.7 1.3-3 3-3s3 1.3 3 3l2-.5C17 9.2 14.8 7 12 7zm0 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm0 3l-4 7h8l-4-7z'],
+ // Amazon — arrow smile under A
+ ['amazon','Amazon','FF9900','M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.73-2.55 1.278-3.918 1.602-1.372.324-2.8.485-4.283.485-2.18 0-4.24-.35-6.18-1.046-1.94-.696-3.677-1.69-5.21-2.982-.27-.227-.306-.478-.082-.602zm6.96-2.876c0-.068.027-.12.08-.157.053-.036.116-.044.19-.025l1.43.352c.133.033.207.11.224.23.025.144-.06.236-.255.277l-1.43.352c-.133.033-.23-.01-.293-.132a.5.5 0 0 1-.07-.237c-.028-.125.056-.235.124-.31zm5.52 0c-.028.125-.11.194-.25.208l-1.43.352c-.168.04-.266-.016-.293-.17-.028-.125.056-.235.124-.31l1.43-.352c.133-.033.228.013.285.136a.5.5 0 0 1 .07.237h.064zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-3.697 7.07C9.67 6.025 11.02 5.5 12.696 5.5c1.005 0 1.857.2 2.56.6.7.4 1.2.95 1.5 1.65.3.7.45 1.6.45 2.7V13c0 .3.15.45.45.45h.697c.3 0 .45.15.45.45v.6c0 .3-.15.45-.45.45h-.697c-.6 0-1.05-.15-1.35-.45-.3-.3-.45-.75-.45-1.35-.3.6-.75 1.05-1.35 1.35-.6.3-1.2.45-1.8.45-.9 0-1.65-.25-2.25-.75s-.9-1.15-.9-1.95c0-.9.3-1.6.9-2.1.6-.5 1.5-.75 2.7-.75h1.8v-.6c0-.6-.15-1.05-.45-1.35-.3-.3-.75-.45-1.35-.45-.5 0-.9.1-1.2.3s-.45.45-.45.75h-1.5c.05-.75.35-1.35.85-1.8zm3.547 7.43c.55 0 1-.15 1.35-.45.35-.3.525-.7.525-1.2V12h-1.5c-.6 0-1.05.125-1.35.375S10.5 13 10.5 13.5c0 .4.125.725.375.975s.575.375.975.375z'],
+ // Flipkart — F in tilted square
+ ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'],
+ // Myntra — M hanger icon
+ ['myntra','Myntra','FF3F6C','M12 2a3 3 0 0 1 3 3h-1a2 2 0 1 0-4 0H8a3 3 0 0 1 3-3zm-9 7l9-3 9 3v1L12 7l-9 3v-1zm2 2h14v10H5V11zm2 2v6h2v-4l3 3 3-3v4h2v-6l-5 5-5-5z'],
+ // Swiggy — S orange swoosh
+ ['swiggy','Swiggy','FC8019','M12 2C9 2 6 4 6 7c0 2.4 1.6 4.4 4 5.3v.5c-3 .8-5 2.7-5 5.2h2c0-2 2-3.5 5-3.5s5 1.5 5 3.5h2c0-2.5-2-4.4-5-5.2v-.5C16.4 11.4 18 9.4 18 7c0-3-3-5-6-5zm0 2c2 0 4 1.3 4 3s-2 3-4 3-4-1.3-4-3 2-3 4-3z'],
+ // Zomato — Z letter
+ ['zomato','Zomato','E23744','M5 5h14v2.5L8 16.5h11V19H5v-2.5L16 7H5z'],
+ // Zepto — Z lightning bolt
+ ['zepto','Zepto','9B59B6','M14 2l-8 11h6l-2 9 10-13h-7z'],
+ // Blinkit — lightning bolt
+ ['blinkit','Blinkit','F8CE46','M13 2L4 14h7l-1 8 10-12h-7z'],
+ // Swiggy Instamart placeholder reuse
+ ['nykaa','Nykaa','FC2779','M12 2C8 2 5 5 5 9c0 2.5 1.2 4.7 3 6.1V22h1v-2h6v2h1v-6.9A8 8 0 0 0 12 2zm-3 5h6v1.5c0 1.4-1.1 2.5-2.5 2.5h-1C10.1 11 9 9.9 9 8.5V7z'],
+ // Meesho
+ ['meesho','Meesho','9B2FE6','M12 3l-9 5v8l9 5 9-5V8zm0 2.3L19 9v6l-7 3.9L5 15V9z'],
+];
+
+// Shopping brands (subset already in BRANDS but grouped here for category display)
+const SHOP_KEYS=['flipkart','amazon','paypal','stripe'];
+
+// Extra brands using letter avatars (no SVG needed, just color)
+const LETTER_BRANDS=[
+ // Smartphones & Hardware
+ ['poco','Poco','FFCB05'],['realme','Realme','FEA000'],['oneplus','OnePlus','F5010C'],
+ ['oppo','OPPO','1D8348'],['vivo','Vivo','415FFF'],['huawei','Huawei','CF0A2C'],
+ ['honor','Honor','0066B3'],['motorola','Motorola','E1001F'],['nokia','Nokia','005AFF'],
+ ['sony','Sony','000000'],['lg','LG','A50034'],['htc','HTC','69BE28'],
+ ['dell','Dell','007DB8'],['hp','HP','0096D6'],['lenovo','Lenovo','E2231A'],
+ ['asus','ASUS','00539B'],['acer','Acer','83B81A'],['msi','MSI','FF0000'],
+ ['intel','Intel','0071C5'],['nvidia','NVIDIA','76B900'],['amd','AMD','ED1C24'],
+ ['qualcomm','Qualcomm','3253DC'],['mediatek','MediaTek','E1251B'],
+ ['corsair','Corsair','F0D000'],['razer','Razer','00FF00'],['logitech','Logitech','00B8FC'],
+ ['steelseries','SteelSeries','FF4713'],['roccat','ROCCAT','009FE3'],
+ ['bose','Bose','000000'],['sonos','Sonos','000000'],['jbl','JBL','FF4400'],
+ ['sennheiser','Sennheiser','000000'],['anker','Anker','0068FF'],
+ // Gaming
+ ['nintendo','Nintendo','E60012'],['xbox','Xbox','107C10'],['playstation','PlayStation','003087'],
+ ['steam','Steam','1B2838'],['epic','Epic Games','313131'],['ea','EA','FF4747'],
+ ['ubisoft','Ubisoft','40BFFF'],['activision','Activision','FF0000'],
+ ['bethesda','Bethesda','1F6FEB'],['rockstar','Rockstar','FCAF17'],
+ ['2k','2K Games','BE2323'],['bandai','Bandai Namco','0047AB'],
+ ['sega','SEGA','1A3B8E'],['capcom','Capcom','0040FF'],['konami','Konami','D00000'],
+ ['roblox','Roblox','E20338'],['minecraft','Minecraft','62B47A'],['fortnite','Fortnite','00D4FF'],
+ ['valorant','Valorant','FF4655'],['genshin','Genshin Impact','1D6FA4'],
+ // Entertainment & Media
+ ['hulu','Hulu','1CE783'],['soundcloud','SoundCloud','FF3300'],
+ ['icloud','iCloud','3693F3'],['googlephotos','Google Photos','EA4335'],
+ ['primevideo','Prime Video','00A8E1'],['disneyplus','Disney+','113CCF'],
+ ['hotstar','Hotstar','1F80E0'],['appletv','Apple TV','000000'],
+ ['peacock','Peacock','000000'],['hbomax','HBO Max','7A2FFF'],['paramount','Paramount+','0064FF'],
+ ['crunchyroll','Crunchyroll','F47521'],['funimation','Funimation','410099'],
+ ['vimeo','Vimeo','1AB7EA'],['dailymotion','Dailymotion','0033FF'],
+ ['mixcloud','Mixcloud','314359'],['audible','Audible','FF9900'],
+ ['podcasts','Podcasts','872EC4'],['deezer','Deezer','FF0092'],
+ ['tidal','Tidal','000000'],['bandcamp','Bandcamp','1DA0C3'],
+ // Shopping & eCommerce
+ ['ebay','eBay','E53238'],['shopify','Shopify','96BF48'],['etsy','Etsy','F56400'],
+ ['alibaba','Alibaba','FF6A00'],['aliexpress','AliExpress','FF4747'],
+ ['myntra','Myntra','FF3F6C'],['meesho','Meesho','9B2FE6'],['nykaa','Nykaa','FC2779'],
+ ['ajio','AJIO','000000'],['snapdeal','Snapdeal','E40046'],['paytmmall','Paytm Mall','002970'],
+ ['bigbasket','BigBasket','84C225'],['grofers','Blinkit','F8CE46'],
+ ['zepto','Zepto','9B59B6'],['dunzo','Dunzo','00D89C'],
+ ['walmart','Walmart','0071CE'],['target','Target','CC0000'],['costco','Costco','005DAA'],
+ ['bestbuy','Best Buy','003B8E'],['newegg','Newegg','FF6600'],
+ ['wayfair','Wayfair','7B189F'],['ikea','IKEA','0058AB'],
+ // Food & Delivery
+ ['swiggy','Swiggy','FC8019'],['zomato','Zomato','E23744'],['ola','Ola','F5C518'],
+ ['doordash','DoorDash','FF3008'],['ubereats','Uber Eats','06C167'],
+ ['grubhub','Grubhub','F63440'],['instacart','Instacart','43B02A'],
+ ['postmates','Postmates','000000'],['deliveroo','Deliveroo','00CCBC'],
+ ['just_eat','Just Eat','FF8000'],['talabat','Talabat','FF6E00'],
+ ['dominos','Dominos','006491'],['mcdonalds','McDonalds','FFC72C'],
+ ['starbucks','Starbucks','00704A'],
+ // Finance & Banking
+ ['coinbase','Coinbase','0052FF'],['binance','Binance','F0B90B'],
+ ['visa','Visa','1A1F71'],['mastercard','Mastercard','EB001B'],
+ ['googlepay','Google Pay','4285F4'],['applepay','Apple Pay','1A1A2E'],
+ ['phonepe','PhonePe','5F259F'],['razorpay','Razorpay','3395FF'],
+ ['robinhood','Robinhood','00C805'],['etrade','E*TRADE','6633FF'],
+ ['fidelity','Fidelity','538234'],['schwab','Schwab','00A0DC'],
+ ['venmo','Venmo','3D95CE'],['cashapp','Cash App','00D64F'],
+ ['revolut','Revolut','0075EB'],['wise','Wise','9FE870'],['monzo','Monzo','FF5B54'],
+ ['n26','N26','48AC98'],['chime','Chime','32D583'],
+ // Travel & Transport
+ ['uber','Uber','000000'],['lyft','Lyft','FF00BF'],
+ ['airbnb','Airbnb','FF5A5F'],['booking','Booking.com','003580'],
+ ['expedia','Expedia','FBCC33'],['tripadvisor','TripAdvisor','34E0A1'],
+ ['makemytrip','MakeMyTrip','EB2026'],['goibibo','Goibibo','EB2026'],
+ ['redbus','redBus','D84E55'],['rapido','Rapido','FFCB05'],
+ ['google_maps','Google Maps','4285F4'],['waze','Waze','05C8F8'],
+ ['citymapper','Citymapper','192F60'],
+ // Productivity & Tools
+ ['dropbox','Dropbox','0061FF'],['trello','Trello','0052CC'],
+ ['asana','Asana','F06A6A'],['monday','Monday.com','FF3D57'],
+ ['jira','Jira','0052CC'],['confluence','Confluence','172B4D'],
+ ['airtable','Airtable','18BFFF'],['smartsheet','Smartsheet','0073E6'],
+ ['clickup','ClickUp','7B68EE'],['todoist','Todoist','DB4035'],
+ ['notion_lg','Notion','000000'],['obsidian','Obsidian','7C3AED'],
+ ['evernote','Evernote','2DBE60'],['onenote','OneNote','7719AA'],
+ ['bear','Bear','E65100'],['roam','Roam Research','343A40'],
+ ['wordpress','WordPress','21759B'],['wix','Wix','FAAD4D'],
+ ['squarespace','Squarespace','1A1A2E'],['webflow','Webflow','146EF5'],
+ ['ghost','Ghost','15171A'],['medium_lg','Medium','000000'],
+ ['substack','Substack','FF6719'],['hashnode','Hashnode','2962FF'],
+ ['devto','Dev.to','0A0A0A'],
+ // Communication
+ ['mailchimp','Mailchimp','FFE01B'],['hubspot','HubSpot','FF7A59'],
+ ['sendgrid','SendGrid','1A82E2'],['mailgun','Mailgun','F06B66'],
+ ['intercom','Intercom','286EFA'],['zendesk','Zendesk','03363D'],
+ ['freshdesk','Freshdesk','2DB84B'],['crisp','Crisp','1972F5'],
+ ['liveagent','LiveAgent','D91B2A'],
+ // Cloud & DevOps
+ ['cloudflare','Cloudflare','F38020'],['vercel','Vercel','1A1A2E'],
+ ['netlify','Netlify','00C7B7'],['heroku','Heroku','430098'],
+ ['digitalocean','DigitalOcean','0080FF'],['googlecloud','Google Cloud','4285F4'],
+ ['linode','Linode','00A95C'],['vultr','Vultr','007BFC'],
+ ['render','Render','46E3B7'],['fly','Fly.io','7C3AED'],
+ ['railway','Railway','0B0D0E'],['supabase','Supabase','3ECF8E'],
+ ['firebase','Firebase','FF6F00'],['mongodb','MongoDB','47A248'],
+ ['postgresql','PostgreSQL','4169E1'],['mysql','MySQL','4479A1'],
+ ['redis','Redis','DC382D'],['elasticsearch','Elastic','FEC514'],
+ ['grafana','Grafana','F46800'],['datadog','Datadog','632CA6'],
+ ['splunk','Splunk','000000'],['newrelic','New Relic','1CE783'],
+ // Dev Tools & Platforms
+ ['wix_lg','Wix','FAAD4D'],['webflow_lg','Webflow','146EF5'],
+ ['bitbucket','Bitbucket','0052CC'],['gitlab','GitLab','FC6D26'],
+ ['kubernetes','Kubernetes','326CE5'],['npm_lg','npm','CB3837'],
+ ['ubuntu','Ubuntu','E95420'],['debian','Debian','A81D33'],
+ ['fedora','Fedora','51A2DA'],['arch','Arch Linux','1793D1'],
+ ['opera','Opera','FF1B2D'],['edge','Edge','0078D4'],
+ ['safari','Safari','006CFF'],['brave','Brave','FB542B'],
+ ['tor','Tor','7D4698'],
+ // Design & Creative
+ ['photoshop','Photoshop','31A8FF'],['illustrator','Illustrator','FF9A00'],
+ ['xd','Adobe XD','FF61F6'],['premiere','Premiere Pro','9999FF'],
+ ['aftereffects','After Effects','9999FF'],['lightroom','Lightroom','31A8FF'],
+ ['indesign','InDesign','FF3366'],['adobecc','Adobe CC','FF0000'],
+ ['invision','InVision','FF3366'],['sketch','Sketch','F7B500'],
+ ['zeplin','Zeplin','FDBD39'],['marvel','Marvel App','FF4773'],
+ ['lottie','LottieFiles','00DDB3'],['unsplash','Unsplash','000000'],
+ ['pexels','Pexels','05A081'],
+ // Microsoft
+ ['microsoftword','Word','2B579A'],['microsoftexcel','Excel','217346'],
+ ['microsoftppt','PowerPoint','B7472A'],['teams','Teams','6264A7'],
+ ['onedrive','OneDrive','0078D4'],['outlook','Outlook','0078D4'],['azure','Azure','0089D6'],
+ ['bing','Bing','258FFA'],['msn','MSN','0067B8'],['skype','Skype','00AFF0'],
+ ['cortana','Cortana','0078D4'],
+ // Indian Apps & Services
+ ['paytm','Paytm','002970'],['gpay_india','GPay India','4285F4'],['bhim','BHIM','0B3EDE'],
+ ['jio','Jio','0B3EDE'],['airtel','Airtel','E40000'],['bsnl','BSNL','004B8D'],
+ ['vodafone','Vodafone','E60000'],['vi','Vi','D8374B'],
+ ['zerodha','Zerodha','387ED1'],['groww','Groww','44C07F'],['upstox','Upstox','7B2FBE'],
+ ['smallcase','smallcase','00D09C'],['navi','Navi','4B0082'],
+ ['cred','CRED','1A1A1A'],['slice','slice','FF4C4C'],['jupiter','Jupiter','6236FF'],
+ ['fi','Fi Money','1DD1A1'],['freo','Freo','FF6B35'],
+ ['practo','Practo','5DAF45'],['1mg','1mg','E2231A'],['pharmeasy','PharmEasy','2ECC71'],
+ ['lenskart','Lenskart','E5483A'],['pepperfry','Pepperfry','F47B00'],
+ ['urban_company','Urban Company','333399'],
+ ['byju','BYJU\'S','3B5998'],['unacademy','Unacademy','08BD80'],
+ ['vedantu','Vedantu','FF9600'],['doubtnut','Doubtnut','EF3E42'],
+ ['byjusexam','BYJU\'S Exam Prep','FF5F1F'],
+ ['sharechat','ShareChat','E21B22'],['moj','Moj','FF4500'],
+ ['josh','Josh','FF0000'],['roposo','Roposo','E23636'],
+ ['mx_player','MX Player','FF6C00'],['voot','Voot','6202EE'],
+ ['sonyliv','SonyLIV','000000'],['zee5','ZEE5','8B008B'],
+ ['altbalaji','ALTBalaji','E21B22'],['jiocinema','JioCinema','0B3EDE'],
+ ['bookmyshow','BookMyShow','BB2222'],
+ // Lifestyle & Health
+ ['fitbit','Fitbit','00B0B9'],['garmin','Garmin','007DC5'],['strava','Strava','FC4C02'],
+ ['nike','Nike','000000'],['adidas','Adidas','000000'],['puma','Puma','000000'],
+ ['under_armour','Under Armour','1D1D1D'],['peloton','Peloton','D50000'],
+ ['calm','Calm','0A81B4'],['headspace','Headspace','FF6E00'],
+ ['duolingo','Duolingo','58CC02'],['babble','Babbel','7AC70C'],
+ ['classpass','ClassPass','FF5B6B'],['noom','Noom','A5CF47'],
+ ['myfitnesspal','MyFitnessPal','0041FF'],
+ // Education
+ ['coursera','Coursera','0056D2'],['udemy','Udemy','A435F0'],
+ ['edx','edX','02262B'],['skillshare','Skillshare','00FF84'],
+ ['pluralsight','Pluralsight','F15B2A'],['linkedin_learning','LinkedIn Learning','0A66C2'],
+ ['khanacademy','Khan Academy','14BF96'],
+ // Misc / Other
+ ['dropbox_lg','Dropbox','0061FF'],['box','Box','0061D5'],
+ ['docusign','DocuSign','FFCC22'],['docusign2','HelloSign','1A61FF'],
+ ['grammarly','Grammarly','15C39A'],['notion2','Coda','3C78D8'],
+ ['calendly','Calendly','006BFF'],['doodle','Doodle','FF0082'],
+ ['loom','Loom','625DF5'],['whereby','Whereby','5C48F6'],
+ ['miro','Miro','FFD02F'],['lucidchart','Lucidchart','F9423A'],
+ ['excalidraw','Excalidraw','6965DB'],
+ ['other','Other','7c6aff'],
+];
+
+// Only SVG brands — letter-avatar fallbacks removed
+const ALL_BRANDS=[...BRANDS,...GOV_BRANDS];
+const BRAND_MAP=Object.fromEntries(ALL_BRANDS.map(b=>([b[0],{name:b[1],color:'#'+b[2],hasSvg:true}])));
+const SVG_MAP=Object.fromEntries(ALL_BRANDS.map(b=>([b[0],b[3]])));
+
+// Category groupings for tabs
+const GOV_KEYS=new Set(GOV_BRANDS.map(b=>b[0]));
+const SOCIAL_KEYS=new Set(['whatsapp','telegram','facebook','instagram','twitter','youtube','tiktok','snapchat','reddit','pinterest','linkedin','discord','twitch','medium','tumblr','threads']);
+const TECH_KEYS=new Set(['google','apple','microsoft','windows','android','linux','github','gitlab','vscode','docker','aws','azure','googlecloud','figma','notion','slack','zoom','teams','chrome','firefox','safari','brave','opera','edge']);
+const FINANCE_KEYS=new Set(['paypal','stripe','visa','mastercard','bitcoin','ethereum','coinbase','binance','gpay','phonepe','bhim','paytm','razorpay','venmo','cashapp']);
+const SHOP_KEYS_SET=new Set(['amazon','flipkart','myntra','ebay','shopify','zomato','swiggy','zepto','blinkit','spotify','netflix','disneyplus','youtube','primevideo']);
+
+function getBrandCategory(slug){
+  if(GOV_KEYS.has(slug))return 'gov';
+  if(SOCIAL_KEYS.has(slug))return 'social';
+  if(FINANCE_KEYS.has(slug))return 'finance';
+  if(SHOP_KEYS_SET.has(slug))return 'shop';
+  if(TECH_KEYS.has(slug))return 'tech';
+  return 'other';
+}
+
+function getBrandBg(slug,fallback){
+  const b=ALL_BRANDS.find(x=>x[0]===slug);
+  if(!b)return fallback||'#7c6aff';
+  const hex=b[2];
+  // For near-black, use a dark purple tint for visibility
+  const isNearBlack=['000000','181717','1a1a1a','1A1A2E','24292e'].includes(hex);
+  return isNearBlack?'#2a2a3e':'#'+hex;
+}
+function getBrandLabel(slug){
+  const b=ALL_BRANDS.find(x=>x[0]===slug);
+  return b?b[1]:'?';
+}
+function getBrandSvgHTML(slug,size=22){
+  const path=SVG_MAP[slug];
+  if(!path)return null;
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="#fff" style="display:block;flex-shrink:0"><path d="${path}"/></svg>`;
+}
+function getBrandAvatarHTML(slug,size=24){
+  const svgHtml=getBrandSvgHTML(slug,size);
+  if(svgHtml)return svgHtml;
+  // Letter fallback
+  const b=ALL_BRANDS.find(x=>x[0]===slug);
+  const letter=b?b[1].slice(0,2).toUpperCase():(slug||'?').slice(0,2).toUpperCase();
+  return `<span style="font-size:${Math.round(size*0.55)}px;font-weight:900;color:#fff;line-height:1;letter-spacing:-1px">${letter}</span>`;
+}
+
+
+
+const COLORS=['#7c6aff','#ff6a9b','#6affdc','#ffa96a','#6ab8ff','#c96aff','#ff6a6a','#b4ff6a','#f4e04d','#ff9f43'];
+const THEMES=[{id:'dark',l:'Dark'},{id:'light',l:'Light'},{id:'midnight',l:'Midnight'},{id:'forest',l:'Forest'},{id:'rose',l:'Rose'},{id:'amber',l:'Amber'}];
+const FONTS=[{id:'dm',l:'DM Sans'},{id:'caladea',l:'Caladea'},{id:'playfair',l:'Playfair'},{id:'kaushan',l:'Kaushan'}];
+const FF={dm:'DM Sans',caladea:'Caladea',playfair:'Playfair Display',kaushan:'Kaushan Script'};
+
+// ====== STORAGE ======
+function loadAll(){
+  try{entries=JSON.parse(localStorage.getItem(SK))||[];}catch{entries=[];}
+  try{settings={...settings,...JSON.parse(localStorage.getItem(SET))};}catch{}
+  try{const g=JSON.parse(localStorage.getItem(GA));if(g){gUser=g.u;gToken=g.t;lastBackup=g.b;}}catch{}
+}
+function saveEntries(){localStorage.setItem(SK,JSON.stringify(entries));}
+function saveSettings(){localStorage.setItem(SET,JSON.stringify(settings));}
+function saveGA(){localStorage.setItem(GA,JSON.stringify({u:gUser,t:gToken,b:lastBackup}));}
+
+// ====== UTILS ======
+// Custom themed dialog — replaces native confirm/alert/prompt
+function cdShow(icon,title,msg,buttons,inputCfg){
+  $('cdIcon').textContent=icon||'';
+  $('cdTitle').textContent=title||'';
+  $('cdMsg').textContent=msg||'';
+  var inp=$('cdInput');
+  if(inputCfg){
+    inp.style.display='block';
+    inp.placeholder=inputCfg.placeholder||'';
+    inp.type=inputCfg.type||'text';
+    inp.value='';
+    setTimeout(()=>inp.focus(),80);
+  } else {
+    inp.style.display='none';
+  }
+  var btns=$('cdBtns');
+  btns.innerHTML='';
+  buttons.forEach(function(b){
+    var el=document.createElement('button');
+    el.textContent=b.label;
+    el.className=b.primary?'btn btn-primary':'btn btn-ghost';
+    if(b.danger)el.style.cssText='flex:1;padding:13px;border-radius:var(--radius-sm);font-family:var(--font-ui);font-size:14px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 28%,transparent)';
+    el.onclick=function(){
+      $('cdOverlay').style.display='none';
+      if(b.cb)b.cb(inputCfg?inp.value:undefined);
+    };
+    btns.appendChild(el);
+  });
+  $('cdOverlay').style.display='flex';
+}
+function cdConfirm(title,msg,onOk,icon){
+  cdShow(icon||'⚠️',title,msg,[
+    {label:'Cancel',primary:false,cb:null},
+    {label:'Confirm',primary:true,cb:function(){onOk();}}
+  ]);
+}
+function cdAlert(title,msg,icon){
+  cdShow(icon||'ℹ️',title,msg,[{label:'OK',primary:true,cb:null}]);
+}
+function cdPromptInput(title,msg,placeholder,onOk){
+  cdShow('✏️',title,msg,[
+    {label:'Cancel',primary:false,cb:null},
+    {label:'Save',primary:true,cb:function(val){if(val)onOk(val);}}
+  ],{placeholder:placeholder,type:'text'});
+}
+// Close on backdrop click
+document.addEventListener('click',function(e){
+  if(e.target===$('cdOverlay'))$('cdOverlay').style.display='none';
+});
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function gi(n){return n?n[0].toUpperCase():'?';}
+function fmtDate(ts){if(!ts)return'—';return new Date(ts).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function toast(msg,d=2400){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function $(id){return document.getElementById(id);}
+function copyTxt(txt,btn){
+  navigator.clipboard.writeText(txt).catch(()=>{const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);});
+  toast('Copied ✓');if(btn){btn.classList.add('copied');setTimeout(()=>btn.classList.remove('copied'),1500);}
+}
+function genPw(n=18){
+  const c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=';
+  const a=new Uint8Array(n);crypto.getRandomValues(a);return Array.from(a).map(b=>c[b%c.length]).join('');
+}
+function dl(name,content,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);}
+function openOv(id){$(id).classList.add('active');}
+function closeOv(id){$(id).classList.remove('active');}
+function togglePwVis(inputId,btn){const i=$(inputId);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
+
+// ====== CRYPTO ======
+async function deriveKey(pass,salt){
+  const enc=new TextEncoder();
+  const km=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encrypt(plain,pass){
+  const enc=new TextEncoder();
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(pass,salt);
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(plain));
+  const buf=new Uint8Array(16+12+ct.byteLength);
+  buf.set(salt);buf.set(iv,16);buf.set(new Uint8Array(ct),28);
+  return btoa(String.fromCharCode(...buf));
+}
+async function decrypt(b64,pass){
+  const buf=new Uint8Array(atob(b64).split('').map(c=>c.charCodeAt(0)));
+  const key=await deriveKey(pass,buf.slice(0,16));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:buf.slice(16,28)},key,buf.slice(28));
+  return new TextDecoder().decode(pt);
+}
+
+// ====== THEME & FONT ======
+function applySettings(){
+  document.body.setAttribute('data-theme',settings.theme);
+  document.body.setAttribute('data-font',settings.font);
+}
+function buildThemeRow(){
+  const row=$('themeRow');
+  row.innerHTML=THEMES.map(t=>`<button class="chip${t.id===settings.theme?' selected':''}" data-t="${t.id}">${t.l}</button>`).join('');
+  row.addEventListener('click',e=>{
+    const b=e.target.closest('.chip');if(!b)return;
+    settings.theme=b.dataset.t;saveSettings();applySettings();
+    row.querySelectorAll('.chip').forEach(x=>x.classList.toggle('selected',x.dataset.t===settings.theme));
+  });
+}
+function buildFontRow(){
+  const row=$('fontRow');
+  row.innerHTML=FONTS.map(f=>`<button class="chip${f.id===settings.font?' selected':''}" data-f="${f.id}" style="font-family:'${FF[f.id]}'">${f.l}</button>`).join('');
+  row.addEventListener('click',e=>{
+    const b=e.target.closest('.chip');if(!b)return;
+    settings.font=b.dataset.f;saveSettings();applySettings();
+    row.querySelectorAll('.chip').forEach(x=>x.classList.toggle('selected',x.dataset.f===settings.font));
+  });
+}
+
+// ====== BRAND ICON PICKER ======
+let selEmoji=ALL_BRANDS[0][0], selColor='#'+ALL_BRANDS[0][2];
+let activeCat='all';
+
+const ICON_CATS=[
+  {id:'all',   label:'All'},
+  {id:'gov',   label:'🏛 Gov & Bank'},
+  {id:'social',label:'💬 Social'},
+  {id:'tech',  label:'💻 Tech'},
+  {id:'finance',label:'💳 Finance'},
+  {id:'shop',  label:'🛒 Shop'},
+  {id:'other', label:'⚙️ Other'},
+  {id:'custom',label:'✏️ Custom'},
+];
+
+function buildCatTabs(){
+  const tabs=$('iconCatTabs');
+  tabs.innerHTML=ICON_CATS.map(c=>`<button class="icon-cat-tab${c.id===activeCat?' active':''}" data-cat="${c.id}">${c.label}</button>`).join('');
+  tabs.addEventListener('click',e=>{
+    const b=e.target.closest('.icon-cat-tab');if(!b)return;
+    activeCat=b.dataset.cat;
+    tabs.querySelectorAll('.icon-cat-tab').forEach(x=>x.classList.toggle('active',x.dataset.cat===activeCat));
+    renderIconRow();
+  });
+}
+
+function renderIconRow(){
+  const row=$('emojiRow');
+  let list;
+  if(activeCat==='all') list=ALL_BRANDS;
+  else if(activeCat==='custom'){
+    // Show custom name-based icon + a palette of colored letter tiles
+    renderCustomTiles();
+    return;
+  } else {
+    list=ALL_BRANDS.filter(b=>getBrandCategory(b[0])===activeCat);
+  }
+  const shown=list.slice(0,120);
+  row.innerHTML=shown.map(b=>{
+    const bg=getBrandBg(b[0]);
+    const sel=selEmoji===b[0];
+    const inner=getBrandAvatarHTML(b[0],22);
+    return `<button class="emoji-btn${sel?' selected':''}" data-e="${b[0]}" data-c="${'#'+b[2]}" title="${b[1]}"
+      style="background:${bg};${sel?'border-color:#fff;box-shadow:0 0 0 3px var(--accent);':''}">${inner}</button>`;
+  }).join('');
+}
+
+const CUSTOM_COLORS=['#7c6aff','#ff6a9b','#ff9f43','#54a0ff','#1dd1a1','#ff6b6b','#feca57','#5f27cd','#00d2d3','#48dbfb','#ff9ff3','#c8d6e5','#576574','#2d3436'];
+function renderCustomTiles(){
+  const row=$('emojiRow');
+  const name=($('f-name')||{value:''}).value.trim()||'?';
+  const initials=name.length>=2?name.slice(0,2).toUpperCase():name.slice(0,1).toUpperCase();
+  row.innerHTML=CUSTOM_COLORS.map((c,i)=>{
+    const sel=selEmoji==='__custom_'+i;
+    return `<button class="emoji-btn${sel?' selected':''}" data-e="__custom_${i}" data-c="${c}" title="${initials} (${c})"
+      style="background:${c};${sel?'border-color:#fff;box-shadow:0 0 0 3px var(--accent);':''}"
+      ><span style="font-size:13px;font-weight:900;color:#fff;letter-spacing:-1px">${initials}</span></button>`;
+  }).join('');
+}
+
+function buildPickers(){
+  buildCatTabs();
+  renderIconRow();
+  $('emojiRow').addEventListener('click',e=>{
+    const b=e.target.closest('.emoji-btn');if(!b)return;
+    $('emojiRow').querySelectorAll('.emoji-btn').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+    selEmoji=b.dataset.e;
+    selColor=b.dataset.c||'#7c6aff';
+  });
+  // Re-render custom tiles when name changes
+  $('f-name').addEventListener('input',()=>{
+    // Auto-detect brand
+    const v=$('f-name').value.toLowerCase().replace(/\s+/g,'').replace(/[^a-z0-9]/g,'');
+    if(v){
+      let found=ALL_BRANDS.find(b=>b[0]===v||b[1].toLowerCase().replace(/\s+/g,'')==v);
+      if(!found)found=ALL_BRANDS.find(b=>b[0].startsWith(v)||b[1].toLowerCase().includes(v));
+      if(found){selEmoji=found[0];selColor='#'+found[2];activeCat='all';buildCatTabs();renderIconRow();return;}
+    }
+    // If on custom tab, refresh initials
+    if(activeCat==='custom') renderCustomTiles();
+  });
+}
+function syncPickers(){
+  buildCatTabs();
+  renderIconRow();
+}
+
+// ====== RENDER ======
+function getInitials(name){const w=name.trim().split(/\s+/);return w.length>=2?(w[0][0]+w[1][0]).toUpperCase():name.slice(0,2).toUpperCase();}
+function getCardAvatar(e){
+  const bg=e.emoji==='__custom__'?(e.color||'#7c6aff'):getBrandBg(e.emoji, e.color);
+  let inner;
+  if(e.emoji==='__custom__'){
+    inner=`<span style="font-size:13px;font-weight:900;color:#fff;letter-spacing:-1px">${getInitials(e.name)}</span>`;
+  } else if(e.emoji&&BRAND_MAP[e.emoji]){
+    inner=getBrandAvatarHTML(e.emoji,22);
+  } else {
+    inner=`<span style="font-size:16px;font-weight:900;color:#fff">${gi(e.name)}</span>`;
+  }
+  return `<div class="card-avatar" style="background:${bg};display:flex;align-items:center;justify-content:center">${inner}</div>`;
+}
+function render(filter=''){
+  const f=filter?entries.filter(e=>e.name.toLowerCase().includes(filter.toLowerCase())||(e.username||'').toLowerCase().includes(filter.toLowerCase())):entries;
+  $('sectionLabel').textContent=filter?`Results for "${filter}"`:`All Passwords (${entries.length})`;
+  const list=$('cardsList'),empty=$('emptyState');
+  if(!f.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=f.map((e,i)=>`<div class="card" style="animation-delay:${i*35}ms" data-id="${e.id}">
+    ${getCardAvatar(e)}
+    <div class="card-info"><div class="card-name">${esc(e.name)}</div><div class="card-user">${esc(e.username||'—')}</div></div>
+    <span class="card-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>`).join('');
+  list.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>openDetail(c.dataset.id)));
+}
+
+// ====== ADD/EDIT ======
+function openAdd(){
+  editId=null;selEmoji=ALL_BRANDS[0][0];selColor='#'+ALL_BRANDS[0][2];activeCat='all';
+  $('modalTitle').textContent='New Entry';
+  ['f-name','f-user','f-pass','f-desc'].forEach(id=>$(id).value='');
+  syncPickers();
+  openOv('addOverlay');
+}
+function closeAdd(){closeOv('addOverlay');editId=null;}
+function saveEntry(){
+  const name=$('f-name').value.trim(),username=$('f-user').value.trim(),password=$('f-pass').value,desc=$('f-desc').value.trim();
+  if(!name){toast('App name is required');return;}if(!password){toast('Password is required');return;}
+  // For custom tiles store initials as emoji slug and the chosen color
+  let emoji=selEmoji, color=selColor;
+  if(selEmoji.startsWith('__custom_')){
+    emoji='__custom__'; // sentinel: use name initials
+    color=selColor;
+  } else {
+    color=BRAND_MAP[selEmoji]?BRAND_MAP[selEmoji].color:selColor;
+  }
+  if(editId){const i=entries.findIndex(e=>e.id===editId);if(i!==-1)entries[i]={...entries[i],name,username,password,desc,emoji,color,updated:Date.now()};}
+  else entries.unshift({id:Date.now().toString()+Math.random().toString(36).slice(2),name,username,password,desc,emoji,color,created:Date.now(),updated:Date.now()});
+  saveEntries();render($('searchInput').value);closeAdd();toast(editId?'Entry updated ✓':'Entry saved ✓');
+}
+
+// ====== DETAIL ======
+function openDetail(id){
+  const e=entries.find(x=>x.id===id);if(!e)return;viewId=id;revealed=false;
+  const av=$('d-avatar');
+  const isCustom=e.emoji==='__custom__';
+  av.style.background=isCustom?(e.color||'#7c6aff'):getBrandBg(e.emoji, e.color);
+  av.style.display='flex';av.style.alignItems='center';av.style.justifyContent='center';
+  av.innerHTML=isCustom
+    ?`<span style="font-size:20px;font-weight:900;color:#fff;letter-spacing:-1px">${getInitials(e.name)}</span>`
+    :e.emoji&&BRAND_MAP[e.emoji]
+      ?getBrandAvatarHTML(e.emoji,30)
+      :`<span style="font-size:24px;font-weight:900;color:#fff">${gi(e.name)}</span>`;
+  $('d-name').textContent=e.name;$('d-sub').textContent=e.username||'Password Entry';$('d-user').textContent=e.username||'—';
+  const p=$('d-pass');p.textContent='••••••••';p.className='detail-field-text pw-hidden';$('revealBtn').innerHTML=EYE_OPEN;
+  const dw=$('d-desc-wrap');if(e.desc){$('d-desc').textContent=e.desc;dw.style.display='';}else dw.style.display='none';
+  const tw=$('d-ts-wrap');if(e.updated){$('d-ts').textContent=fmtDate(e.updated);tw.style.display='';}else tw.style.display='none';
+  openOv('detailOverlay');
+}
+function closeDetail(){closeOv('detailOverlay');viewId=null;}
+const EYE_OPEN=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const EYE_SHUT=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+function toggleReveal(){
+  const e=entries.find(x=>x.id===viewId);if(!e)return;revealed=!revealed;
+  const el=$('d-pass');
+  if(revealed){el.textContent=e.password;el.className='detail-field-text';$('revealBtn').innerHTML=EYE_SHUT;}
+  else{el.textContent='••••••••';el.className='detail-field-text pw-hidden';$('revealBtn').innerHTML=EYE_OPEN;}
+}
+function deleteEntry(){const e=entries.find(x=>x.id===viewId);if(!e)return;cdConfirm('Delete Entry',`Delete "${e.name}"? This cannot be undone.`,function(){entries=entries.filter(x=>x.id!==viewId);saveEntries();render($('searchInput').value);closeDetail();toast('Entry deleted');},'🗑️');}
+function editEntry(){
+  const e=entries.find(x=>x.id===viewId);if(!e)return;closeDetail();
+  editId=e.id;
+  selEmoji=e.emoji||ALL_BRANDS[0][0];
+  selColor=e.color||(BRAND_MAP[selEmoji]?BRAND_MAP[selEmoji].color:'#7c6aff');
+  activeCat='all';
+  syncPickers();
+  $('modalTitle').textContent='Edit Entry';
+  $('f-name').value=e.name;$('f-user').value=e.username||'';$('f-pass').value=e.password;$('f-desc').value=e.desc||'';
+  openOv('addOverlay');
+}
+
+// ====== PROFILE ======
+const PROFILE_SVG=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+function updateProfileUI(){
+  $('statEntries').textContent=entries.length;
+  $('statBackup').textContent=lastBackup?fmtDate(lastBackup):'—';
+  // Render Google sign-in button in profile overlay
+  // profileSignInBtnWrap now has static HTML button — nothing to inject
+  $('sGdriveSub').textContent=gUser
+    ?gUser.email||'Connected'
+    :getClientId()?'Client ID saved — tap to sign in':'Setup required';
+  // Update settings Google row
+  if($('sGoogleTitle')){
+    if(gUser){
+      $('sGoogleTitle').textContent=gUser.name||'Google Account';
+      $('sGoogleSub').textContent=gUser.email||'Signed in';
+      $('sGoogleSignIn').style.background='color-mix(in srgb,var(--success) 8%,var(--surface2))';
+    } else {
+      $('sGoogleTitle').textContent='Sign in with Google';
+      $('sGoogleSub').textContent=getClientId()?'Tap to sign in':'Backup passwords to Drive';
+      $('sGoogleSignIn').style.background='';
+    }
+  }
+  if(gUser){
+    $('profileName').textContent=gUser.name||'Google User';
+    $('profileEmail').textContent=gUser.email||'';
+    const lg=$('profileAvatarLg');
+    if(gUser.pic){
+      lg.innerHTML=`<img src="${gUser.pic}" alt="">`;
+      $('profileBtn').innerHTML=`<img src="${gUser.pic}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`;
+    }else{
+      const init=(gUser.name||'G')[0].toUpperCase();
+      lg.textContent=init;$('profileBtn').textContent=init;
+    }
+    $('signInSection').style.display='none';$('signedInSection').style.display='block';
+  } else {
+    $('profileName').textContent='Guest User';$('profileEmail').textContent='Not signed in';
+    $('profileBtn').innerHTML=PROFILE_SVG;
+    $('profileAvatarLg').innerHTML=`<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+    $('signInSection').style.display='block';$('signedInSection').style.display='none';
+  }
+  updateGdriveOverlay();
+}
+
+// ====== GOOGLE SIGN-IN — exact same as finance tracker ======
+// Only needs: Authorized JavaScript origins in Google Cloud Console
+// NO redirect URI needed
+
+const GCLIENT_KEY='pm_gclient';
+// Built-in Client ID — safe to embed publicly (domain-restricted by Google)
+const BUILTIN_CLIENT_ID='558826381629-6frdfctlgr46jeuh647uvfsgrt8sdh3c.apps.googleusercontent.com';
+const GSCOPE='https://www.googleapis.com/auth/drive.file email profile';
+var GIS_LOADED=false;
+var GAPI_LOADED=false;
+
+function getClientId(){
+  return localStorage.getItem(GCLIENT_KEY)||BUILTIN_CLIENT_ID||'';
+}
+function setClientId(id){
+  localStorage.setItem(GCLIENT_KEY,id.trim());
+}
+// Load both GIS + GAPI SDKs (same as finance tracker)
+function loadGoogleSDKs(){
+  if(GIS_LOADED&&GAPI_LOADED)return;
+  if(!GIS_LOADED){
+    var s1=document.createElement('script');
+    s1.src='https://accounts.google.com/gsi/client';
+    s1.onload=function(){GIS_LOADED=true;tryBootGoogle();};
+    s1.onerror=function(){toast('Failed to load Google SDK');};
+    document.head.appendChild(s1);
+  }
+  if(!GAPI_LOADED){
+    var s2=document.createElement('script');
+    s2.src='https://apis.google.com/js/api.js';
+    s2.onload=function(){
+      gapi.load('client',function(){
+        gapi.client.init({}).then(function(){
+          GAPI_LOADED=true;tryBootGoogle();
+        });
+      });
+    };
+    s2.onerror=function(){toast('Failed to load GAPI');};
+    document.head.appendChild(s2);
+  }
+}
+
+function tryBootGoogle(){
+  if(!GIS_LOADED||!GAPI_LOADED)return;
+  // Restore saved session
+  var saved=localStorage.getItem('pm_gsession');
+  if(saved){
+    try{
+      var sess=JSON.parse(saved);
+      if(sess&&sess.access_token&&sess.expiry>Date.now()){
+        gToken=sess.access_token;
+        gUser={name:sess.name,email:sess.email,pic:sess.photo};
+        saveGA();updateProfileUI();
+        return;
+      }
+    }catch(e){}
+    localStorage.removeItem('pm_gsession');
+  }
+  updateProfileUI();
+}
+
+// Sign in — called directly from button onclick (user gesture preserved)
+function signInGoogle(){
+  var cid=getClientId();
+  if(!cid){updateGdriveOverlay();openOv('gdriveOverlay');return;}
+  if(!GIS_LOADED||!GAPI_LOADED){
+    loadGoogleSDKs();
+    toast('Loading Google SDK… tap again in a moment');
+    return;
+  }
+  if(location.protocol==='file:'){
+    toast('⚠️ Google sign-in needs HTTPS. Host on GitHub Pages.');return;
+  }
+  try{
+    var tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:cid,
+      scope:GSCOPE,
+      callback:function(resp){
+        if(resp.error){toast('Sign-in error: '+resp.error,5000);return;}
+        gToken=resp.access_token;
+        fetchGoogleProfile(resp.access_token,resp.expires_in||3600);
+      }
+    });
+    tokenClient.requestAccessToken({prompt:''});
+  }catch(e){
+    toast('Sign-in error: '+e.message,5000);
+  }
+}
+
+function fetchGoogleProfile(token,expiresIn){
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo',{
+    headers:{Authorization:'Bearer '+token}
+  }).then(function(r){return r.json();}).then(function(u){
+    gUser={name:u.name||u.email.split('@')[0],email:u.email,pic:u.picture||''};
+    // Save session (expires in 1hr)
+    localStorage.setItem('pm_gsession',JSON.stringify({
+      access_token:token,name:gUser.name,email:gUser.email,
+      photo:gUser.pic,expiry:Date.now()+(expiresIn*1000)
+    }));
+    saveGA();updateProfileUI();
+    closeOv('profileOverlay');closeOv('gdriveOverlay');
+    toast('✓ Signed in as '+gUser.name);
+  }).catch(function(e){toast('Profile fetch error: '+e.message,5000);});
+}
+
+function signOut(){
+  cdConfirm('Sign Out','Sign out of your Google account?',function(){
+  gToken=null;gUser=null;lastBackup=null;
+  localStorage.removeItem('pm_gsession');
+  localStorage.removeItem(GA);
+  if(typeof google!=='undefined'&&google.accounts&&google.accounts.oauth2){
+    var cid=getClientId();
+    if(cid)try{google.accounts.oauth2.revoke(gToken,function(){});}catch(e){}
+  }
+  updateProfileUI();
+  toast('Signed out');
+  },'👋');
+}
+
+function showClientIdSetup(){
+  updateGdriveOverlay();
+  openOv('gdriveOverlay');
+}
+
+// ====== GOOGLE DRIVE ======
+const DRV_FILE='pm_backup.enc';
+async function driveBackup(pass){
+  if(!gToken){toast('Sign in to Google first');return;}if(!pass){toast('Enter passphrase');return;}
+  toast('⏳ Encrypting & uploading…');
+  try{
+    const enc=await encrypt(JSON.stringify({entries,ts:Date.now()}),pass);
+    // Search for existing backup file in Drive root (drive.file scope)
+    const listR=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D%22${DRV_FILE}%22+and+trashed%3Dfalse&fields=files(id)`,{headers:{Authorization:'Bearer '+gToken}});
+    const listD=await listR.json();const fid=listD.files&&listD.files[0]?listD.files[0].id:null;
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify({name:DRV_FILE,mimeType:'text/plain'})],{type:'application/json'}));
+    form.append('media',new Blob([enc],{type:'text/plain'}));
+    const url=fid
+      ?`https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=multipart`
+      :'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+    const method=fid?'PATCH':'POST';
+    const res=await fetch(url,{method,headers:{Authorization:'Bearer '+gToken},body:form});
+    if(!res.ok)throw new Error('Upload failed');
+    lastBackup=Date.now();saveGA();updateProfileUI();toast('☁️ Backup uploaded ✓');
+  }catch(err){toast('Backup failed: '+(err.message||'Unknown error'));}
+}
+async function driveRestore(pass){
+  if(!gToken){toast('Sign in first');return;}if(!pass){toast('Enter passphrase');return;}
+  toast('⏳ Downloading…');
+  try{
+    const listR=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D%22${DRV_FILE}%22+and+trashed%3Dfalse&fields=files(id)`,{headers:{Authorization:'Bearer '+gToken}});
+    const listD=await listR.json();if(!listD.files||!listD.files[0]){toast('No backup found in Drive');return;}
+    const fid=listD.files[0].id;
+    const dlR=await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`,{headers:{Authorization:'Bearer '+gToken}});
+    const enc=await dlR.text();
+    const plain=await decrypt(enc.trim(),pass);
+    const data=JSON.parse(plain);if(!data.entries){toast('Invalid backup');return;}
+    cdConfirm('Restore Backup',`Replace all current data with ${data.entries.length} entries from backup?`,function(){
+      entries=data.entries;saveEntries();render($('searchInput').value);lastBackup=Date.now();saveGA();updateProfileUI();toast(`✓ Restored ${entries.length} entries`);closeOv('gdriveOverlay');
+    },'🔄');
+  }catch{toast('Restore failed — wrong passphrase?');}
+}
+
+// Official-style Google Sign-In button (same HTML as finance tracker)
+
+async function viewBackupFileInfo(){
+  const info=$('backupFileInfo');
+  if(!gToken){toast('Sign in to Google first');return;}
+  if(info)info.style.display='none';
+  toast('⏳ Checking Drive…');
+  try{
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D%22${DRV_FILE}%22+and+trashed%3Dfalse&fields=files(id,name,size,modifiedTime,createdTime)`,{headers:{Authorization:'Bearer '+gToken}});
+    const d=await r.json();
+    if(!d.files||!d.files[0]){
+      toast('No backup file found on Drive');
+      if(info){info.style.display='block';info.innerHTML='<span style="color:var(--text-dim)">No backup file found on your Google Drive yet. Create one using "Backup to Google Drive".</span>';}
+      return;
+    }
+    const f=d.files[0];
+    const sizeKB=f.size?(Math.round(f.size/102.4)/10)+' KB':'unknown';
+    const created=f.createdTime?new Date(f.createdTime).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'—';
+    const modified=f.modifiedTime?new Date(f.modifiedTime).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'—';
+    if(info){
+      info.style.display='block';
+      info.innerHTML=`
+        <div style="display:grid;gap:5px">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">File name</span><strong>${f.name}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Size</span><strong>${sizeKB}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Created</span><strong>${created}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Last backup</span><strong>${modified}</strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Location</span><strong>Drive App Data</strong></div>
+          <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">📌 This file is in Google Drive's hidden "App Data" folder — not visible in regular Drive UI. Only this app can read it.</div>
+        </div>`;
+    }
+    toast('Backup file found ✓');
+  }catch(err){toast('Error: '+(err.message||'unknown'));}
+}
+
+function updateGdriveOverlay(){
+  var signInSec=$('gdriveSignInSection'),connSec=$('gdriveConnectedSection');
+  if(!signInSec)return;
+  if(gUser&&gToken){
+    signInSec.style.display='none';
+    connSec.style.display='block';
+    if($('gdriveUserName'))$('gdriveUserName').textContent=gUser.name||'';
+    if($('gdriveUserEmail'))$('gdriveUserEmail').textContent=gUser.email||'';
+    if($('backupFileInfo'))$('backupFileInfo').style.display='none';
+  }else{
+    signInSec.style.display='block';
+    connSec.style.display='none';
+    var cid=getClientId(); // will always return built-in ID if no custom one saved
+    var setupPanel=$('gClientSetupPanel');
+    var signActions=$('gSignInActions');
+    var btnWrap=$('gSignInBtnWrap');
+    // Always hide setup panel since built-in ID is always available
+    if(setupPanel)setupPanel.style.display='none';
+    if(signActions)signActions.style.display='flex';
+    if(btnWrap)btnWrap.style.display='block';
+  }
+}
+
+// ====== PIN LOCK SYSTEM ======
+const PIN_KEY='pm_pin_hash';
+const PIN_LEN=4;
+const PIN_LOCKOUT_KEY='pm_pin_lockout';
+const PIN_ATTEMPTS_KEY='pm_pin_attempts';
+const SECURITY_Q_KEY='pm_security_q';
+const SECURITY_A_KEY='pm_security_a';
+const MAX_ATTEMPTS=3;
+const LOCKOUT_DURATION=60*60*1000; // 1 hour
+let pinBuffer='';
+let pinMode='unlock'; // 'unlock' | 'setup1' | 'setup2' | 'verify-change'
+let pinSetupFirst='';
+let isLocked=true;
+let autoLockTimer=null;
+
+async function hashPIN(pin){
+  const salt='pm_salt_9f3a';
+  const data=new TextEncoder().encode(salt+pin);
+  const hash=await crypto.subtle.digest('SHA-256',data);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function getPinAttempts(){return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY)||'0');}
+function setPinAttempts(n){localStorage.setItem(PIN_ATTEMPTS_KEY,n);}
+function getLockoutUntil(){return parseInt(localStorage.getItem(PIN_LOCKOUT_KEY)||'0');}
+function setLockoutUntil(ts){localStorage.setItem(PIN_LOCKOUT_KEY,ts);}
+function isLockedOut(){return Date.now()<getLockoutUntil();}
+function getRemainingLockout(){return Math.max(0,Math.ceil((getLockoutUntil()-Date.now())/60000));}
+function clearLockout(){localStorage.removeItem(PIN_LOCKOUT_KEY);localStorage.removeItem(PIN_ATTEMPTS_KEY);}
+
+function getSecurityQ(){return localStorage.getItem(SECURITY_Q_KEY)||'';}
+function getSecurityA(){return localStorage.getItem(SECURITY_A_KEY)||'';}
+function saveSecurityQA(q,a){localStorage.setItem(SECURITY_Q_KEY,q);localStorage.setItem(SECURITY_A_KEY,a.trim().toLowerCase());}
+
+function hasPIN(){return!!localStorage.getItem(PIN_KEY);}
+async function verifyPIN(pin){
+  const stored=localStorage.getItem(PIN_KEY);
+  if(!stored)return true;
+  const h=await hashPIN(pin);
+  return h===stored;
+}
+async function storePIN(pin){
+  const h=await hashPIN(pin);
+  localStorage.setItem(PIN_KEY,h);
+}
+function removePIN(){localStorage.removeItem(PIN_KEY);clearLockout();}
+
+// Security question overlay logic
+function showSecurityQuestion(){
+  const q=getSecurityQ();
+  if(!q){
+    setLockoutUntil(Date.now()+LOCKOUT_DURATION);
+    setPinAttempts(0);
+    $('lockError').textContent='Locked for 1 hour. No security question set.';
+    return;
+  }
+  $('secQText').textContent=q;
+  $('secQInput').value='';
+  $('secQError').textContent='';
+  $('secQOverlay').style.display='flex';
+  setTimeout(()=>$('secQInput').focus(),100);
+}
+function closeSecQ(){
+  $('secQOverlay').style.display='none';
+}
+
+
+// Show/hide lock screen
+function showLockScreen(mode='unlock'){
+  pinMode=mode; pinBuffer=''; pinSetupFirst='';
+  const ls=$('lockScreen');
+  ls.classList.remove('hidden');
+  updateLockUI();
+  updatePinDots();
+  $('lockError').textContent='';
+}
+function hideLockScreen(){
+  isLocked=false;
+  $('lockScreen').classList.add('hidden');
+  startAutoLockTimer();
+}
+function lockApp(){
+  isLocked=true;
+  clearTimeout(autoLockTimer);
+  if(hasPIN()){showLockScreen('unlock');}
+  else{showLockScreen('setup1');}
+}
+
+function startAutoLockTimer(){
+  clearTimeout(autoLockTimer);
+  // Auto-lock after 5 minutes of inactivity
+  autoLockTimer=setTimeout(()=>{if(!isLocked)lockApp();},5*60*1000);
+}
+function resetAutoLock(){
+  if(!isLocked)startAutoLockTimer();
+}
+
+const LOCK_SVG=`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+const KEY_SVG=`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3"/></svg>`;
+
+function updateLockUI(){
+  const icon=$('lockIcon'),title=$('lockTitle'),sub=$('lockSub'),forgot=$('lockForgot'),steps=$('setupSteps');
+  const step0=$('step0'),step1=$('step1');
+  if(pinMode==='unlock'){
+    icon.innerHTML=LOCK_SVG; title.textContent='Password Manager';
+    sub.textContent='Enter your PIN to unlock';
+    forgot.style.display=hasPIN()?'block':'none';
+    steps.style.display='none';
+  } else if(pinMode==='verify-change'){
+    icon.innerHTML=KEY_SVG; title.textContent='Verify Current PIN';
+    sub.textContent='Enter your current PIN before changing it';
+    forgot.style.display='block';
+    steps.style.display='none';
+  } else if(pinMode==='setup1'){
+    icon.innerHTML=KEY_SVG; title.textContent='Set New PIN';
+    sub.textContent='Choose a 4-digit PIN to protect your passwords';
+    forgot.style.display='none';
+    steps.style.display='flex';
+    step0.className='setup-step active';step1.className='setup-step';
+  } else if(pinMode==='setup2'){
+    icon.innerHTML=KEY_SVG; title.textContent='Confirm PIN';
+    sub.textContent='Enter the same PIN again to confirm';
+    forgot.style.display='none';
+    steps.style.display='flex';
+    step0.className='setup-step done';step1.className='setup-step active';
+  }
+}
+
+function updatePinDots(){
+  for(let i=0;i<PIN_LEN;i++){
+    const d=$('dot'+i);
+    d.classList.toggle('filled',i<pinBuffer.length);
+    d.classList.remove('error');
+  }
+}
+
+function pinDotError(){
+  for(let i=0;i<PIN_LEN;i++)$('dot'+i).classList.add('error');
+  setTimeout(()=>{for(let i=0;i<PIN_LEN;i++)$('dot'+i).classList.remove('error');},500);
+}
+
+async function onPinDigit(n){
+  if(pinBuffer.length>=PIN_LEN)return;
+  pinBuffer+=n;
+  updatePinDots();
+  if(pinBuffer.length===PIN_LEN){
+    await processPIN();
+  }
+}
+
+function onPinDelete(){
+  if(pinBuffer.length>0){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();}
+}
+
+async function processPIN(){
+  $('lockError').textContent='';
+  if(pinMode==='unlock'){
+    // Check if currently locked out
+    if(isLockedOut()){
+      const mins=getRemainingLockout();
+      $('lockError').textContent=`Too many attempts. Try again in ${mins} min.`;
+      pinBuffer='';updatePinDots();
+      return;
+    }
+    const ok=await verifyPIN(pinBuffer);
+    if(ok){
+      clearLockout();
+      hideLockScreen();
+    } else {
+      pinDotError();
+      const attempts=getPinAttempts()+1;
+      setPinAttempts(attempts);
+      const remaining=MAX_ATTEMPTS-attempts;
+      if(attempts>=MAX_ATTEMPTS){
+        setPinAttempts(0);
+        // Show security question instead of immediate lockout
+        pinBuffer='';updatePinDots();
+        showSecurityQuestion();
+      } else {
+        $('lockError').textContent=`Incorrect PIN. ${remaining} attempt${remaining===1?'':'s'} left.`;
+        pinBuffer=''; updatePinDots();
+      }
+    }
+  } else if(pinMode==='verify-change'){
+    const ok=await verifyPIN(pinBuffer);
+    if(ok){
+      pinBuffer=''; pinSetupFirst='';
+      pinMode='setup1'; updateLockUI(); updatePinDots();
+    } else {
+      pinDotError();
+      $('lockError').textContent='Incorrect PIN. Try again.';
+      pinBuffer=''; updatePinDots();
+    }
+  } else if(pinMode==='setup1'){
+    pinSetupFirst=pinBuffer; pinBuffer='';
+    pinMode='setup2'; updateLockUI(); updatePinDots();
+  } else if(pinMode==='setup2'){
+    if(pinBuffer===pinSetupFirst){
+      await storePIN(pinBuffer);
+      $('sPINsub').textContent='PIN is set';
+      $('lockBtn').style.display='';
+      // Ask for security question
+      const existingQ=getSecurityQ();
+      if(!existingQ){
+        pinBuffer=''; pinSetupFirst='';
+        cdShow('🔐','Set Security Question','This question helps you recover your PIN if you enter it wrong 3 times.',[
+          {label:'Skip',primary:false,cb:function(){hideLockScreen();toast('PIN set successfully 🔒');}},
+          {label:'Set Question',primary:true,cb:function(q){
+            if(!q||q.trim().length<4){toast('Enter a longer question');return;}
+            cdShow('💬','Set Answer','Enter your answer (case-insensitive):',[
+              {label:'Back',primary:false,cb:null},
+              {label:'Save',primary:true,cb:function(a){
+                if(!a||!a.trim()){toast('Enter an answer');return;}
+                saveSecurityQA(q.trim(),a.trim());
+                hideLockScreen();
+                toast('PIN & security question set 🔒');
+              }}
+            ],{placeholder:'Your secret answer…',type:'text'});
+          }}
+        ],{placeholder:'e.g. Name of your first pet?',type:'text'});
+      } else {
+        hideLockScreen();
+        toast('PIN set successfully 🔒');
+      }
+    } else {
+      pinDotError();
+      $('lockError').textContent='PINs do not match. Start over.';
+      pinBuffer=''; pinSetupFirst=''; pinMode='setup1';
+      setTimeout(()=>{updateLockUI();updatePinDots();$('lockError').textContent='';},700);
+    }
+  }
+}
+
+function initLockScreen(){
+  // Wire numpad
+  $('numpad').addEventListener('click',e=>{
+    const btn=e.target.closest('.numpad-btn');if(!btn)return;
+    const n=btn.dataset.n;
+    if(btn.id==='numpadDel'){onPinDelete();}
+    else if(n!==undefined&&n!==''){onPinDigit(n);}
+  });
+  // Keyboard support
+  document.addEventListener('keydown',e=>{
+    if(!isLocked)return;
+    if(e.key>='0'&&e.key<='9')onPinDigit(e.key);
+    else if(e.key==='Backspace')onPinDelete();
+    else if(e.key==='Enter'&&pinBuffer.length===PIN_LEN)processPIN();
+  });
+  // Forgot PIN
+  $('lockForgot').addEventListener('click',()=>{
+    const q=getSecurityQ();
+    if(q){
+      showSecurityQuestion();
+    } else {
+      cdConfirm('Reset PIN','No security question set. This will delete your PIN and you\'ll set a new one.',function(){
+        removePIN();pinBuffer='';pinMode='setup1';
+        updateLockUI();updatePinDots();$('lockError').textContent='';
+        $('sPINsub').textContent='Set a 4-digit lock PIN';
+      },'🔑');
+    }
+  });
+  // Lock button in header
+  $('lockBtn').addEventListener('click',()=>{
+    if(hasPIN()){lockApp();}else{closeOv('settingsOverlay');showLockScreen('setup1');}
+  });
+  // Change PIN from settings
+  $('sChangePIN').addEventListener('click',()=>{
+    closeOv('settingsOverlay');
+    if(hasPIN()){
+      showLockScreen('verify-change');
+    } else {
+      showLockScreen('setup1');
+    }
+  });
+  // Activity reset auto-lock
+  ['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,resetAutoLock,{passive:true}));
+  // Initial state
+  if(hasPIN()){
+    $('sPINsub').textContent='PIN is set';
+    showLockScreen('unlock');
+  } else {
+    // No PIN set — show setup on first launch
+    showLockScreen('setup1');
+  }
+}
+
+
+// ====== EXPORT FUNCTIONS — All 3 formats encrypted ======
+// Format written to disk:  base64( AES-GCM( JSON-payload ) )
+// The JSON payload carries a "fmt" field so the importer knows how to parse.
+
+function exportJSON(){
+  if(!entries.length){toast('No entries to export');return;}
+  closeOv('ieOverlay');
+  setTimeout(()=>{
+    promptPass('Set Export Key','Enter an encryption key. You will need the SAME key to import this file.',async pass=>{
+      if(!pass){openOv('ieOverlay');return;}
+      try{
+        const payload=JSON.stringify({fmt:'json',entries,exported:new Date().toISOString()});
+        const enc=await encrypt(payload,pass);
+        dl('passwords_'+Date.now()+'.json',enc,'application/octet-stream');
+        toast('📄 JSON exported & encrypted ✓');
+      }catch(e){toast('Export failed: '+e.message);}
+    });
+  },280);
+}
+
+function exportCSV(){
+  if(!entries.length){toast('No entries to export');return;}
+  closeOv('ieOverlay');
+  setTimeout(()=>{
+    promptPass('Set Export Key','Enter an encryption key. You will need the SAME key to import this file.',async pass=>{
+      if(!pass){openOv('ieOverlay');return;}
+      try{
+        const hdr='name,username,password,description,created,updated';
+        const rows=entries.map(e=>[e.name,e.username||'',e.password,e.desc||'',
+          e.created?new Date(e.created).toISOString():'',
+          e.updated?new Date(e.updated).toISOString():'']
+          .map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+        const csv=[hdr,...rows].join('\n');
+        const payload=JSON.stringify({fmt:'csv',csv,exported:new Date().toISOString()});
+        const enc=await encrypt(payload,pass);
+        dl('passwords_'+Date.now()+'.csv',enc,'application/octet-stream');
+        toast('📊 CSV exported & encrypted ✓');
+      }catch(e){toast('Export failed: '+e.message);}
+    });
+  },280);
+}
+
+function exportVault(){
+  if(!entries.length){toast('No entries to export');return;}
+  closeOv('ieOverlay');
+  setTimeout(()=>{
+    promptPass('Set Export Key','Enter an encryption key. You will need the SAME key to import this file.',async pass=>{
+      if(!pass){openOv('ieOverlay');return;}
+      try{
+        const payload=JSON.stringify({fmt:'vault',entries,exported:new Date().toISOString()});
+        const enc=await encrypt(payload,pass);
+        dl('passwords_'+Date.now()+'.vault',enc,'application/octet-stream');
+        toast('🔒 Vault exported & encrypted ✓');
+      }catch(e){toast('Export failed: '+e.message);}
+    });
+  },280);
+}
+
+// ====== IMPORT — all formats require decryption key ======
+function handleImport(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    const raw=ev.target.result.trim();
+    // All exported files are base64-encrypted — ask for key first
+    closeOv('ieOverlay');
+    setTimeout(()=>{
+      promptPass('Enter Import Key','Enter the encryption key used when this file was exported.',async pass=>{
+        if(!pass){openOv('ieOverlay');return;}
+        try{
+          const plain=await decrypt(raw,pass);
+          const data=JSON.parse(plain);
+          const fmt=data.fmt||'json';
+          let imported=[];
+          if(fmt==='csv'){
+            // Parse the embedded CSV string
+            const lines=data.csv.split('\n').filter(l=>l.trim());
+            const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').toLowerCase().trim());
+            const ni=hdr.indexOf('name'),ui=hdr.indexOf('username'),pi=hdr.indexOf('password'),di=hdr.indexOf('description');
+            imported=lines.slice(1).map(line=>{
+              const cols=[];let cur='',inQ=false;
+              for(const ch of line+','){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur.replace(/^"|"$/g,'').replace(/""/g,'"'));cur='';}else cur+=ch;}
+              return{id:Date.now().toString()+Math.random().toString(36).slice(2),name:cols[ni]||'',username:cols[ui]||'',password:cols[pi]||'',desc:cols[di]||'',created:Date.now(),updated:Date.now()};
+            }).filter(e=>e.name&&e.password);
+          } else {
+            // json or vault — both carry entries array
+            imported=data.entries||[];
+          }
+          if(!imported.length){toast('No entries found in file');openOv('ieOverlay');return;}
+          const n=merge(imported);
+          render($('searchInput').value);
+          toast(`✓ Imported ${n} new entries`);
+        }catch(e){
+          toast('Wrong key or invalid file');
+          openOv('ieOverlay');
+        }
+      });
+    },280);
+  };
+  reader.readAsText(file);
+}
+function merge(imp){const ids=new Set(entries.map(e=>e.id));const nw=imp.filter(e=>!ids.has(e.id)).map(e=>({...e,id:e.id||Date.now().toString()+Math.random().toString(36).slice(2)}));entries=[...nw,...entries];saveEntries();return nw.length;}
+
+// ====== SHARE APP ======
+function getShareUrl(){
+  return location.href.split('?')[0].split('#')[0];
+}
+function openShareOverlay(){
+  $('shareUrlText').textContent=getShareUrl();
+  openOv('shareOverlay');
+}
+
+// ====== PASSPHRASE PROMPT ======
+function promptPass(title,desc,cb){
+  ppCb=cb;$('ppTitle').textContent='🔒 '+title;$('ppDesc').textContent=desc;$('ppInput').value='';openOv('ppOverlay');
+}
+
+// ====== EVENT WIRING ======
+document.addEventListener('DOMContentLoaded',()=>{
+  loadAll();applySettings();buildPickers();buildThemeRow();buildFontRow();render();updateProfileUI();
+  // Load Google SDKs eagerly (same as finance tracker)
+  loadGoogleSDKs(); // always load — built-in Client ID is always available
+
+  // Search
+  $('searchInput').addEventListener('input',e=>render(e.target.value));
+
+  // FAB
+  $('addBtn').addEventListener('click',openAdd);
+
+  // Add overlay
+  $('cancelAddBtn').addEventListener('click',closeAdd);
+  $('saveBtn').addEventListener('click',saveEntry);
+  $('addOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAdd();});
+  $('genPassBtn').addEventListener('click',()=>{
+    const i=$('f-pass');i.type='text';i.value=genPw();setTimeout(()=>{i.type='password';},1600);toast('Password generated 🎲');
+  });
+
+  // Detail overlay
+  $('detailOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeDetail();});
+  $('revealBtn').addEventListener('click',toggleReveal);
+  $('deleteBtn').addEventListener('click',deleteEntry);
+  $('editBtn').addEventListener('click',editEntry);
+  $('copyUserBtn').addEventListener('click',function(){copyTxt($('d-user').textContent,this);});
+  $('copyPassBtn').addEventListener('click',function(){const e=entries.find(x=>x.id===viewId);if(e)copyTxt(e.password,this);});
+
+  // Settings
+  $('settingsBtn').addEventListener('click',()=>openOv('settingsOverlay'));
+  $('settingsClose').addEventListener('click',()=>closeOv('settingsOverlay'));
+  $('settingsOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('settingsOverlay');});
+
+  // Share App
+  $('sShareApp').addEventListener('click',()=>{closeOv('settingsOverlay');openShareOverlay();});
+  $('closeShareBtn').addEventListener('click',()=>closeOv('shareOverlay'));
+  $('shareOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('shareOverlay');});
+  $('copyShareLinkBtn').addEventListener('click',function(){copyTxt($('shareUrlText').textContent,this);});
+  $('shareWhatsApp').addEventListener('click',()=>{const u=encodeURIComponent(getShareUrl());window.open('https://wa.me/?text='+encodeURIComponent('🔐 Password Manager App — open this link in Chrome/Safari and tap "Add to Home Screen" to install it on your phone:\n\n')+u,'_blank');});
+  $('shareTelegram').addEventListener('click',()=>{const u=encodeURIComponent(getShareUrl());window.open('https://t.me/share/url?url='+u+'&text='+encodeURIComponent('🔐 Password Manager — open in Chrome/Safari and tap "Add to Home Screen" to install'),'_blank');});
+  $('shareEmail').addEventListener('click',()=>{const u=getShareUrl();location.href='mailto:?subject='+encodeURIComponent('Password Manager App')+'&body='+encodeURIComponent('Hey!\n\nOpen this link on your phone in Chrome or Safari:\n\n'+u+'\n\nThen tap the browser menu → "Add to Home Screen" → Install. It works like a real app — no app store needed!');});
+  $('shareSMS').addEventListener('click',()=>{const u=getShareUrl();location.href='sms:?&body='+encodeURIComponent('🔐 Install Password Manager: Open '+u+' in Chrome/Safari → tap menu → "Add to Home Screen"');});
+  $('shareNative').addEventListener('click',async()=>{
+    const u=getShareUrl();
+    if(navigator.share){try{await navigator.share({title:'Password Manager',text:'Secure Password Manager app — install it on your phone!',url:u});}catch(e){if(e.name!=='AbortError')toast('Sharing failed');}}
+    else{copyTxt(u,$('copyShareLinkBtn'));toast('Link copied — share it manually!');}
+  });
+  // Google Sign-In row in settings
+  $('sGoogleSignIn')&&$('sGoogleSignIn').addEventListener('click',()=>{
+    closeOv('settingsOverlay');
+    if(gUser){updateProfileUI();openOv('profileOverlay');}
+    else{updateGdriveOverlay();openOv('gdriveOverlay');}
+  });
+  $('sGdrive').addEventListener('click',()=>{updateGdriveOverlay();openOv('gdriveOverlay');});
+  $('sImport').addEventListener('click',()=>{closeOv('settingsOverlay');openOv('ieOverlay');});
+  $('sClear').addEventListener('click',()=>{cdConfirm('Clear All Data','Delete ALL passwords permanently? This cannot be undone.',function(){entries=[];saveEntries();render();toast('All data cleared');},'🗑️');});
+
+  // Fix 5: Manual Refresh
+  $('sRefresh').addEventListener('click',()=>{
+    toast('Refreshing…');
+    setTimeout(()=>location.reload(),600);
+  });
+
+  // Profile
+  $('profileBtn').addEventListener('click',()=>{updateProfileUI();openOv('profileOverlay');});
+  $('profileOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('profileOverlay');});
+  $('closeProfileBtn').addEventListener('click',()=>closeOv('profileOverlay'));
+  $('googleSignOutBtn')&&$('googleSignOutBtn').addEventListener('click',signOut);
+  $('driveBackupBtn')&&$('driveBackupBtn').addEventListener('click',()=>promptPass('Backup','Enter your encryption passphrase:',p=>{if(p)driveBackup(p);}));
+  $('driveRestoreBtn')&&$('driveRestoreBtn').addEventListener('click',()=>promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);}));
+
+  // GDrive overlay
+  $('gdriveOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('gdriveOverlay');});
+  $('closeGdriveBtn')&&$('closeGdriveBtn').addEventListener('click',()=>closeOv('gdriveOverlay'));
+  $('closeGdriveBtn2')&&$('closeGdriveBtn2').addEventListener('click',()=>closeOv('gdriveOverlay'));
+  $('closeGdriveBtnC')&&$('closeGdriveBtnC').addEventListener('click',()=>closeOv('gdriveOverlay'));
+  $('toggleDrivePass')&&$('toggleDrivePass').addEventListener('click',function(){togglePwVis('drivePassphrase',this);});
+  $('gdriveMainBtn')&&$('gdriveMainBtn').addEventListener('click',()=>{
+    const p=$('drivePassphrase').value;if(!p){toast('Enter passphrase first');return;}driveBackup(p);
+  });
+  $('restoreNowBtn')&&$('restoreNowBtn').addEventListener('click',()=>{
+    promptPass('Restore','Enter the passphrase used when this backup was created:',p=>{if(p)driveRestore(p);});
+  });
+  $('viewBackupFileBtn')&&$('viewBackupFileBtn').addEventListener('click',viewBackupFileInfo);
+  $('gSignOutBtn')&&$('gSignOutBtn').addEventListener('click',signOut);
+  $('saveClientIdBtn')&&$('saveClientIdBtn').addEventListener('click',function(){
+    var val=($('gClientIdInput')||{}).value.trim();
+    if(!val){toast('Paste your Google Client ID');return;}
+    if(!val.includes('.apps.googleusercontent.com')){toast('Invalid Client ID format');return;}
+    setClientId(val);
+    GIS_LOADED=false;GAPI_LOADED=false;
+    toast('Client ID saved ✓');
+    loadGoogleSDKs();
+    updateGdriveOverlay();
+    updateProfileUI();
+  });
+  $('changeClientIdBtn')&&$('changeClientIdBtn').addEventListener('click',()=>{
+    localStorage.removeItem(GCLIENT_KEY);updateGdriveOverlay();
+  });
+
+  // Import/Export
+  $('ieOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('ieOverlay');});
+  $('closeIeBtn').addEventListener('click',()=>closeOv('ieOverlay'));
+  $('exportJSON').addEventListener('click',exportJSON);
+  $('exportCSV').addEventListener('click',exportCSV);
+  $('exportVault').addEventListener('click',exportVault);
+  const iz=$('importZone'),inf=$('importFile');
+  iz.addEventListener('click',()=>inf.click());
+  inf.addEventListener('change',e=>handleImport(e.target.files[0]));
+  iz.addEventListener('dragover',e=>{e.preventDefault();iz.classList.add('drag-over');});
+  iz.addEventListener('dragleave',()=>iz.classList.remove('drag-over'));
+  iz.addEventListener('drop',e=>{e.preventDefault();iz.classList.remove('drag-over');handleImport(e.dataTransfer.files[0]);});
+
+  // Passphrase prompt
+  $('ppOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeOv('ppOverlay');});
+  $('ppCancel').addEventListener('click',()=>closeOv('ppOverlay'));
+  $('ppOk').addEventListener('click',()=>{const v=$('ppInput').value;closeOv('ppOverlay');if(ppCb){ppCb(v);ppCb=null;}});
+  $('ppInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('ppOk').click();});
+  $('togglePp').addEventListener('click',function(){togglePwVis('ppInput',this);});
+
+  // Install banner
+  let dp;
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('installBanner').style.display='flex';});
+  $('installBanner').addEventListener('click',async()=>{if(!dp)return;dp.prompt();const{outcome}=await dp.userChoice;if(outcome==='accepted')$('installBanner').style.display='none';dp=null;});
+  $('dismissInstall').addEventListener('click',e=>{e.stopPropagation();$('installBanner').style.display='none';});
+
+  // Security question overlay
+  $('secQCancel').addEventListener('click',()=>{
+    closeSecQ();
+    // No security question answered — apply lockout
+    setLockoutUntil(Date.now()+LOCKOUT_DURATION);
+    setPinAttempts(0);
+    $('lockError').textContent='Locked for 1 hour due to too many wrong attempts.';
+  });
+  $('secQSubmit').addEventListener('click',()=>{
+    const ans=$('secQInput').value;
+    if(!ans.trim()){$('secQError').textContent='Please enter your answer.';return;}
+    const stored=getSecurityA();
+    if(ans.trim().toLowerCase()===stored){
+      closeSecQ();
+      clearLockout();
+      removePIN();pinBuffer='';pinMode='setup1';
+      updateLockUI();updatePinDots();$('lockError').textContent='';
+      $('sPINsub').textContent='Set a 4-digit lock PIN';
+      toast('Verified ✓ Set a new PIN');
+    } else {
+      $('secQError').textContent='Wrong answer. Locked for 1 hour.';
+      setLockoutUntil(Date.now()+LOCKOUT_DURATION);
+      setPinAttempts(0);
+      setTimeout(()=>{closeSecQ();$('lockError').textContent='Wrong answer. Locked for 1 hour.';},1200);
+    }
+  });
+  $('secQInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('secQSubmit').click();});
+
+  // Open exported file from lock screen
+  $('lockFileOpen').addEventListener('change',e=>{
+    const f=e.target.files[0];
+    if(f)handleImport(f);
+    e.target.value='';
+  });
+  $('lockFileOpenLabel').addEventListener('mouseover',()=>{$('lockFileOpenLabel').style.borderColor='var(--accent)';$('lockFileOpenLabel').style.color='var(--accent)';});
+  $('lockFileOpenLabel').addEventListener('mouseout',()=>{$('lockFileOpenLabel').style.borderColor='';$('lockFileOpenLabel').style.color='';});
+
+  // PIN lock system — must be last
+  if(hasPIN())$('sPINsub').textContent='PIN is set';
+  initLockScreen();
+});
+</script>
+</body>
+</html>

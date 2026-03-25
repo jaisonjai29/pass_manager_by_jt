@@ -15,7 +15,7 @@
 <!-- Replace the content value below with your actual Google verification code -->
 <meta name="google-site-verification" content="aMaMhJS3skJbyufJ2uiTEDJE605ykb5L9IEl9Djf-EE">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&family=Kaushan+Script&family=Caladea:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&family=Kaushan+Script&family=Caladea:wght@400;700&family=Protest+Riot&family=Rancho&display=swap');
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -38,7 +38,10 @@
 [data-font="playfair"]{--font-ui:'Playfair Display',serif;}
 [data-font="dm"]{--font-ui:'DM Sans',sans-serif;}
 [data-font="kaushan"]{--font-ui:'Kaushan Script',cursive;}
-[data-font="caladea"]{--font-ui:'Caladea',serif;}
+[data-font="system"]{--font-ui:'Caladea',serif;}
+[data-font="protest"]{--font-ui:'Protest Riot',sans-serif;}
+[data-font="rancho"]{--font-ui:'Rancho',cursive;}
+[data-font="system"]{--font-ui:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
 
 html{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100%;overflow-x:hidden;transition:background .3s,color .3s;}
@@ -284,7 +287,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 .privacy-footer a:hover{color:var(--accent);}
 </style>
 </head>
-<body data-theme="midnight" data-font="caladea">
+<body data-theme="midnight" data-font="system">
 
 <!-- ===== LOCK SCREEN ===== -->
 <noscript>
@@ -982,7 +985,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 
 // ====== STATE ======
 const SK='vault_v2',SET='vault_set_v2',GA='vault_ga';
-let entries=[],settings={theme:'midnight',font:'caladea'},gUser=null,gToken=null,lastBackup=null;
+let entries=[],settings={theme:'midnight',font:'system'},gUser=null,gToken=null,lastBackup=null;
 let editId=null,viewId=null,revealed=false;
 let ppCb=null;
 
@@ -1306,8 +1309,8 @@ function getBrandAvatarHTML(slug,size=24){
 
 const COLORS=['#7c6aff','#ff6a9b','#6affdc','#ffa96a','#6ab8ff','#c96aff','#ff6a6a','#b4ff6a','#f4e04d','#ff9f43'];
 const THEMES=[{id:'dark',l:'Dark'},{id:'light',l:'Light'},{id:'midnight',l:'Midnight'},{id:'forest',l:'Forest'},{id:'rose',l:'Rose'},{id:'amber',l:'Amber'}];
-const FONTS=[{id:'dm',l:'DM Sans'},{id:'caladea',l:'Caladea'},{id:'playfair',l:'Playfair'},{id:'kaushan',l:'Kaushan'}];
-const FF={dm:'DM Sans',caladea:'Caladea',playfair:'Playfair Display',kaushan:'Kaushan Script'};
+const FONTS=[{id:'system',l:'System UI'},{id:'dm',l:'DM Sans'},{id:'caladea',l:'Caladea'},{id:'playfair',l:'Playfair'},{id:'kaushan',l:'Kaushan'},{id:'protest',l:'Protest Riot'},{id:'rancho',l:'Rancho'}];
+const FF={system:'-apple-system,sans-serif',dm:'DM Sans',caladea:'Caladea',playfair:'Playfair Display',kaushan:'Kaushan Script',protest:'Protest Riot',rancho:'Rancho'};
 
 // ====== STORAGE ======
 function loadAll(){
@@ -1847,6 +1850,10 @@ async function deleteFile(fid){
 async function driveBackup(pass){
   if(!gToken){toast('Sign in to Google first');return;}
   if(!pass){toast('Enter passphrase');return;}
+  if(!entries.length){
+    cdAlert('Cannot Backup','You have no passwords saved. Backing up now would overwrite your existing Google Drive backup with an empty file.','⚠️');
+    return;
+  }
   toast('⏳ Encrypting & uploading…');
   try{
     // Ensure token is fresh
@@ -1959,14 +1966,16 @@ function updateGdriveOverlay(){
 }
 
 // ====== PIN LOCK SYSTEM ======
-const PIN_KEY='pm_pin_hash';
 const PIN_LEN=4;
-const PIN_LOCKOUT_KEY='pm_pin_lockout';
-const PIN_ATTEMPTS_KEY='pm_pin_attempts';
-const SECURITY_Q_KEY='pm_security_q';
-const SECURITY_A_KEY='pm_security_a';
 const MAX_ATTEMPTS=3;
-const LOCKOUT_DURATION=60*60*1000; // 1 hour
+const LOCKOUT_DURATION=60*60*1000;
+// Keys scoped per Google account so each account has its own PIN
+function _pkey(b){const e=gUser&&gUser.email?gUser.email.replace(/[^a-zA-Z0-9]/g,'_'):'_local';return b+'_'+e;}
+function PIN_KEY(){return _pkey('pm_pin_hash');}
+function PIN_LOCKOUT_KEY(){return _pkey('pm_pin_lockout');}
+function PIN_ATTEMPTS_KEY(){return _pkey('pm_pin_attempts');}
+function SECURITY_Q_KEY(){return _pkey('pm_security_q');}
+function SECURITY_A_KEY(){return _pkey('pm_security_a');}
 let pinBuffer='';
 let pinMode='unlock'; // 'unlock' | 'setup1' | 'setup2' | 'verify-change'
 let pinSetupFirst='';
@@ -1980,31 +1989,31 @@ async function hashPIN(pin){
   return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-function getPinAttempts(){return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY)||'0');}
-function setPinAttempts(n){localStorage.setItem(PIN_ATTEMPTS_KEY,n);}
-function getLockoutUntil(){return parseInt(localStorage.getItem(PIN_LOCKOUT_KEY)||'0');}
-function setLockoutUntil(ts){localStorage.setItem(PIN_LOCKOUT_KEY,ts);}
+function getPinAttempts(){return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY())||'0');}
+function setPinAttempts(n){localStorage.setItem(PIN_ATTEMPTS_KEY(),n);}
+function getLockoutUntil(){return parseInt(localStorage.getItem(PIN_LOCKOUT_KEY())||'0');}
+function setLockoutUntil(ts){localStorage.setItem(PIN_LOCKOUT_KEY(),ts);}
 function isLockedOut(){return Date.now()<getLockoutUntil();}
 function getRemainingLockout(){return Math.max(0,Math.ceil((getLockoutUntil()-Date.now())/60000));}
-function clearLockout(){localStorage.removeItem(PIN_LOCKOUT_KEY);localStorage.removeItem(PIN_ATTEMPTS_KEY);}
+function clearLockout(){localStorage.removeItem(PIN_LOCKOUT_KEY());localStorage.removeItem(PIN_ATTEMPTS_KEY());}
 
-function getSecurityQ(){return localStorage.getItem(SECURITY_Q_KEY)||'';}
-function getSecurityA(){return localStorage.getItem(SECURITY_A_KEY)||'';}
-function saveSecurityQA(q,a){localStorage.setItem(SECURITY_Q_KEY,q);localStorage.setItem(SECURITY_A_KEY,a.trim().toLowerCase());}
+function getSecurityQ(){return localStorage.getItem(SECURITY_Q_KEY())||'';}
+function getSecurityA(){return localStorage.getItem(SECURITY_A_KEY())||'';}
+function saveSecurityQA(q,a){localStorage.setItem(SECURITY_Q_KEY(),q);localStorage.setItem(SECURITY_A_KEY(),a.trim().toLowerCase());}
 
-function hasPIN(){return!!localStorage.getItem(PIN_KEY);}
+function hasPIN(){return!!localStorage.getItem(PIN_KEY());}
 async function verifyPIN(pin){
-  const stored=localStorage.getItem(PIN_KEY);
+  const stored=localStorage.getItem(PIN_KEY());
   if(!stored)return true;
   const h=await hashPIN(pin);
   return h===stored;
 }
 async function storePIN(pin){
   const h=await hashPIN(pin);
-  localStorage.setItem(PIN_KEY,h);
+  localStorage.setItem(PIN_KEY(),h);
   $('lockBtn').style.display=''; // reveal lock button in header
 }
-function removePIN(){localStorage.removeItem(PIN_KEY);clearLockout();}
+function removePIN(){localStorage.removeItem(PIN_KEY());clearLockout();}
 
 // Security question overlay logic
 function showSecurityQuestion(){
@@ -2175,21 +2184,7 @@ async function processPIN(){
       const existingQ=getSecurityQ();
       if(!existingQ){
         pinBuffer=''; pinSetupFirst='';
-        cdShow('🔐','Set Security Question','This question helps you recover your PIN if you enter it wrong 3 times.',[
-          {label:'Skip',primary:false,cb:function(){hideLockScreen();toast('PIN set successfully 🔒');}},
-          {label:'Set Question',primary:true,cb:function(q){
-            if(!q||q.trim().length<4){toast('Enter a longer question');return;}
-            cdShow('💬','Set Answer','Enter your answer (case-insensitive):',[
-              {label:'Back',primary:false,cb:null},
-              {label:'Save',primary:true,cb:function(a){
-                if(!a||!a.trim()){toast('Enter an answer');return;}
-                saveSecurityQA(q.trim(),a.trim());
-                hideLockScreen();
-                toast('PIN & security question set 🔒');
-              }}
-            ],{placeholder:'Your secret answer…',type:'text'});
-          }}
-        ],{placeholder:'e.g. Name of your first pet?',type:'text'});
+        showSecurityQPicker();
       } else {
         hideLockScreen();
         toast('PIN set successfully 🔒');
@@ -2203,6 +2198,31 @@ async function processPIN(){
   }
 }
 
+
+// Security question picker — 3 preset questions
+const SECURITY_QUESTIONS=[
+  "What is the name of your first pet?",
+  "What is your mother's maiden name?",
+  "What was the name of your primary school?"
+];
+function showSecurityQPicker(){
+  var btns=SECURITY_QUESTIONS.map(function(q,i){
+    return {label:q,primary:false,cb:function(){
+      cdShow('💬','Your Answer','Q: '+q+'\n\nType your answer (not case-sensitive):',
+        [{label:'Back',primary:false,cb:function(){showSecurityQPicker();}},
+         {label:'Save',primary:true,cb:function(a){
+           if(!a||!a.trim()){toast('Please enter an answer');return;}
+           saveSecurityQA(q,a.trim());
+           hideLockScreen();
+           toast('PIN & security question saved 🔒');
+         }}],
+        {placeholder:'Your answer…',type:'text'}
+      );
+    }};
+  });
+  btns.unshift({label:'Skip',primary:false,cb:function(){hideLockScreen();toast('PIN set 🔒');}});
+  cdShow('🔐','Choose Security Question','Pick one to help recover your PIN:',btns);
+}
 function initLockScreen(){
   // Wire numpad
   $('numpad').addEventListener('click',e=>{

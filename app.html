@@ -15,7 +15,7 @@
 <!-- Replace the content value below with your actual Google verification code -->
 <meta name="google-site-verification" content="aMaMhJS3skJbyufJ2uiTEDJE605ykb5L9IEl9Djf-EE">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&family=Kaushan+Script&family=Caladea:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&family=Kaushan+Script&family=Caladea:wght@400;700&family=Protest+Riot&family=Rancho&display=swap');
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
@@ -38,14 +38,17 @@
 [data-font="playfair"]{--font-ui:'Playfair Display',serif;}
 [data-font="dm"]{--font-ui:'DM Sans',sans-serif;}
 [data-font="kaushan"]{--font-ui:'Kaushan Script',cursive;}
-[data-font="caladea"]{--font-ui:'Caladea',serif;}
+[data-font="system"]{--font-ui:'Protest Riot',sans-serif;}
+[data-font="rancho"]{--font-ui:'Rancho',cursive;}
+[data-font="system"]{--font-ui:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
 
 html{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100%;overflow-x:hidden;transition:background .3s,color .3s;}
 body::before{content:'';position:fixed;top:-40%;left:-20%;width:80vw;height:80vw;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 10%,transparent) 0%,transparent 60%);pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:60vw;background:radial-gradient(circle,color-mix(in srgb,var(--accent2) 8%,transparent) 0%,transparent 60%);pointer-events:none;z-index:0;}
 
-#app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 0 100px;}
+#app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 0 100px;transition:opacity .4s;}
+#app.app-hidden{opacity:0;pointer-events:none;}
 
 /* HEADER */
 .header{padding:44px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:linear-gradient(to bottom,var(--bg) 65%,transparent);}
@@ -283,7 +286,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 .privacy-footer a:hover{color:var(--accent);}
 </style>
 </head>
-<body data-theme="midnight" data-font="caladea">
+<body data-theme="midnight" data-font="system">
 
 <!-- ===== LOCK SCREEN ===== -->
 <noscript>
@@ -294,7 +297,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
     <a href="privacy.html" style="color:#7c6aff">Privacy Policy</a>
   </div>
 </noscript>
-<div id="lockScreen" class="lock-screen">
+<div id="lockScreen" class="lock-screen hidden">
   <div class="lock-bg-orb1"></div>
   <div class="lock-bg-orb2"></div>
   <div class="lock-icon" id="lockIcon">🔐</div>
@@ -339,6 +342,14 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
     </label>
     <input type="file" id="lockFileOpen" accept=".json,.csv,.vault" style="display:none">
   </div>
+  <!-- Google Sign-In on lock screen — always visible when not signed in -->
+  <div id="lockGoogleSignInWrap" style="margin-top:20px;text-align:center">
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;letter-spacing:.3px">Sign in to sync & backup passwords</div>
+    <button onclick="signInGoogle()" style="display:inline-flex;align-items:center;gap:8px;padding:11px 20px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.18);border-radius:12px;color:var(--text);font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='rgba(255,255,255,.18)'">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
 </div>
 
 <!-- Security Question Panel (shown over lock screen) -->
@@ -356,14 +367,14 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
   <div id="secQError" style="font-size:12px;color:var(--danger);min-height:16px;text-align:center"></div>
 </div>
 
-<div id="app">
+<div id="app" class="app-hidden">
   <div class="header">
     <div class="logo">
       <div class="logo-icon">🔐</div>
       <span class="logo-text">Password Manager</span>
     </div>
     <div class="header-actions">
-      <button class="lock-btn" id="lockBtn" title="Lock">
+      <button class="lock-btn" id="lockBtn" title="Lock" style="display:none">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </button>
       <button class="icon-btn" id="settingsBtn" title="Settings">
@@ -580,18 +591,18 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div style="font-size:14px;font-weight:700">Password Manager</div>
-          <div style="font-size:11px;font-family:var(--font-mono);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:3px 8px;border-radius:20px">v2.1.0</div>
+          <div style="font-size:11px;font-family:var(--font-mono);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:3px 8px;border-radius:20px">v2.2.0</div>
         </div>
         <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">Release History</div>
         <div style="display:flex;flex-direction:column;gap:0">
           <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
             <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 6px color-mix(in srgb,var(--accent) 60%,transparent)"></div>
-            <div style="font-size:13px;font-weight:700;flex:1">v2.1.0</div>
+            <div style="font-size:13px;font-weight:700;flex:1">v2.2.0</div>
             <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:2px 7px;border-radius:10px">Latest</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
             <div style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);flex-shrink:0"></div>
-            <div style="font-size:13px;font-weight:700;color:var(--text-dim)">v2.0.0</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text-dim)">v2.1.0</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px;padding:7px 0">
             <div style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);flex-shrink:0"></div>
@@ -767,6 +778,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
       <div class="s-row" id="exportJSON"><div class="s-row-l"><span class="s-icon">📄</span><div><div class="s-title">Export as JSON</div><div class="s-sub">Encrypted — requires key to import</div></div></div><span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
       <div class="s-row" id="exportCSV"><div class="s-row-l"><span class="s-icon">📊</span><div><div class="s-title">Export as CSV</div><div class="s-sub">Encrypted — requires key to import</div></div></div><span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
       <div class="s-row" id="exportVault"><div class="s-row-l"><span class="s-icon">🔒</span><div><div class="s-title">Export as Vault</div><div class="s-sub">Encrypted — requires key to import</div></div></div><span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
+      <div class="s-row" id="exportReadable"><div class="s-row-l"><span class="s-icon">📝</span><div><div class="s-title">Human-Readable Backup</div><div class="s-sub">Plain text + encrypted block — emergency use</div></div></div><span class="s-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
     </div>
     <div class="divider"></div>
     <div class="s-label">Import</div>
@@ -972,7 +984,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 
 // ====== STATE ======
 const SK='vault_v2',SET='vault_set_v2',GA='vault_ga';
-let entries=[],settings={theme:'midnight',font:'caladea'},gUser=null,gToken=null,lastBackup=null;
+let entries=[],settings={theme:'midnight',font:'system'},gUser=null,gToken=null,lastBackup=null;
 let editId=null,viewId=null,revealed=false;
 let ppCb=null;
 
@@ -998,7 +1010,6 @@ const BRANDS=[
  ['apple','Apple','555555','M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.54 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701'],
  ['windows','Windows','0078D4','M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13-1.801'],
  ['amazon','Amazon','FF9900','M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.73-2.55 1.278-3.918 1.602-1.372.324-2.8.485-4.283.485-2.18 0-4.24-.35-6.18-1.046-1.94-.696-3.677-1.69-5.21-2.982-.27-.227-.306-.478-.082-.602zm6.96-2.876c0-.068.027-.12.08-.157.053-.036.116-.044.19-.025l1.43.352c.133.033.207.11.224.23.025.144-.06.236-.255.277l-1.43.352c-.133.033-.23-.01-.293-.132a.5.5 0 0 1-.07-.237c-.028-.125.056-.235.124-.31zm5.52 0c-.028.125-.11.194-.25.208l-1.43.352c-.168.04-.266-.016-.293-.17-.028-.125.056-.235.124-.31l1.43-.352c.133-.033.228.013.285.136a.5.5 0 0 1 .07.237h.064zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-3.697 7.07C9.67 6.025 11.02 5.5 12.696 5.5c1.005 0 1.857.2 2.56.6.7.4 1.2.95 1.5 1.65.3.7.45 1.6.45 2.7V13c0 .3.15.45.45.45h.697c.3 0 .45.15.45.45v.6c0 .3-.15.45-.45.45h-.697c-.6 0-1.05-.15-1.35-.45-.3-.3-.45-.75-.45-1.35-.3.6-.75 1.05-1.35 1.35-.6.3-1.2.45-1.8.45-.9 0-1.65-.25-2.25-.75s-.9-1.15-.9-1.95c0-.9.3-1.6.9-2.1.6-.5 1.5-.75 2.7-.75h1.8v-.6c0-.6-.15-1.05-.45-1.35-.3-.3-.75-.45-1.35-.45-.5 0-.9.1-1.2.3s-.45.45-.45.75h-1.5c.05-.75.35-1.35.85-1.8zm3.547 7.43c.55 0 1-.15 1.35-.45.35-.3.525-.7.525-1.2V12h-1.5c-.6 0-1.05.125-1.35.375S10.5 13 10.5 13.5c0 .4.125.725.375.975s.575.375.975.375z'],
- ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.bookmarks.606L9.398 13.54V0zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0z'],
  ['spotify','Spotify','1DB954','M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z'],
  ['disneyplus','Disney+','113CCF','M11.803 3.256c-4.89.008-9.26 2.39-9.26 5.324 0 1.565 1.025 2.973 2.696 3.99l.107.065c1.578.946 3.657 1.491 5.857 1.508.006 0 .012.001.018.001h.037c2.338 0 4.535-.62 6.142-1.685l.094-.066c1.56-1.019 2.522-2.373 2.522-3.813 0-2.793-3.585-5.193-8.15-5.324h-.063zm0 1.312h.067c3.83.11 6.836 2.06 6.836 4.012 0 1.018-.74 2.014-2.022 2.794-1.376.882-3.297 1.426-5.393 1.436h-.03c-1.915-.016-3.713-.501-5.058-1.361-1.19-.762-1.864-1.73-1.864-2.709 0-2.087 3.187-4.091 7.464-4.172z'],
  ['snapchat','Snapchat','FFFC00','M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.379 4.045l-.004.03a.5.5 0 0 0 .134.402c.972-.104 1.99-.372 2.483-.576a.272.272 0 0 1 .11-.024c.07 0 .14.028.194.078a.333.333 0 0 1 .081.228.468.468 0 0 1-.036.185c-.28.77-1.444 1.372-2.77 1.663l-.043.01-.011.032c-.08.231-.148.55-.2.798l-.008.028c-.148.593-.414.79-.756.79a1.11 1.11 0 0 1-.395-.077 3.32 3.32 0 0 0-1.208-.218c-.433 0-.854.08-1.249.226-.24.087-.45.13-.637.13-.627 0-1.2-.296-1.714-.836-.61-.644-1.14-1.684-2.078-3.16a4.25 4.25 0 0 0-1.044-1.037l-.06-.046-.033.07c-.16.365-.336.888-.33 1.655 0 .14-.01.45-.014.58l.004.03c.018.22.067.524.2.824.13.293.246.382.327.408.064.02.103.04.103.04v.003c.1.103.027.25-.107.303a3.55 3.55 0 0 1-.56.11 3.91 3.91 0 0 1-.576.045c-.438 0-.815-.105-1.06-.31-.24-.2-.38-.5-.38-.86 0-.03.003-.06.005-.09.007-.09.013-.17.013-.268 0-.11-.005-.23-.023-.35-.023-.143-.07-.255-.14-.32a.396.396 0 0 0-.267-.097c-.148 0-.353.067-.62.202-.27.135-.513.2-.764.2-.363 0-.627-.153-.773-.43a.636.636 0 0 1-.068-.29c0-.258.143-.497.405-.676.278-.19.63-.376 1.076-.548 1.045-.404 1.716-1.157 2.03-1.835L4.9 5.97c-.217-.47-.283-1-.283-1.56 0-2.73 2.183-4.88 4.877-4.88h.002c.113 0 .226.004.337.01.25.015.499.053.742.112a5.474 5.474 0 0 1 1.631.14zm-.001 17.41c-.006 0-.013 0-.02-.001a7.65 7.65 0 0 1-3.666-.87c-.53.13-1.093.22-1.695.252h-.003a.362.362 0 0 0-.264.133.45.45 0 0 0-.08.29c0 .004 0 .008.001.012.01.136.073.353.217.573.163.25.375.467.626.644.248.177.525.316.818.412.317.1.648.148.983.148.45 0 .883-.068 1.285-.202.28-.093.55-.22.8-.375.248-.153.48-.33.69-.53.178-.17.328-.36.447-.555a2.97 2.97 0 0 0 .236-.5.48.48 0 0 0 .028-.16.32.32 0 0 0-.094-.24.37.37 0 0 0-.264-.106.38.38 0 0 0-.046.003z'],
@@ -1012,21 +1023,6 @@ const BRANDS=[
  ['canva','Canva','00C4CC','M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm-.1 18.1c-2.4 0-4.3-1.2-5.5-3.1L4.3 16.5 3.1 13.7l2-.5C5 12.9 5 12.5 5 12s0-.9.1-1.3l-2-.5 1.2-2.8 2.1 1.5c1.2-1.9 3.1-3.1 5.5-3.1 2 0 3.8.9 5 2.4l-2 1.4c-.8-1-1.9-1.6-3-1.6-1.8 0-3.3 1.3-3.7 3.1H11v2h-3c.4 1.8 1.9 3.1 3.7 3.1 1.2 0 2.2-.6 3-1.6l2 1.4c-1.2 1.5-3 2.4-4.8 2.1z'],
  ['paypal','PayPal','003087','M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.996 5.973-8.81 5.973H9.089l-1.297 8.23H4.722l-.085.534A.36.36 0 0 0 5 27h3.22l2.063-13.09h1.952c4.814 0 7.617-1.783 8.832-5.432zm-2.96-6.46c.764 1.999.567 4.196-.558 5.847C15.432 9.81 13.056 11 10.204 11H7.022L5.318 21H1.92l-.033.21A.389.389 0 0 0 2.271 22h2.927L7.014 8.93h2.953c4.61 0 7.614-2.056 8.673-5.934.247-.922.315-1.773.275-2.557-.078-.27-.18-.526-.312-.77a8.432 8.432 0 0 0-.496-.651z'],
  ['stripe','Stripe','635BFF','M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z'],
- ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24H5.398zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.712.606L9.398 13.54V0h4.489zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0h2.298z'],
- ['xiaomi','Xiaomi','FF6900','M9.608 4.8v14.4H14.4V4.8H9.608zm-4.8 0v14.4h4.792V4.8H4.808zM14.4 4.8v14.4h4.792V4.8H14.4zM0 0v24h24V0H0z'],
- ['samsung','Samsung','1428A0','M19.2 9.6a3.2 3.2 0 1 0-6.4 0 3.2 3.2 0 0 0 6.4 0zm-6.4 4.8A3.2 3.2 0 1 0 6.4 14.4a3.2 3.2 0 0 0 6.4 0zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 21.6A9.6 9.6 0 1 1 12 2.4a9.6 9.6 0 0 1 0 19.2z'],
- ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27l-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'], ['airbnb','Airbnb','FF5A5F','M12 .5c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 10.503c-1.245 0-2.247-.997-2.247-2.24C9.752 7.518 10.755 6.52 12 6.52c1.244 0 2.245.997 2.245 2.242 0 1.244-1 2.24-2.245 2.24zM4.7 18.89c.024-.076.36-1.096 1.348-2.224 1.14-1.302 2.797-1.96 4.53-1.96.2 0 .41.01.617.032.46.05.917.143 1.36.28.053.016.1.04.15.06.496.178.97.41 1.39.7.42.29.79.63 1.07 1.01.11.15.22.31.31.47.04.073.075.147.107.22.187.41.266.87.196 1.294-.057.344-.2.672-.443.943-.33.37-.792.6-1.29.6h-.007c-.34-.005-.68-.07-1.01-.163-.36-.1-.71-.215-1.06-.34-.38-.132-.77-.28-1.17-.42-.4-.14-.8-.28-1.197-.37-.397-.09-.8-.14-1.21-.14-.71 0-1.43.17-2.06.53-.39.22-.73.52-.98.88-.08.114-.143.238-.2.366zm14.6 0c-.056-.13-.12-.253-.2-.366-.25-.36-.59-.66-.98-.88-.63-.36-1.35-.53-2.06-.53-.41 0-.813.05-1.21.14-.397.09-.797.23-1.197.37-.4.14-.79.288-1.17.42-.35.125-.7.24-1.06.34-.33.093-.67.158-1.01.163h-.007c-.498 0-.96-.23-1.29-.6-.243-.27-.386-.6-.443-.943-.07-.424.009-.884.196-1.294.032-.073.067-.147.107-.22.09-.16.2-.32.31-.47.28-.38.65-.72 1.07-1.01.42-.29.894-.522 1.39-.7.05-.02.097-.044.15-.06.443-.137.9-.23 1.36-.28.207-.022.417-.032.617-.032 1.733 0 3.39.658 4.53 1.96.988 1.128 1.324 2.148 1.348 2.224z'],
- ['uber','Uber','000000','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z'], ['aws','AWS','232F3E','M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576a.347.347 0 0 1 .056.176c0 .08-.048.16-.152.24l-.503.336a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.24-.024-.304-.08-.064-.048-.12-.16-.168-.311L7.586 5.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.08.065.048.113.16.16.312l1.342 5.284 1.245-5.284c.04-.16.088-.264.151-.312a.549.549 0 0 1 .32-.08h.638c.152 0 .256.025.32.08.063.048.12.16.151.312l1.261 5.348 1.381-5.348c.048-.16.104-.264.16-.312a.52.52 0 0 1 .311-.08h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.17c-.048.16-.104.263-.168.311-.064.057-.168.08-.312.08h-.686c-.151 0-.255-.024-.32-.08-.063-.056-.119-.16-.15-.32L12.55 7.793l-1.238 4.906c-.04.16-.087.264-.15.32-.065.056-.177.08-.32.08h-.685zm10.145.228c-.41 0-.82-.048-1.214-.144-.395-.096-.703-.2-.910-.32-.128-.071-.216-.151-.248-.224a.56.56 0 0 1-.048-.224v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.778.778 0 0 0-.215-.559c-.144-.151-.415-.287-.806-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.073-.63.216-.886.144-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .358.008.535.032.183.024.35.056.51.088.16.04.312.08.455.127.144.048.256.096.336.144a.69.69 0 0 1 .24.2.43.43 0 0 1 .071.263v.375c0 .168-.064.256-.184.256a.83.83 0 0 1-.303-.096 3.652 3.652 0 0 0-1.532-.311c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.734.167-1.142.167z'], ['netflix','Netflix','E50914','M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24H5.398zm8.489 0v9.63L18.6 24c-.608.06-3.52.323-4.712.606L9.398 13.54V0h4.489zm-8.489 0C3.6.052 3.6 0 3.4 0H.3C.134 0 0 .135 0 .3v23.4c0 .165.134.3.3.3h2.9c.166 0 .3-.135.3-.3V0h2.298z'],
- ['xiaomi','Xiaomi','FF6900','M9.608 4.8v14.4H14.4V4.8H9.608zm-4.8 0v14.4h4.792V4.8H4.808zM14.4 4.8v14.4h4.792V4.8H14.4zM0 0v24h24V0H0z'],
- ['samsung','Samsung','1428A0','M12 2.4A9.6 9.6 0 1 0 12 21.6 9.6 9.6 0 0 0 12 2.4zm2.4 11.2a3.2 3.2 0 1 1-6.4 0V10.4a3.2 3.2 0 1 1 6.4 0v3.2z'],
- ['flipkart','Flipkart','F74F29','M11.257.004C5.273-.138.113 4.816.003 10.8S4.816 21.963 10.8 22.073c6.024.113 10.982-4.637 11.197-10.58L11.257.004zm3.55 16.27l-1.17 1.18L7.24 11.1l1.18-1.167 6.39 6.34zm1.177-6.02L9.6 4.87l1.18-1.17 6.38 6.38-1.177 1.175z'],
- ['zoom','Zoom','2D8CFF','M24 12c0 6.627-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0s12 5.373 12 12zM9.25 7.75A1.25 1.25 0 0 0 8 9v4.5a2.75 2.75 0 0 0 2.75 2.75h5.5c.69 0 1.25-.56 1.25-1.25V10.5a2.75 2.75 0 0 0-2.75-2.75H9.25zM16 9.5l2.4-1.75c.26-.19.6 0 .6.31v7.88c0 .3-.34.5-.6.31L16 14.5V9.5z'],
- ['medium','Medium','000000','M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z'],
- ['uber','Uber','000000','M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z'],
- ['firefox','Firefox','FF7139','M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm3.885 15.9c-1.065.63-2.295.96-3.6.99-3.96 0-7.2-3.24-7.2-7.2 0-.33.03-.66.075-.975 1.02 2.175 3.165 3.675 5.625 3.675.39 0 .78-.045 1.155-.12-.42-.525-.675-1.2-.675-1.92 0-1.725 1.395-3.12 3.12-3.12.285 0 .555.045.81.12A7.154 7.154 0 0 1 16.8 10.8c0 1.905-.735 3.63-1.935 4.92a5.16 5.16 0 0 0 1.02-1.35c.06-.15.09-.3.09-.45 0-.555-.225-1.065-.6-1.44A4.945 4.945 0 0 1 12 14.4c-2.76 0-5.04-2.04-5.37-4.71a5.175 5.175 0 0 0-.03.51c0 2.925 2.37 5.295 5.295 5.295.99 0 1.92-.27 2.7-.75z'],
- ['stripe','Stripe','635BFF','M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z'],
- ['opera','Opera','FF1B2D','M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.8 17.4c-2.994-.36-5.4-2.994-5.4-6 0-3.006 2.406-5.64 5.4-6 .6-.06 1.2-.06 1.8 0 2.994.36 5.4 2.994 5.4 6 0 3.006-2.406 5.64-5.4 6-.6.06-1.2.06-1.8 0z'],
- ['airbnb','Airbnb','FF5A5F','M12 .5c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 10.503c-1.245 0-2.247-.997-2.247-2.24C9.752 7.518 10.755 6.52 12 6.52c1.244 0 2.245.997 2.245 2.242 0 1.244-1 2.24-2.245 2.24zm9.322 8.386c-.444 1.292-1.992 1.989-4.037 2.128l-.056.003-1.077-1.56c-.555-.804-1.01-1.463-1.31-1.857-.15-.199-.34-.44-.579-.44-.238 0-.424.241-.575.44-.302.394-.757 1.053-1.31 1.857l-1.078 1.56-.056-.003c-2.045-.14-3.593-.836-4.037-2.128-.26-.76-.171-1.58.266-2.364.81-1.45 2.677-2.97 4.717-3.805l.044-.018.023.048a2.985 2.985 0 0 0 3.993 0l.023-.048.044.018c2.04.835 3.907 2.356 4.717 3.805.437.783.526 1.604.266 2.364z'],
 ];
 
 // Government & Indian services brands
@@ -1312,8 +1308,8 @@ function getBrandAvatarHTML(slug,size=24){
 
 const COLORS=['#7c6aff','#ff6a9b','#6affdc','#ffa96a','#6ab8ff','#c96aff','#ff6a6a','#b4ff6a','#f4e04d','#ff9f43'];
 const THEMES=[{id:'dark',l:'Dark'},{id:'light',l:'Light'},{id:'midnight',l:'Midnight'},{id:'forest',l:'Forest'},{id:'rose',l:'Rose'},{id:'amber',l:'Amber'}];
-const FONTS=[{id:'dm',l:'DM Sans'},{id:'caladea',l:'Caladea'},{id:'playfair',l:'Playfair'},{id:'kaushan',l:'Kaushan'}];
-const FF={dm:'DM Sans',caladea:'Caladea',playfair:'Playfair Display',kaushan:'Kaushan Script'};
+const FONTS=[{id:'dm',l:'DM Sans'},{id:'caladea',l:'Caladea'},{id:'playfair',l:'Playfair'},{id:'kaushan',l:'Kaushan'},{id:'protest',l:'Protest Riot'},{id:'rancho',l:'Rancho'},{id:'system',l:'System UI'}];
+const FF={dm:'DM Sans',caladea:'Caladea',playfair:'Playfair Display',kaushan:'Kaushan Script',protest:'Protest Riot',rancho:'Rancho',system:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif'};
 
 // ====== STORAGE ======
 function loadAll(){
@@ -1716,12 +1712,14 @@ function tryBootGoogle(){
         gToken=sess.access_token;
         gUser={name:sess.name,email:sess.email,pic:sess.photo};
         saveGA();updateProfileUI();
+        updateLockGoogleBtn(); // hide button if session is valid
         return;
       }
     }catch(e){}
     localStorage.removeItem('pm_gsession');
   }
   updateProfileUI();
+  updateLockGoogleBtn(); // show button since no valid session
 }
 
 // Sign in — called directly from button onclick (user gesture preserved)
@@ -1757,7 +1755,6 @@ function fetchGoogleProfile(token,expiresIn){
     headers:{Authorization:'Bearer '+token}
   }).then(function(r){return r.json();}).then(function(u){
     gUser={name:u.name||u.email.split('@')[0],email:u.email,pic:u.picture||''};
-    // Save session (expires in 1hr)
     localStorage.setItem('pm_gsession',JSON.stringify({
       access_token:token,name:gUser.name,email:gUser.email,
       photo:gUser.pic,expiry:Date.now()+(expiresIn*1000)
@@ -1765,11 +1762,13 @@ function fetchGoogleProfile(token,expiresIn){
     saveGA();updateProfileUI();
     closeOv('profileOverlay');closeOv('gdriveOverlay');
     toast('✓ Signed in as '+gUser.name);
+    // Hide Google sign-in button on lock screen now that we're signed in
+    updateLockGoogleBtn();
   }).catch(function(e){toast('Profile fetch error: '+e.message,5000);});
 }
 
 function signOut(){
-  cdConfirm('Sign Out','Sign out of your Google account?',function(){
+  cdConfirm('Sign Out','⚠️ Signing out will delete all locally stored passwords from this device. Make sure you have a Google Drive backup first!',function(){
   gToken=null;gUser=null;lastBackup=null;
   localStorage.removeItem('pm_gsession');
   localStorage.removeItem(GA);
@@ -1777,9 +1776,12 @@ function signOut(){
     var cid=getClientId();
     if(cid)try{google.accounts.oauth2.revoke(gToken,function(){});}catch(e){}
   }
+  // Wipe all passwords on sign-out (Fix 6)
+  entries=[];saveEntries();render();
   updateProfileUI();
-  toast('Signed out');
-  },'👋');
+  toast('Signed out — passwords cleared 🗑️');
+  setTimeout(()=>lockApp(),800);
+  },'⚠️');
 }
 
 function showClientIdSetup(){
@@ -1789,44 +1791,122 @@ function showClientIdSetup(){
 
 // ====== GOOGLE DRIVE ======
 const DRV_FILE='pm_backup.enc';
+
+// ── Token refresh ──────────────────────────────────────────────────────────
+// Silently refreshes the OAuth token before any Drive call.
+// Returns true if a valid token is available, false if re-login is needed.
+let _tokenRefreshPromise=null;
+function refreshToken(){
+  if(_tokenRefreshPromise)return _tokenRefreshPromise;
+  _tokenRefreshPromise=new Promise(resolve=>{
+    var cid=getClientId();
+    if(!cid||!GIS_LOADED){_tokenRefreshPromise=null;resolve(false);return;}
+    try{
+      var tc=google.accounts.oauth2.initTokenClient({
+        client_id:cid,scope:GSCOPE,
+        callback:function(resp){
+          _tokenRefreshPromise=null;
+          if(resp.error||!resp.access_token){resolve(false);return;}
+          gToken=resp.access_token;
+          // Update stored session expiry
+          var s=localStorage.getItem('pm_gsession');
+          try{var o=JSON.parse(s);o.access_token=gToken;o.expiry=Date.now()+(resp.expires_in||3600)*1000;localStorage.setItem('pm_gsession',JSON.stringify(o));}catch(e){}
+          resolve(true);
+        }
+      });
+      // prompt:'' = silent refresh (no popup if already consented)
+      tc.requestAccessToken({prompt:''});
+    }catch(e){_tokenRefreshPromise=null;resolve(false);}
+  });
+  return _tokenRefreshPromise;
+}
+
+// ── Drive fetch helper — auto-retries once after token refresh on 401 ──────
+async function driveFetch(url,opts,retry=true){
+  const r=await fetch(url,{...opts,headers:{...((opts&&opts.headers)||{}),Authorization:'Bearer '+gToken}});
+  if(r.status===401&&retry){
+    const ok=await refreshToken();
+    if(ok)return driveFetch(url,opts,false);
+  }
+  return r;
+}
+
+// ── List ALL backup files by name ─────────────────────────────────────────
+async function listBackupFiles(){
+  const q=encodeURIComponent(`name='${DRV_FILE}' and trashed=false`);
+  const r=await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name,modifiedTime,size)`);
+  if(!r.ok)return[];
+  const d=await r.json();
+  return d.files||[];
+}
+
+// ── Delete a file by ID ───────────────────────────────────────────────────
+async function deleteFile(fid){
+  await driveFetch(`https://www.googleapis.com/drive/v3/files/${fid}`,{method:'DELETE'});
+}
+
+// ── Upload the backup (overwrites; deletes any duplicate old copies) ───────
 async function driveBackup(pass){
-  if(!gToken){toast('Sign in to Google first');return;}if(!pass){toast('Enter passphrase');return;}
+  if(!gToken){toast('Sign in to Google first');return;}
+  if(!pass){toast('Enter passphrase');return;}
   toast('⏳ Encrypting & uploading…');
   try{
+    // Ensure token is fresh
+    const sess=localStorage.getItem('pm_gsession');
+    try{const o=JSON.parse(sess);if(o.expiry<Date.now()+60000)await refreshToken();}catch(e){}
+
     const enc=await encrypt(JSON.stringify({entries,ts:Date.now()}),pass);
-    // Search for existing backup file in Drive root (drive.file scope)
-    const listR=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D%22${DRV_FILE}%22+and+trashed%3Dfalse&fields=files(id)`,{headers:{Authorization:'Bearer '+gToken}});
-    const listD=await listR.json();const fid=listD.files&&listD.files[0]?listD.files[0].id:null;
-    const form=new FormData();
-    form.append('metadata',new Blob([JSON.stringify({name:DRV_FILE,mimeType:'text/plain'})],{type:'application/json'}));
-    form.append('media',new Blob([enc],{type:'text/plain'}));
-    const url=fid
-      ?`https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=multipart`
-      :'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-    const method=fid?'PATCH':'POST';
-    const res=await fetch(url,{method,headers:{Authorization:'Bearer '+gToken},body:form});
-    if(!res.ok)throw new Error('Upload failed');
-    lastBackup=Date.now();saveGA();updateProfileUI();toast('☁️ Backup uploaded ✓');
-  }catch(err){toast('Backup failed: '+(err.message||'Unknown error'));}
+    const files=await listBackupFiles();
+
+    if(files.length===0){
+      // No existing backup — create new
+      const form=new FormData();
+      form.append('metadata',new Blob([JSON.stringify({name:DRV_FILE,mimeType:'text/plain'})],{type:'application/json'}));
+      form.append('media',new Blob([enc],{type:'text/plain'}));
+      const res=await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',body:form});
+      if(!res.ok){const err=await res.text();throw new Error('Upload failed ('+res.status+'): '+err);}
+    } else {
+      // Overwrite the first file
+      const fid=files[0].id;
+      const form=new FormData();
+      form.append('metadata',new Blob([JSON.stringify({name:DRV_FILE,mimeType:'text/plain'})],{type:'application/json'}));
+      form.append('media',new Blob([enc],{type:'text/plain'}));
+      const res=await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${fid}?uploadType=multipart`,{method:'PATCH',body:form});
+      if(!res.ok){const err=await res.text();throw new Error('Update failed ('+res.status+'): '+err);}
+      // Delete any duplicate copies (keep only the one we just updated)
+      if(files.length>1){
+        await Promise.all(files.slice(1).map(f=>deleteFile(f.id)));
+        console.log('Cleaned up '+(files.length-1)+' duplicate backup(s)');
+      }
+    }
+    lastBackup=Date.now();saveGA();updateProfileUI();
+    toast('☁️ Backup uploaded ✓');
+  }catch(err){
+    console.error('driveBackup error:',err);
+    toast('Backup failed — tap to retry after re-signing in',4000);
+  }
 }
+
 async function driveRestore(pass){
   if(!gToken){toast('Sign in first');return;}if(!pass){toast('Enter passphrase');return;}
   toast('⏳ Downloading…');
   try{
-    const listR=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D%22${DRV_FILE}%22+and+trashed%3Dfalse&fields=files(id)`,{headers:{Authorization:'Bearer '+gToken}});
-    const listD=await listR.json();if(!listD.files||!listD.files[0]){toast('No backup found in Drive');return;}
-    const fid=listD.files[0].id;
-    const dlR=await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`,{headers:{Authorization:'Bearer '+gToken}});
+    // Refresh token if near expiry
+    const sess=localStorage.getItem('pm_gsession');
+    try{const o=JSON.parse(sess);if(o.expiry<Date.now()+60000)await refreshToken();}catch(e){}
+
+    const files=await listBackupFiles();
+    if(!files||!files[0]){toast('No backup found in Drive');return;}
+    const fid=files[0].id;
+    const dlR=await driveFetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`);
     const enc=await dlR.text();
     const plain=await decrypt(enc.trim(),pass);
     const data=JSON.parse(plain);if(!data.entries){toast('Invalid backup');return;}
     cdConfirm('Restore Backup',`Replace all current data with ${data.entries.length} entries from backup?`,function(){
       entries=data.entries;saveEntries();render($('searchInput').value);lastBackup=Date.now();saveGA();updateProfileUI();toast(`✓ Restored ${entries.length} entries`);closeOv('gdriveOverlay');
     },'🔄');
-  }catch{toast('Restore failed — wrong passphrase?');}
+  }catch(e){toast('Restore failed — wrong passphrase or sign in again');}
 }
-
-// Official-style Google Sign-In button (same HTML as finance tracker)
 
 async function viewBackupFileInfo(){
   const info=$('backupFileInfo');
@@ -1834,28 +1914,24 @@ async function viewBackupFileInfo(){
   if(info)info.style.display='none';
   toast('⏳ Checking Drive…');
   try{
-    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D%22${DRV_FILE}%22+and+trashed%3Dfalse&fields=files(id,name,size,modifiedTime,createdTime)`,{headers:{Authorization:'Bearer '+gToken}});
-    const d=await r.json();
-    if(!d.files||!d.files[0]){
+    const files=await listBackupFiles();
+    if(!files||!files[0]){
       toast('No backup file found on Drive');
-      if(info){info.style.display='block';info.innerHTML='<span style="color:var(--text-dim)">No backup file found on your Google Drive yet. Create one using "Backup to Google Drive".</span>';}
+      if(info){info.style.display='block';info.innerHTML='<span style="color:var(--text-dim)">No backup file found yet. Create one using "Backup to Google Drive".</span>';}
       return;
     }
-    const f=d.files[0];
+    const f=files[0];
     const sizeKB=f.size?(Math.round(f.size/102.4)/10)+' KB':'unknown';
-    const created=f.createdTime?new Date(f.createdTime).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'—';
     const modified=f.modifiedTime?new Date(f.modifiedTime).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'—';
+    const dupes=files.length>1?`<div style="color:var(--danger);margin-top:6px;font-size:11px">⚠️ Found ${files.length} copies — will be cleaned up on next backup.</div>`:'';
     if(info){
       info.style.display='block';
-      info.innerHTML=`
-        <div style="display:grid;gap:5px">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">File name</span><strong>${f.name}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Size</span><strong>${sizeKB}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Created</span><strong>${created}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Last backup</span><strong>${modified}</strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Location</span><strong>Drive App Data</strong></div>
-          <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">📌 This file is in Google Drive's hidden "App Data" folder — not visible in regular Drive UI. Only this app can read it.</div>
-        </div>`;
+      info.innerHTML=`<div style="display:grid;gap:5px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">File name</span><strong>${f.name}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Size</span><strong>${sizeKB}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Last backup</span><strong>${modified}</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text-dim)">Copies on Drive</span><strong>${files.length}</strong></div>
+        ${dupes}</div>`;
     }
     toast('Backup file found ✓');
   }catch(err){toast('Error: '+(err.message||'unknown'));}
@@ -1928,6 +2004,7 @@ async function verifyPIN(pin){
 async function storePIN(pin){
   const h=await hashPIN(pin);
   localStorage.setItem(PIN_KEY,h);
+  $('lockBtn').style.display=''; // reveal lock button in header
 }
 function removePIN(){localStorage.removeItem(PIN_KEY);clearLockout();}
 
@@ -1959,15 +2036,26 @@ function showLockScreen(mode='unlock'){
   updateLockUI();
   updatePinDots();
   $('lockError').textContent='';
+  // Always show Google sign-in on lock screen whenever not signed in
+  updateLockGoogleBtn();
+}
+
+function updateLockGoogleBtn(){
+  const gb=$('lockGoogleSignInWrap');
+  if(!gb)return;
+  // Show if not signed in, hide if signed in
+  gb.style.display=gUser?'none':'block';
 }
 function hideLockScreen(){
   isLocked=false;
   $('lockScreen').classList.add('hidden');
+  $('app').classList.remove('app-hidden'); // reveal app after unlock
   startAutoLockTimer();
 }
 function lockApp(){
   isLocked=true;
   clearTimeout(autoLockTimer);
+  $('app').classList.add('app-hidden'); // hide app when locked
   if(hasPIN()){showLockScreen('unlock');}
   else{showLockScreen('setup1');}
 }
@@ -2160,13 +2248,13 @@ function initLockScreen(){
   });
   // Activity reset auto-lock
   ['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,resetAutoLock,{passive:true}));
-  // Initial state
+  // Initial state — auto-show PIN screen after 2s splash (Fix 2: no manual launch needed)
   if(hasPIN()){
     $('sPINsub').textContent='PIN is set';
-    showLockScreen('unlock');
+    $('lockBtn').style.display='';
+    setTimeout(()=>showLockScreen('unlock'),2000);
   } else {
-    // No PIN set — show setup on first launch
-    showLockScreen('setup1');
+    setTimeout(()=>showLockScreen('setup1'),2000);
   }
 }
 
@@ -2224,6 +2312,46 @@ function exportVault(){
         const enc=await encrypt(payload,pass);
         dl('passwords_'+Date.now()+'.vault',enc,'application/octet-stream');
         toast('🔒 Vault exported & encrypted ✓');
+      }catch(e){toast('Export failed: '+e.message);}
+    });
+  },280);
+}
+
+// Fix 3: Human-readable plaintext + encrypted emergency backup
+function exportReadable(){
+  if(!entries.length){toast('No entries to export');return;}
+  closeOv('ieOverlay');
+  setTimeout(()=>{
+    promptPass('Set Backup Key','Enter an encryption key. The file is human-readable AND contains an encrypted block you can re-import.',async pass=>{
+      if(!pass){openOv('ieOverlay');return;}
+      try{
+        const now=new Date();
+        let txt='';
+        txt+='╔══════════════════════════════════════════════════╗\n';
+        txt+='║        PASSWORD MANAGER — EMERGENCY BACKUP       ║\n';
+        txt+='╚══════════════════════════════════════════════════╝\n';
+        txt+='\nExported : '+now.toLocaleString()+'\n';
+        txt+='Entries  : '+entries.length+'\n';
+        txt+='Version  : v2.2.0\n';
+        txt+='\n⚠️  KEEP THIS FILE PRIVATE. Store it offline safely.\n';
+        txt+='   Anyone who reads it can see all your passwords.\n';
+        txt+='\n════════════════ YOUR PASSWORDS ════════════════\n\n';
+        entries.forEach((e,i)=>{
+          txt+='['+String(i+1).padStart(2,'0')+'] '+e.name+'\n';
+          if(e.username) txt+='      Username : '+e.username+'\n';
+          txt+='      Password : '+e.password+'\n';
+          if(e.desc)     txt+='      Notes    : '+e.desc+'\n';
+          if(e.updated)  txt+='      Modified : '+new Date(e.updated).toLocaleString()+'\n';
+          txt+='\n';
+        });
+        txt+='══════════════ ENCRYPTED IMPORT BLOCK ══════════════\n';
+        txt+='(Open the app → Import/Export → Import, then paste or\n';
+        txt+=' open this file and enter the same key to restore.)\n\n';
+        const enc=await encrypt(JSON.stringify({fmt:'vault',entries,exported:now.toISOString()}),pass);
+        txt+=enc+'\n';
+        txt+='\n════════════════════════════════════════════════════\n';
+        dl('passwords_backup_'+Date.now()+'.txt',txt,'text/plain');
+        toast('📝 Human-readable backup saved ✓');
       }catch(e){toast('Export failed: '+e.message);}
     });
   },280);
@@ -2394,6 +2522,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('exportJSON').addEventListener('click',exportJSON);
   $('exportCSV').addEventListener('click',exportCSV);
   $('exportVault').addEventListener('click',exportVault);
+  $('exportReadable').addEventListener('click',exportReadable);
   const iz=$('importZone'),inf=$('importFile');
   iz.addEventListener('click',()=>inf.click());
   inf.addEventListener('change',e=>handleImport(e.target.files[0]));
@@ -2452,7 +2581,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('lockFileOpenLabel').addEventListener('mouseout',()=>{$('lockFileOpenLabel').style.borderColor='';$('lockFileOpenLabel').style.color='';});
 
   // PIN lock system — must be last
-  if(hasPIN())$('sPINsub').textContent='PIN is set';
+  if(hasPIN()){$('sPINsub').textContent='PIN is set';$('lockBtn').style.display='';}
   initLockScreen();
 });
 </script>

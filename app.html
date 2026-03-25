@@ -38,7 +38,8 @@
 [data-font="playfair"]{--font-ui:'Playfair Display',serif;}
 [data-font="dm"]{--font-ui:'DM Sans',sans-serif;}
 [data-font="kaushan"]{--font-ui:'Kaushan Script',cursive;}
-[data-font="system"]{--font-ui:'Protest Riot',sans-serif;}
+[data-font="system"]{--font-ui:'Caladea',serif;}
+[data-font="protest"]{--font-ui:'Protest Riot',sans-serif;}
 [data-font="rancho"]{--font-ui:'Rancho',cursive;}
 [data-font="system"]{--font-ui:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
 
@@ -1308,8 +1309,8 @@ function getBrandAvatarHTML(slug,size=24){
 
 const COLORS=['#7c6aff','#ff6a9b','#6affdc','#ffa96a','#6ab8ff','#c96aff','#ff6a6a','#b4ff6a','#f4e04d','#ff9f43'];
 const THEMES=[{id:'dark',l:'Dark'},{id:'light',l:'Light'},{id:'midnight',l:'Midnight'},{id:'forest',l:'Forest'},{id:'rose',l:'Rose'},{id:'amber',l:'Amber'}];
-const FONTS=[{id:'dm',l:'DM Sans'},{id:'caladea',l:'Caladea'},{id:'playfair',l:'Playfair'},{id:'kaushan',l:'Kaushan'},{id:'protest',l:'Protest Riot'},{id:'rancho',l:'Rancho'},{id:'system',l:'System UI'}];
-const FF={dm:'DM Sans',caladea:'Caladea',playfair:'Playfair Display',kaushan:'Kaushan Script',protest:'Protest Riot',rancho:'Rancho',system:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif'};
+const FONTS=[{id:'system',l:'System UI'},{id:'dm',l:'DM Sans'},{id:'caladea',l:'Caladea'},{id:'playfair',l:'Playfair'},{id:'kaushan',l:'Kaushan'},{id:'protest',l:'Protest Riot'},{id:'rancho',l:'Rancho'}];
+const FF={system:'-apple-system,sans-serif',dm:'DM Sans',caladea:'Caladea',playfair:'Playfair Display',kaushan:'Kaushan Script',protest:'Protest Riot',rancho:'Rancho'};
 
 // ====== STORAGE ======
 function loadAll(){
@@ -1849,6 +1850,10 @@ async function deleteFile(fid){
 async function driveBackup(pass){
   if(!gToken){toast('Sign in to Google first');return;}
   if(!pass){toast('Enter passphrase');return;}
+  if(!entries.length){
+    toast('⚠️ No passwords to backup — aborted to protect existing backup',4000);
+    return;
+  }
   toast('⏳ Encrypting & uploading…');
   try{
     // Ensure token is fresh
@@ -1961,14 +1966,19 @@ function updateGdriveOverlay(){
 }
 
 // ====== PIN LOCK SYSTEM ======
-const PIN_KEY='pm_pin_hash';
 const PIN_LEN=4;
-const PIN_LOCKOUT_KEY='pm_pin_lockout';
-const PIN_ATTEMPTS_KEY='pm_pin_attempts';
-const SECURITY_Q_KEY='pm_security_q';
-const SECURITY_A_KEY='pm_security_a';
+// PIN & security Q keys are scoped per Google account — each account has its own PIN
+function _pkey(base){
+  const email=gUser&&gUser.email?gUser.email.replace(/[^a-zA-Z0-9]/g,'_'):'_local';
+  return base+'_'+email;
+}
+function PIN_KEY(){return _pkey('pm_pin_hash');}
+function PIN_LOCKOUT_KEY(){return _pkey('pm_pin_lockout');}
+function PIN_ATTEMPTS_KEY(){return _pkey('pm_pin_attempts');}
+function SECURITY_Q_KEY(){return _pkey('pm_security_q');}
+function SECURITY_A_KEY(){return _pkey('pm_security_a');}
 const MAX_ATTEMPTS=3;
-const LOCKOUT_DURATION=60*60*1000; // 1 hour
+const LOCKOUT_DURATION=60*60*1000;
 let pinBuffer='';
 let pinMode='unlock'; // 'unlock' | 'setup1' | 'setup2' | 'verify-change'
 let pinSetupFirst='';
@@ -1982,31 +1992,31 @@ async function hashPIN(pin){
   return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-function getPinAttempts(){return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY)||'0');}
-function setPinAttempts(n){localStorage.setItem(PIN_ATTEMPTS_KEY,n);}
-function getLockoutUntil(){return parseInt(localStorage.getItem(PIN_LOCKOUT_KEY)||'0');}
-function setLockoutUntil(ts){localStorage.setItem(PIN_LOCKOUT_KEY,ts);}
+function getPinAttempts(){return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY())||'0');}
+function setPinAttempts(n){localStorage.setItem(PIN_ATTEMPTS_KEY(),n);}
+function getLockoutUntil(){return parseInt(localStorage.getItem(PIN_LOCKOUT_KEY())||'0');}
+function setLockoutUntil(ts){localStorage.setItem(PIN_LOCKOUT_KEY(),ts);}
 function isLockedOut(){return Date.now()<getLockoutUntil();}
 function getRemainingLockout(){return Math.max(0,Math.ceil((getLockoutUntil()-Date.now())/60000));}
-function clearLockout(){localStorage.removeItem(PIN_LOCKOUT_KEY);localStorage.removeItem(PIN_ATTEMPTS_KEY);}
+function clearLockout(){localStorage.removeItem(PIN_LOCKOUT_KEY());localStorage.removeItem(PIN_ATTEMPTS_KEY());}
 
-function getSecurityQ(){return localStorage.getItem(SECURITY_Q_KEY)||'';}
-function getSecurityA(){return localStorage.getItem(SECURITY_A_KEY)||'';}
-function saveSecurityQA(q,a){localStorage.setItem(SECURITY_Q_KEY,q);localStorage.setItem(SECURITY_A_KEY,a.trim().toLowerCase());}
+function getSecurityQ(){return localStorage.getItem(SECURITY_Q_KEY())||'';}
+function getSecurityA(){return localStorage.getItem(SECURITY_A_KEY())||'';}
+function saveSecurityQA(q,a){localStorage.setItem(SECURITY_Q_KEY(),q);localStorage.setItem(SECURITY_A_KEY(),a.trim().toLowerCase());}
 
-function hasPIN(){return!!localStorage.getItem(PIN_KEY);}
+function hasPIN(){return!!localStorage.getItem(PIN_KEY());}
 async function verifyPIN(pin){
-  const stored=localStorage.getItem(PIN_KEY);
+  const stored=localStorage.getItem(PIN_KEY());
   if(!stored)return true;
   const h=await hashPIN(pin);
   return h===stored;
 }
 async function storePIN(pin){
   const h=await hashPIN(pin);
-  localStorage.setItem(PIN_KEY,h);
+  localStorage.setItem(PIN_KEY(),h);
   $('lockBtn').style.display=''; // reveal lock button in header
 }
-function removePIN(){localStorage.removeItem(PIN_KEY);clearLockout();}
+function removePIN(){localStorage.removeItem(PIN_KEY());clearLockout();}
 
 // Security question overlay logic
 function showSecurityQuestion(){
@@ -2177,21 +2187,7 @@ async function processPIN(){
       const existingQ=getSecurityQ();
       if(!existingQ){
         pinBuffer=''; pinSetupFirst='';
-        cdShow('🔐','Set Security Question','This question helps you recover your PIN if you enter it wrong 3 times.',[
-          {label:'Skip',primary:false,cb:function(){hideLockScreen();toast('PIN set successfully 🔒');}},
-          {label:'Set Question',primary:true,cb:function(q){
-            if(!q||q.trim().length<4){toast('Enter a longer question');return;}
-            cdShow('💬','Set Answer','Enter your answer (case-insensitive):',[
-              {label:'Back',primary:false,cb:null},
-              {label:'Save',primary:true,cb:function(a){
-                if(!a||!a.trim()){toast('Enter an answer');return;}
-                saveSecurityQA(q.trim(),a.trim());
-                hideLockScreen();
-                toast('PIN & security question set 🔒');
-              }}
-            ],{placeholder:'Your secret answer…',type:'text'});
-          }}
-        ],{placeholder:'e.g. Name of your first pet?',type:'text'});
+        showSecurityQPicker();
       } else {
         hideLockScreen();
         toast('PIN set successfully 🔒');
@@ -2205,6 +2201,56 @@ async function processPIN(){
   }
 }
 
+
+// ── Security question picker — 3 preset questions, user picks one ──────────
+const SECURITY_QUESTIONS=[
+  "What is the name of your first pet?",
+  "What is your mother's maiden name?",
+  "What was the name of your primary school?"
+];
+function showSecurityQPicker(){
+  // Build a small inline picker inside cdOverlay
+  var html='<div style="display:flex;flex-direction:column;gap:8px;margin:14px 0">';
+  SECURITY_QUESTIONS.forEach(function(q,i){
+    html+='<button onclick="selectSecQ('+i+')" id="sqBtn'+i+'" style="text-align:left;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--font-ui);font-size:13px;cursor:pointer;transition:border-color .15s">'+q+'</button>';
+  });
+  html+='</div>';
+  cdShow('🔐','Choose a Security Question',
+    'This question helps you recover your PIN if you forget it.',
+    [{label:'Skip',primary:false,cb:function(){hideLockScreen();toast('PIN set — no security question 🔒');}},
+     {label:'Cancel',primary:false,cb:function(){hideLockScreen();toast('PIN set successfully 🔒');}}]
+  );
+  // Inject question buttons into the dialog
+  var msgEl=$('cdMsg');
+  if(msgEl){
+    var wrap=document.createElement('div');
+    wrap.innerHTML=html;
+    msgEl.parentNode.insertBefore(wrap,msgEl.nextSibling);
+  }
+}
+var _selectedSecQ='';
+function selectSecQ(i){
+  _selectedSecQ=SECURITY_QUESTIONS[i];
+  // Highlight selected
+  SECURITY_QUESTIONS.forEach(function(_,j){
+    var b=$('sqBtn'+j);
+    if(b)b.style.borderColor=j===i?'var(--accent)':'var(--border)';
+  });
+  // Show answer prompt
+  setTimeout(function(){
+    cdShow('💬','Your Answer',
+      'Q: '+_selectedSecQ+'\n\nEnter your answer (not case-sensitive):',
+      [{label:'Back',primary:false,cb:function(){showSecurityQPicker();}},
+       {label:'Save',primary:true,cb:function(a){
+         if(!a||!a.trim()){toast('Please enter an answer');showSecurityQPicker();return;}
+         saveSecurityQA(_selectedSecQ,a.trim());
+         hideLockScreen();
+         toast('PIN & security question saved 🔒');
+       }}],
+      {placeholder:'Your answer…',type:'text'}
+    );
+  },50);
+}
 function initLockScreen(){
   // Wire numpad
   $('numpad').addEventListener('click',e=>{
@@ -2248,13 +2294,13 @@ function initLockScreen(){
   });
   // Activity reset auto-lock
   ['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,resetAutoLock,{passive:true}));
-  // Initial state — auto-show PIN screen after 2s splash (Fix 2: no manual launch needed)
+  // Show lock screen immediately — app is hidden until PIN entered
   if(hasPIN()){
     $('sPINsub').textContent='PIN is set';
     $('lockBtn').style.display='';
-    setTimeout(()=>showLockScreen('unlock'),2000);
+    showLockScreen('unlock');
   } else {
-    setTimeout(()=>showLockScreen('setup1'),2000);
+    showLockScreen('setup1');
   }
 }
 
@@ -2317,44 +2363,36 @@ function exportVault(){
   },280);
 }
 
-// Fix 3: Human-readable plaintext + encrypted emergency backup
+// Human-readable export — NO password needed to open/read the file
+// The file itself is plain text, readable in any app/browser directly
 function exportReadable(){
   if(!entries.length){toast('No entries to export');return;}
   closeOv('ieOverlay');
-  setTimeout(()=>{
-    promptPass('Set Backup Key','Enter an encryption key. The file is human-readable AND contains an encrypted block you can re-import.',async pass=>{
-      if(!pass){openOv('ieOverlay');return;}
-      try{
-        const now=new Date();
-        let txt='';
-        txt+='╔══════════════════════════════════════════════════╗\n';
-        txt+='║        PASSWORD MANAGER — EMERGENCY BACKUP       ║\n';
-        txt+='╚══════════════════════════════════════════════════╝\n';
-        txt+='\nExported : '+now.toLocaleString()+'\n';
-        txt+='Entries  : '+entries.length+'\n';
-        txt+='Version  : v2.2.0\n';
-        txt+='\n⚠️  KEEP THIS FILE PRIVATE. Store it offline safely.\n';
-        txt+='   Anyone who reads it can see all your passwords.\n';
-        txt+='\n════════════════ YOUR PASSWORDS ════════════════\n\n';
-        entries.forEach((e,i)=>{
-          txt+='['+String(i+1).padStart(2,'0')+'] '+e.name+'\n';
-          if(e.username) txt+='      Username : '+e.username+'\n';
-          txt+='      Password : '+e.password+'\n';
-          if(e.desc)     txt+='      Notes    : '+e.desc+'\n';
-          if(e.updated)  txt+='      Modified : '+new Date(e.updated).toLocaleString()+'\n';
-          txt+='\n';
-        });
-        txt+='══════════════ ENCRYPTED IMPORT BLOCK ══════════════\n';
-        txt+='(Open the app → Import/Export → Import, then paste or\n';
-        txt+=' open this file and enter the same key to restore.)\n\n';
-        const enc=await encrypt(JSON.stringify({fmt:'vault',entries,exported:now.toISOString()}),pass);
-        txt+=enc+'\n';
-        txt+='\n════════════════════════════════════════════════════\n';
-        dl('passwords_backup_'+Date.now()+'.txt',txt,'text/plain');
-        toast('📝 Human-readable backup saved ✓');
-      }catch(e){toast('Export failed: '+e.message);}
+  try{
+    const now=new Date();
+    let txt='';
+    txt+='╔══════════════════════════════════════════════════╗\n';
+    txt+='║        PASSWORD MANAGER — EMERGENCY BACKUP       ║\n';
+    txt+='╚══════════════════════════════════════════════════╝\n';
+    txt+='\nExported : '+now.toLocaleString()+'\n';
+    txt+='Entries  : '+entries.length+'\n';
+    txt+='Version  : v2.2.0\n';
+    txt+='\n⚠️  KEEP THIS FILE PRIVATE. Store it offline safely.\n';
+    txt+='   Anyone who reads it can see all your passwords.\n';
+    txt+='\n════════════════ YOUR PASSWORDS ════════════════\n\n';
+    entries.forEach((e,i)=>{
+      txt+='['+String(i+1).padStart(2,'0')+'] '+e.name+'\n';
+      if(e.username) txt+='      Username : '+e.username+'\n';
+      txt+='      Password : '+e.password+'\n';
+      if(e.desc)     txt+='      Notes    : '+e.desc+'\n';
+      if(e.updated)  txt+='      Modified : '+new Date(e.updated).toLocaleString()+'\n';
+      txt+='\n';
     });
-  },280);
+    txt+='════════════════════════════════════════════════════\n';
+    txt+='Generated by Password Manager v2.2.0\n';
+    dl('passwords_backup_'+Date.now()+'.txt',txt,'text/plain');
+    toast('📝 Human-readable backup saved ✓');
+  }catch(e){toast('Export failed: '+e.message);}
 }
 
 // ====== IMPORT — all formats require decryption key ======

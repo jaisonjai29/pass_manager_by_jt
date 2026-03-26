@@ -51,6 +51,7 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
 
 #app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 0 100px;transition:opacity .4s;}
 #app.app-hidden{opacity:0;pointer-events:none;}
+#app.app-hidden{opacity:0;pointer-events:none;}
 
 /* HEADER */
 .header{padding:44px 20px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:linear-gradient(to bottom,var(--bg) 65%,transparent);}
@@ -578,7 +579,6 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
       </div>
     </div>
 
-    <!-- Fix 5: Manual Refresh -->
     <div>
       <div class="s-label">App</div>
       <div class="s-row" id="sRefresh">
@@ -587,28 +587,19 @@ body::after{content:'';position:fixed;bottom:-30%;right:-20%;width:60vw;height:6
       </div>
     </div>
 
-    <!-- Fix 4: Build Version only -->
     <div>
       <div class="s-label">About</div>
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="font-size:14px;font-weight:700">Password Manager</div>
-          <div style="font-size:11px;font-family:var(--font-mono);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:3px 8px;border-radius:20px">v2.2.0</div>
-        </div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px">Release History</div>
-        <div style="display:flex;flex-direction:column;gap:0">
-          <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 6px color-mix(in srgb,var(--accent) 60%,transparent)"></div>
-            <div style="font-size:13px;font-weight:700;flex:1">v2.2.0</div>
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:2px 7px;border-radius:10px">Latest</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;font-weight:700">Password Manager</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:3px">Secure · Local · Private</div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);flex-shrink:0"></div>
-            <div style="font-size:13px;font-weight:700;color:var(--text-dim)">v2.1.0</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;padding:7px 0">
-            <div style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);flex-shrink:0"></div>
-            <div style="font-size:13px;font-weight:700;color:var(--text-dim)">v1.0.0</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:4px 10px;border-radius:20px;font-weight:700">v2.3.0</div>
+            <button onclick="showChangelog()" title="What's new" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--border-hover);background:var(--surface3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:all .15s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border-hover)';this.style.color='var(--text-dim)'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -1260,7 +1251,7 @@ const LETTER_BRANDS=[
 ];
 
 
-// ── Indian Banks ─────────────────────────────────────────────────────────
+// ── Indian Banks ──────────────────────────────────────────────────────────
 const BANK_BRANDS=[
  ['hdfc_b','HDFC Bank','004C8F','M4 4h4v7h8V4h4v16h-4v-6H8v6H4z'],
  ['icici_b','ICICI Bank','F7A800','M6 4h3v16H6zm9 0h3v16h-3zM8.5 11.5h7v1h-7z'],
@@ -1273,9 +1264,8 @@ const BANK_BRANDS=[
  ['canara_b','Canara Bank','005DAA','M12 2C7 2 3 6 3 12s4 10 9 10 9-4 9-10S17 2 12 2zm-2 5h4v2h-4zm-1 3h6v2H9zm-1 3h8v2H8zm0 3h8v2H8z'],
  ['indusind_b','IndusInd','1E3A5F','M4 4h3v16H4zm4 0h3v7h6V4h3v16h-3v-7H11v7H8z'],
  ['yesbank_b','Yes Bank','0099CC','M12 3l-8 5v4l8-5 8 5V8zm-8 7v6l8 5 8-5v-6l-8 5z'],
- ['federalbank','Federal Bank','F7941D','M4 4h16v2H4zm0 5h10v2H4zm0 5h16v2H4zm0 5h10v2H4z'],
+ ['federal_b','Federal Bank','F7941D','M4 4h16v2H4zm0 5h10v2H4zm0 5h16v2H4zm0 5h10v2H4z'],
 ];
-
 // ── IT & Consulting ───────────────────────────────────────────────────────
 const IT_BRANDS=[
  ['tcs_it','TCS','0066B3','M4 6h16v2H4zm4 4h8v2H8zm-4 4h16v2H4zm0 4h16v2H4z'],
@@ -1295,8 +1285,7 @@ const IT_BRANDS=[
  ['hexaware_it','Hexaware','E51937','M4 4h4v7h8V4h4v16h-4v-7H8v7H4z'],
  ['zensar_it','Zensar','F26522','M4 4h16v2.5L8 16.5h12V19H4v-2.5L16 7H4z'],
 ];
-
-// ── Developer Tools ───────────────────────────────────────────────────────
+// ── Dev Tools ─────────────────────────────────────────────────────────────
 const DEV_BRANDS=[
  ['vscode_d','VS Code','007ACC','M3 3l7.5 7.5L3 18h3l6-6 6 6h3L14.5 10.5 21 3h-3l-6 6-3-3V3z'],
  ['postman_d','Postman','FF6C37','M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 5l6 3-6 3V7z'],
@@ -1309,7 +1298,6 @@ const DEV_BRANDS=[
  ['npm_d','npm','CB3837','M0 0v8h8V0zm2 2h4v4H5V4H2zm7-2v8h2V2h4v6h2V0z'],
  ['linear_d','Linear','5E6AD2','M3.5 15L9 9.5 15 15.5 20.5 10M3.5 15L2 22l7-2zm17-5L22 8l-5 2z'],
 ];
-
 // ── Productivity & Engineering ────────────────────────────────────────────
 const ENG_BRANDS=[
  ['confluence_e','Confluence','172B4D','M3.5 17.5c-.3-.4-.2-1 .3-1.3l10-6.7c.4-.3 1-.2 1.3.3l1.5 2.2-10 6.7c-.5.3-1.1.2-1.4-.3zm2-6.5c-.3-.4-.2-1 .3-1.3l10-6.7c.4-.3 1-.2 1.3.3L18.5 5.5l-10 6.7c-.5.3-1.1.2-1.4-.3z'],
@@ -1319,13 +1307,10 @@ const ENG_BRANDS=[
  ['obsidian_e','Obsidian','7C3AED','M12 2L4 8l2 6-2 6 8 2 8-2-2-6 2-6zm0 3l5 4-1.5 4L12 19l-3.5-6L7 9z'],
  ['miro_e','Miro','FFD02F','M17 3h-4l3 4h-4l-9 14h4l-3-4h4L17 3z'],
  ['loom_e','Loom','625DF5','M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 4a6 6 0 0 1 0 12A6 6 0 0 1 12 6zm0 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'],
- ['lucidchart_e','Lucidchart','F9423A','M12 2L2 7l4 3-4 3 10 9 10-9-4-3 4-3zm0 3.5l6 3.5-2 1.5L12 13l-4-2.5-2-1.5z'],
- ['excalidraw_e','Excalidraw','6965DB','M3 17L8 5l4 8 3-4 6 8H3z'],
  ['msteams_e','MS Teams','6264A7','M14 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 7c2.5 0 4.5 1.8 4.9 4.1H9.1C9.5 12.8 11.5 11 14 11zm-7-4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM3 17h8.1c.2.7.5 1.4.9 2H3v-2z'],
- ['whereby_e','Whereby','5C48F6','M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-4-4 1.41-1.41L10 13.17l6.59-6.59L18 8l-8 8z'],
+ ['excalidraw_e','Excalidraw','6965DB','M3 17L8 5l4 8 3-4 6 8H3z'],
+ ['lucidchart_e','Lucidchart','F9423A','M12 2L2 7l4 3-4 3 10 9 10-9-4-3 4-3zm0 3.5l6 3.5-2 1.5L12 13l-4-2.5-2-1.5z'],
 ];
-
-// Only SVG brands — letter-avatar fallbacks removed
 const ALL_BRANDS=[...BRANDS,...GOV_BRANDS,...BANK_BRANDS,...IT_BRANDS,...DEV_BRANDS,...ENG_BRANDS];
 const BRAND_MAP=Object.fromEntries(ALL_BRANDS.filter(b=>b[3]).map(b=>([b[0],{name:b[1],color:'#'+b[2],hasSvg:true}])));
 const SVG_MAP=Object.fromEntries(ALL_BRANDS.filter(b=>b[3]).map(b=>([b[0],b[3]])));
@@ -2315,6 +2300,66 @@ function showSecurityQPicker(){
   btns.appendChild(skip);
   $('cdOverlay').style.display='flex';
 }
+
+// ── What's New changelog ──────────────────────────────────────────────────
+function showChangelog(){
+  const changes=[
+    {v:'v2.3.0',label:'Current',items:[
+      'Icons preserved on CSV/JSON import',
+      'Security question — 3 preset choices, vertical layout',
+      'PIN unique per Google account',
+      'New icon sections: Banks, IT & Consulting, Dev Tools, Productivity',
+      'Human-readable export with encryption key',
+      'Empty backup guard prevents overwriting Drive backup',
+      'Neon Noir dark theme',
+      'Fonts: System UI (default), Protest Riot, Rancho',
+      'Google Drive overlay z-index fixed (shows on top)',
+      'AES-256-GCM encryption on all backups',
+    ]},
+    {v:'v2.2.0',label:'',items:[
+      'Google Drive backup & restore with token auto-refresh',
+      'Duplicate Drive backup cleanup',
+      'Lock screen Google sign-in button',
+      'Lock screen shows instantly with no flash',
+      'Sign-out wipes local passwords for security',
+      'Human-readable .txt backup export',
+    ]},
+    {v:'v2.1.0',label:'',items:[
+      'Per-account PIN lock system',
+      'Security question for PIN recovery',
+      '5-minute auto-lock',
+      'Brand icon picker with 200+ icons',
+    ]},
+  ];
+  var html='<div style="display:flex;flex-direction:column;gap:16px;max-height:60vh;overflow-y:auto;padding-right:4px">';
+  changes.forEach(function(rel){
+    html+='<div>';
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    html+='<span style="font-size:12px;font-weight:800;font-family:var(--font-mono);color:var(--accent)">'+rel.v+'</span>';
+    if(rel.label)html+='<span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:2px 7px;border-radius:10px">'+rel.label+'</span>';
+    html+='</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:5px">';
+    rel.items.forEach(function(item){
+      html+='<div style="display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--text-dim)"><span style="color:var(--accent3);flex-shrink:0;margin-top:1px">✦</span><span>'+item+'</span></div>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div>';
+  $('cdIcon').textContent='📋';
+  $('cdTitle').textContent="What's New";
+  $('cdMsg').innerHTML=html;
+  $('cdMsg').style.fontSize='';
+  $('cdInput').style.display='none';
+  var btns=$('cdBtns');
+  btns.innerHTML='';
+  var ok=document.createElement('button');
+  ok.textContent='Got it';
+  ok.className='btn btn-primary';
+  ok.style.width='100%';
+  ok.onclick=function(){$('cdOverlay').style.display='none';$('cdMsg').style.fontSize='';$('cdMsg').innerHTML='';};
+  btns.appendChild(ok);
+  $('cdOverlay').style.display='flex';
+}
 function initLockScreen(){
   // Wire numpad
   $('numpad').addEventListener('click',e=>{
@@ -2369,9 +2414,7 @@ function initLockScreen(){
 }
 
 
-// ====== EXPORT FUNCTIONS — All 3 formats encrypted ======
-// Format written to disk:  base64( AES-GCM( JSON-payload ) )
-// The JSON payload carries a "fmt" field so the importer knows how to parse.
+// ====== EXPORT FUNCTIONS ======
 
 function exportJSON(){
   if(!entries.length){toast('No entries to export');return;}
@@ -2427,7 +2470,6 @@ function exportVault(){
   },280);
 }
 
-// Fix 3: Human-readable plaintext + encrypted emergency backup
 function exportReadable(){
   if(!entries.length){toast('No entries to export');return;}
   closeOv('ieOverlay');
@@ -2443,7 +2485,7 @@ function exportReadable(){
         txt+='\nExported : '+now.toLocaleString()+'\n';
         txt+='Entries  : '+entries.length+'\n';
         txt+='Version  : v2.2.0\n';
-        txt+='Encryption key : [REMEMBER THIS TO RE-IMPORT]\n';
+        txt+='Encryption key : [REMEMBER THIS KEY TO RE-IMPORT]\n';
         txt+='\n⚠️  KEEP THIS FILE PRIVATE. Store it offline safely.\n';
         txt+='   Anyone who reads it can see all your passwords.\n';
         txt+='\n════════════════ YOUR PASSWORDS ════════════════\n\n';
@@ -2581,11 +2623,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(gUser){updateProfileUI();openOv('profileOverlay');}
     else{updateGdriveOverlay();openOv('gdriveOverlay');}
   });
-  $('sGdrive').addEventListener('click',()=>{updateGdriveOverlay();openOv('gdriveOverlay');});
+  $('sGdrive').addEventListener('click',()=>{closeOv('settingsOverlay');updateGdriveOverlay();openOv('gdriveOverlay');});
   $('sImport').addEventListener('click',()=>{closeOv('settingsOverlay');openOv('ieOverlay');});
   $('sClear').addEventListener('click',()=>{cdConfirm('Clear All Data','Delete ALL passwords permanently? This cannot be undone.',function(){entries=[];saveEntries();render();toast('All data cleared');},'🗑️');});
 
-  // Fix 5: Manual Refresh
   $('sRefresh').addEventListener('click',()=>{
     toast('Refreshing…');
     setTimeout(()=>location.reload(),600);
